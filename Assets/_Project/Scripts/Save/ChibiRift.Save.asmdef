@@ -1,0 +1,17 @@
+{
+    "name": "ChibiRift.Save",
+    "rootNamespace": "ChibiRift.Save",
+    "references": [
+        "ChibiRift.Core",
+        "ChibiRift.Data"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

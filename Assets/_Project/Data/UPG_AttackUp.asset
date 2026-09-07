@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c376342ee633638c08e8eb9247d26fc7, type: 3}
+  m_Name: UPG_AttackUp
+  m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.UpgradeData
+  _id: upgrade.attack_up
+  _displayName: Sharpened Claws
+  _description: Increases Attack. Stackable up to 5 times (UPG-005, UPG-010).
+  _category: 0
+  _rarity: 0
+  _weight: 100
+  _icon: {fileID: 0}
+  _isStackable: 1
+  _maxStack: 5
+  _isFallback: 0
+  _targetStat: 1
+  _flatAmount: 3
+  _percentAmount: 0
+  _grantedSkill: {fileID: 0}
+  _minimumHeroLevel: 1

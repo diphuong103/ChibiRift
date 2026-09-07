@@ -1,0 +1,25 @@
+{
+    "name": "ChibiRift.EditorTools",
+    "rootNamespace": "ChibiRift.EditorTools",
+    "references": [
+        "ChibiRift.Core",
+        "ChibiRift.Data",
+        "ChibiRift.Gameplay",
+        "ChibiRift.Save",
+        "ChibiRift.Telemetry",
+        "ChibiRift.Meta",
+        "ChibiRift.UI",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 163dcc128da79bfe6a0a3e22b99c6151, type: 3}
+  m_Name: ENM_Melee
+  m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.EnemyData
+  _id: enemy.melee_grunt
+  _displayName: Melee Grunt
+  _description: Closes on the hero and attacks in melee (SRS 13).
+  _baseStats:
+    MaxHealth: 30
+    Attack: 5
+    AttackSpeed: 1
+    MoveSpeed: 3
+    CritChance: 0.05
+    CritMultiplier: 1.5
+    Defense: 0
+    DamageReduction: 0
+  _archetype: 0
+  _detectionRange: 10
+  _attackRange: 1.5
+  _attackCooldown: 1.5
+  _attackWindup: 0.3
+  _knockbackResistance: 0
+  _experienceReward: 10
+  _goldReward: 1
+  _gemReward: 0
+  _eliteModifiers:
+  - {fileID: 11400000, guid: 0763aa08e1297e5c4a0f48fb3b50cfdd, type: 2}
+  _eliteRewardMultiplier: 3
+  _prefab: {fileID: 0}

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 387460251a89d467e92e69946a0af6ae, type: 3}
+  m_Name: HERO_Knight
+  m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.HeroData
+  _id: hero.knight
+  _displayName: Knight
+  _description: The MVP hero. Melee, 3 hit combo, dash with i-frames (SRS 12).
+  _baseStats:
+    MaxHealth: 100
+    Attack: 10
+    AttackSpeed: 1
+    MoveSpeed: 6
+    CritChance: 0.05
+    CritMultiplier: 1.5
+    Defense: 0
+    DamageReduction: 0
+  _dash:
+    Distance: 4
+    Duration: 0.18
+    IFrameDuration: 0.25
+    Cooldown: 1.5
+  _jumpForce: 12
+  _maxJumpCount: 2
+  _comboLength: 3
+  _comboWindow: 0.5
+  _hurtIFrameDuration: 0.5
+  _skills:
+  - {fileID: 11400000, guid: e56b88de6b9133a7899872493063b136, type: 2}
+  _passive: {fileID: 0}
+  _animatorController: {fileID: 0}
+  _portrait: {fileID: 0}
+  _unlockedByDefault: 1
+  _gemUnlockCost: 0

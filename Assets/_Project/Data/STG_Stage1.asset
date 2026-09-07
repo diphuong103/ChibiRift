@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb22fdd9ecc17378803087e5030b4b0, type: 3}
+  m_Name: STG_Stage1
+  m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.StageData
+  _id: stage.01
+  _displayName: Stage 1
+  _description: 'The MVP stage: waves then a two phase boss (SRS 14, STG-003).'
+  _waves:
+  - {fileID: 11400000, guid: a760907e450b223638b0275826858291, type: 2}
+  _boss: {fileID: 11400000, guid: 330d698879ed2a7c9b76ef45ba2450d4, type: 2}
+  _enemyHealthMultiplier: 1
+  _enemyDamageMultiplier: 1
+  _clearGoldReward: 50
+  _clearGemReward: 0
+  _sceneName: Run_01

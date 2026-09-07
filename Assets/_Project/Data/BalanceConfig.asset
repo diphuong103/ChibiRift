@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a0b57ef3b8b93e52856e68b905bac38, type: 3}
+  m_Name: BalanceConfig
+  m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.BalanceConfig
+  _id: balance.default
+  _displayName: Default Balance
+  _description: Baseline balance from SRS section 35. Values marked Configurable
+    there are provisional; see OPEN_ISSUES.md.
+  _minDamage: 1
+  _maxDamageReduction: 0.8
+  _defaultCritMultiplier: 1.5
+  _playerBaseHealth: 100
+  _playerBaseAttack: 10
+  _playerBaseCritChance: 0.05
+  _playerBaseDefense: 0
+  _playerBaseDamageReduction: 0
+  _dashCooldown: 1.5
+  _dashIFrameDuration: 0.25
+  _baseExperience: 100
+  _experienceGrowthFactor: 1.15
+  _maxHeroLevel: 50
+  _upgradeChoiceCount: 3
+  _rarityWeights:
+  - Rarity: 0
+    WeightMultiplier: 100
+  - Rarity: 1
+    WeightMultiplier: 60
+  - Rarity: 2
+    WeightMultiplier: 30
+  - Rarity: 3
+    WeightMultiplier: 12
+  - Rarity: 4
+    WeightMultiplier: 4
+  _eliteHealthMultiplier: 3
+  _eliteDamageMultiplier: 1.5
+  _defaultComboWindow: 0.5
+  _hitStopDuration: 0.05
+  _screenShakeAmplitude: 1
+  _screenShakeDuration: 0.15
