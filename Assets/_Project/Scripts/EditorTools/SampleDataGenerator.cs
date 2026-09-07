@@ -24,7 +24,7 @@ namespace ChibiRift.EditorTools
             // SRS 35 lives here. Every default already matches the table, so nothing is overridden.
             BalanceConfig balance = Create<BalanceConfig>(
                 "BalanceConfig", "balance.default", "Default Balance",
-                "Baseline balance from SRS section 35. Values marked Configurable there are provisional; see OPEN_ISSUES.md.",
+                "Baseline balance from SRS section 35. Values SRS marks Configurable were fixed by the project owner; see OPEN_ISSUES.md.",
                 so =>
                 {
                     // UPG-004 / RNG-001: rarer upgrades are drawn less often.

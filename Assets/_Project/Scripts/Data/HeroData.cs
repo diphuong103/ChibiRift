@@ -31,11 +31,11 @@ namespace ChibiRift.Data
         [Min(1)]
         [SerializeField] private int _comboLength = 3;
 
-        [Tooltip("Seconds to input the next combo hit before the chain resets (COM-003). No SRS 35 baseline; provisional.")]
+        [Tooltip("Seconds to input the next combo hit before the chain resets (COM-003). No SRS 35 baseline; set by the project owner (OI-04).")]
         [Min(0.01f)]
         [SerializeField] private float _comboWindow = 0.5f;
 
-        [Tooltip("Seconds of invulnerability after taking a hit (HPS-005). No SRS 35 baseline; provisional.")]
+        [Tooltip("Seconds of invulnerability after taking a hit (HPS-005). No SRS 35 baseline; set by the project owner (OI-05).")]
         [Min(0f)]
         [SerializeField] private float _hurtIFrameDuration = 0.5f;
 

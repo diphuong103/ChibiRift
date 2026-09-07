@@ -283,4 +283,4 @@ The repository has been initialised (`git init`) but nothing has been staged or 
 ## 12. Related documents
 
 - `TRACEABILITY.md` — every SRS requirement ID mapped to the file that serves it.
-- `OPEN_ISSUES.md` — ambiguities found in the SRS and the provisional decision taken for each.
+- `OPEN_ISSUES.md` — ambiguities found in the SRS and the decision taken for each.

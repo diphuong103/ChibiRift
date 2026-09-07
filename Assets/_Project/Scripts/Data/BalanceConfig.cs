@@ -19,8 +19,8 @@ namespace ChibiRift.Data
     /// The single home for every tunable number (SRS 35: "Balance không hard-code trong script").
     /// Gameplay code reads values from here; a balance literal appearing in ChibiRift.Gameplay is
     /// a defect. Values carrying an explicit SRS 35 baseline are copied verbatim and must not be
-    /// edited without updating the SRS; values SRS 35 only marks "Configurable" are provisional
-    /// and listed in OPEN_ISSUES.md.
+    /// edited without updating the SRS; values SRS 35 only marks "Configurable" were fixed by
+    /// the project owner and are recorded in OPEN_ISSUES.md.
     /// </summary>
     [CreateAssetMenu(fileName = "BalanceConfig", menuName = "ChibiRift/Balance Config", order = 0)]
     public sealed class BalanceConfig : GameDataAsset
@@ -69,11 +69,11 @@ namespace ChibiRift.Data
         [SerializeField] private float _dashIFrameDuration = 0.25f;
 
         [Header("Experience (SRS 10)")]
-        [Tooltip("XPRequired(level) = BaseXP * GrowthFactor^(level-1). SRS 35 says Configurable only; provisional.")]
+        [Tooltip("XPRequired(level) = BaseXP * GrowthFactor^(level-1). SRS 35 says Configurable only; set by the project owner (OI-02).")]
         [Min(1f)]
         [SerializeField] private float _baseExperience = 100f;
 
-        [Tooltip("Growth factor of the XP curve. SRS 35 says Configurable only; provisional.")]
+        [Tooltip("Growth factor of the XP curve. SRS 35 says Configurable only; set by the project owner (OI-02).")]
         [Min(1f)]
         [SerializeField] private float _experienceGrowthFactor = 1.4f;
 
@@ -99,7 +99,7 @@ namespace ChibiRift.Data
         [SerializeField] private float _eliteDamageMultiplier = 1.5f;
 
         [Header("Combat feel (SRS 21, SRS 35)")]
-        [Tooltip("Combo input window in seconds. SRS 35 says Configurable only; provisional.")]
+        [Tooltip("Combo input window in seconds. SRS 35 says Configurable only; set by the project owner (OI-04).")]
         [Min(0.01f)]
         [SerializeField] private float _defaultComboWindow = 0.5f;
 

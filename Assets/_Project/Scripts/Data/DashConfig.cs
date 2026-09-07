@@ -6,16 +6,16 @@ namespace ChibiRift.Data
     /// <summary>
     /// Dash tuning required on every hero by HER-006 and MOV-006.
     /// Cooldown and i-frame duration have SRS 35 baselines; distance and duration do not and are
-    /// flagged in OPEN_ISSUES.md as provisional designer values.
+    /// were fixed by the project owner and recorded in OPEN_ISSUES.md (OI-03).
     /// </summary>
     [Serializable]
     public struct DashConfig
     {
-        [Tooltip("World units travelled by one dash. Not specified in SRS 35; provisional.")]
+        [Tooltip("World units travelled by one dash. Not in SRS 35; set by the project owner (OI-03).")]
         [Min(0f)]
         public float Distance;
 
-        [Tooltip("Seconds the dash movement takes. Not specified in SRS 35; provisional.")]
+        [Tooltip("Seconds the dash movement takes. Not in SRS 35; set by the project owner (OI-03).")]
         [Min(0.01f)]
         public float Duration;
 
@@ -27,7 +27,7 @@ namespace ChibiRift.Data
         [Min(0f)]
         public float Cooldown;
 
-        /// <summary>Baseline dash: SRS 35 values where given, provisional values elsewhere.</summary>
+        /// <summary>Baseline dash: SRS 35 values where given, owner-confirmed values elsewhere (OI-03).</summary>
         public static DashConfig Baseline => new DashConfig
         {
             Distance = 5f,

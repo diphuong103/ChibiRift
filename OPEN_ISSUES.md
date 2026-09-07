@@ -1,20 +1,19 @@
 # Open Issues
 
 Ambiguities, gaps and contradictions found while reading
-`SRS_2D_Action_Roguelite_RPG_Unity_v1.1.docx`, together with the provisional decision taken so the
+`SRS_2D_Action_Roguelite_RPG_Unity_v1.1.docx`, together with the decision taken so the
 skeleton could be built. **No new requirements were invented.** Where the SRS is silent, the
-value chosen is marked *provisional* and is a designer decision to confirm, not a fact.
+value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
 > outstanding balance values and they are applied to the assets. OI-06 to OI-15 remain open.
-> One consequence to be aware of: the confirmed values live in the **assets**, while the C#
-> field initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, and the `BalanceConfig`
-> defaults) still carry the older provisional numbers. Any *newly created* asset therefore
-> starts from the old values. Aligning the C# defaults is a separate, not-yet-approved change.
+> The five values are now consistent in all three places: the `.asset` files, the C# field
+> initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
+> `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
 
 ---
 
-Every provisional number lives in a ScriptableObject, so confirming or changing it is a data edit,
+Every unconfirmed number lives in a ScriptableObject, so confirming or changing it is a data edit,
 not a code change.
 
 ---
@@ -41,7 +40,7 @@ lists `XP Growth | Configurable` with no figures.
 Applied to `Data/BalanceConfig.asset` `_baseExperience` (100) and `_experienceGrowthFactor` (1.4).
 
 Note for balance: 1.4 is a steep curve. Level 10 costs 100 × 1.4⁹ ≈ 2066 XP and reaching level 10
-costs ≈ 7156 XP cumulative, against ≈ 1519 under the earlier provisional 1.15. Expect noticeably
+costs ≈ 7156 XP cumulative, against ≈ 1519 under the earlier working value 1.15. Expect noticeably
 fewer level-ups per Run; worth re-checking against telemetry (TEL-002) once a Run is playable.
 
 `MaxHeroLevel = 50` remains a project-added ceiling with no SRS basis, kept so
@@ -70,7 +69,7 @@ intended rather than coincidental.
 **COM-003** requires the combo to reset after a timeout; **SRS 35** lists
 `Combo Window | Configurable` with no number.
 
-**Resolved by the project owner: 0.5 s**, confirming the provisional value.
+**Resolved by the project owner: 0.5 s**, confirming the value already in use.
 
 `Data/BalanceConfig.asset` `_defaultComboWindow` and `Data/HERO_Knight.asset` `_comboWindow`
 both read 0.5; no change was needed.

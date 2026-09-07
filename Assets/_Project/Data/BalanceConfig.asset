@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.BalanceConfig
   _id: balance.default
   _displayName: Default Balance
-  _description: Baseline balance from SRS section 35. Values marked Configurable
-    there are provisional; see OPEN_ISSUES.md.
+  _description: Baseline balance from SRS section 35. Values SRS marks Configurable
+    were fixed by the project owner; see OPEN_ISSUES.md.
   _minDamage: 1
   _maxDamageReduction: 0.8
   _defaultCritMultiplier: 2
