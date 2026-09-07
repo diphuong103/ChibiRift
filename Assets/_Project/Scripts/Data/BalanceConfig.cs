@@ -36,7 +36,7 @@ namespace ChibiRift.Data
 
         [Tooltip("SRS 35 range is 1.5x-2.0x; 1.5 taken as the baseline. See OPEN_ISSUES.md.")]
         [Min(1f)]
-        [SerializeField] private float _defaultCritMultiplier = 1.5f;
+        [SerializeField] private float _defaultCritMultiplier = 2f;
 
         [Header("Player baseline (SRS 35)")]
         [Tooltip("SRS 35 baseline: 100.")]
@@ -75,7 +75,7 @@ namespace ChibiRift.Data
 
         [Tooltip("Growth factor of the XP curve. SRS 35 says Configurable only; provisional.")]
         [Min(1f)]
-        [SerializeField] private float _experienceGrowthFactor = 1.15f;
+        [SerializeField] private float _experienceGrowthFactor = 1.4f;
 
         [Tooltip("Highest level the curve is defined for. Guards against runaway loops.")]
         [Min(1)]

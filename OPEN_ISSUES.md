@@ -5,71 +5,90 @@ Ambiguities, gaps and contradictions found while reading
 skeleton could be built. **No new requirements were invented.** Where the SRS is silent, the
 value chosen is marked *provisional* and is a designer decision to confirm, not a fact.
 
+> **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
+> outstanding balance values and they are applied to the assets. OI-06 to OI-15 remain open.
+> One consequence to be aware of: the confirmed values live in the **assets**, while the C#
+> field initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, and the `BalanceConfig`
+> defaults) still carry the older provisional numbers. Any *newly created* asset therefore
+> starts from the old values. Aligning the C# defaults is a separate, not-yet-approved change.
+
+---
+
 Every provisional number lives in a ScriptableObject, so confirming or changing it is a data edit,
 not a code change.
 
 ---
 
-## OI-01 — Critical multiplier is given as a range, not a value
+## OI-01 — Critical multiplier is given as a range, not a value  ✅ CLOSED 2026-09-05
 
 **SRS 35** lists `Crit Multiplier | 1.5x–2.0x`. A single number is needed to seed
-`BalanceConfig` and `StatBlock`.
+`BalanceConfig` and `HeroData`.
 
-**Decision:** take **1.5**, the lower bound, as the baseline. Stored in
-`BalanceConfig.DefaultCritMultiplier` and `StatBlock.PlayerBaseline.CritMultiplier`.
+**Resolved by the project owner: 2.0**, the upper bound of the SRS range.
 
-**Needs from design:** either a single baseline value, or confirmation that the range means
-"per-hero" / "per-upgrade" variation, in which case the range belongs in `HeroData` rather than in
-the global config.
+Applied to `Data/BalanceConfig.asset` `_defaultCritMultiplier` and
+`Data/HERO_Knight.asset` `_baseStats.CritMultiplier`. Both now read `2`.
 
 ---
 
-## OI-02 — XP curve parameters have no numbers
+## OI-02 — XP curve parameters have no numbers  ✅ CLOSED 2026-09-05
 
 **SRS 10** gives the shape `XPRequired(level) = BaseXP × GrowthFactor^(level-1)`, and **SRS 35**
 lists `XP Growth | Configurable` with no figures.
 
-**Decision:** provisional `BaseXP = 100`, `GrowthFactor = 1.15`, plus a `MaxHeroLevel = 50`
-ceiling that the SRS does not mention but which is needed to stop `LevelForTotalExperience` from
-looping without bound. All three are in `BalanceConfig`.
+**Resolved by the project owner: BaseXP = 100, GrowthFactor = 1.4.**
 
-**Needs from design:** real values, and confirmation that a level cap is wanted at all.
+Applied to `Data/BalanceConfig.asset` `_baseExperience` (100) and `_experienceGrowthFactor` (1.4).
+
+Note for balance: 1.4 is a steep curve. Level 10 costs 100 × 1.4⁹ ≈ 2066 XP and reaching level 10
+costs ≈ 7156 XP cumulative, against ≈ 1519 under the earlier provisional 1.15. Expect noticeably
+fewer level-ups per Run; worth re-checking against telemetry (TEL-002) once a Run is playable.
+
+`MaxHeroLevel = 50` remains a project-added ceiling with no SRS basis, kept so
+`LevelForTotalExperience` cannot loop without bound.
 
 ---
 
-## OI-03 — Dash distance and duration are unspecified
+## OI-03 — Dash distance and duration are unspecified  ✅ CLOSED 2026-09-05
 
 **SRS 35** gives `Dash Cooldown 1.5s` and `Dash I-Frame Duration 0.25s`, and **HER-006** requires
-`distance, duration, i-frame, cooldown`. Distance and duration have no baseline anywhere.
+`distance, duration, i-frame, cooldown`. Distance and duration had no baseline anywhere.
 
-**Decision:** provisional `Distance = 4` world units, `Duration = 0.18s`, in
-`DashConfig.Baseline`. The two SRS values are copied verbatim.
+**Resolved by the project owner: Distance = 5.0 world units, Duration = 0.25 s.**
 
-**Needs from design:** dash distance and duration, ideally after the P1 movement prototype exists,
-since these are feel values.
+Applied to `Data/HERO_Knight.asset` `_dash.Distance` (5) and `_dash.Duration` (0.25).
+`IFrameDuration` (0.25) and `Cooldown` (1.5) keep their SRS 35 values, untouched.
+
+Note: duration now equals the i-frame window exactly, so the hero is invulnerable for the whole
+dash rather than part of it. That is a legitimate design choice, and worth confirming it is
+intended rather than coincidental.
 
 ---
 
-## OI-04 — Combo window has no baseline
+## OI-04 — Combo window has no baseline  ✅ CLOSED 2026-09-05
 
 **COM-003** requires the combo to reset after a timeout; **SRS 35** lists
 `Combo Window | Configurable` with no number.
 
-**Decision:** provisional `0.5s`, in `BalanceConfig.DefaultComboWindow` and
-`HeroData.ComboWindow` (per-hero override).
+**Resolved by the project owner: 0.5 s**, confirming the provisional value.
+
+`Data/BalanceConfig.asset` `_defaultComboWindow` and `Data/HERO_Knight.asset` `_comboWindow`
+both read 0.5; no change was needed.
 
 ---
 
-## OI-05 — Post-hit i-frame duration is unspecified
+## OI-05 — Post-hit i-frame duration is unspecified  ✅ CLOSED 2026-09-05
 
 **HPS-005** requires invulnerability frames in **two** situations: after taking a hit, and during
-the dash window. **SRS 35** only gives a duration for the dash case (0.25s).
+the dash window. **SRS 35** only gives a duration for the dash case (0.25 s).
 
-**Decision:** provisional `HeroData.HurtIFrameDuration = 0.5s`, kept as a separate field from
-`DashConfig.IFrameDuration` because the two serve different purposes and should be tunable apart.
+**Resolved by the project owner: 0.8 s after taking a hit.**
 
-**Needs from design:** the post-hit value, and whether the two windows can overlap or the longer
-one wins.
+Applied to `Data/HERO_Knight.asset` `_hurtIFrameDuration` (0.8). It stays a separate field from
+`_dash.IFrameDuration` (0.25) because the two serve different purposes and tune apart.
+
+Still open for design: whether the two windows may overlap, or the longer one wins when a hit
+lands during a dash. `PlayerStats.BeginInvulnerability` currently has no stacking rule.
 
 ---
 

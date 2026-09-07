@@ -51,7 +51,7 @@ namespace ChibiRift.Data
             AttackSpeed = 1f,
             MoveSpeed = 6f,
             CritChance = 0.05f,
-            CritMultiplier = 1.5f,
+            CritMultiplier = 2f,
             Defense = 0f,
             DamageReduction = 0f
         };

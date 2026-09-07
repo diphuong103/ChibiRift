@@ -30,8 +30,8 @@ namespace ChibiRift.Data
         /// <summary>Baseline dash: SRS 35 values where given, provisional values elsewhere.</summary>
         public static DashConfig Baseline => new DashConfig
         {
-            Distance = 4f,
-            Duration = 0.18f,
+            Distance = 5f,
+            Duration = 0.25f,
             IFrameDuration = 0.25f,
             Cooldown = 1.5f
         };

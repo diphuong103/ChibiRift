@@ -21,19 +21,19 @@ MonoBehaviour:
     AttackSpeed: 1
     MoveSpeed: 6
     CritChance: 0.05
-    CritMultiplier: 1.5
+    CritMultiplier: 2
     Defense: 0
     DamageReduction: 0
   _dash:
-    Distance: 4
-    Duration: 0.18
+    Distance: 5
+    Duration: 0.25
     IFrameDuration: 0.25
     Cooldown: 1.5
   _jumpForce: 12
   _maxJumpCount: 2
   _comboLength: 3
   _comboWindow: 0.5
-  _hurtIFrameDuration: 0.5
+  _hurtIFrameDuration: 0.8
   _skills:
   - {fileID: 11400000, guid: e56b88de6b9133a7899872493063b136, type: 2}
   _passive: {fileID: 0}

@@ -18,7 +18,7 @@ MonoBehaviour:
     there are provisional; see OPEN_ISSUES.md.
   _minDamage: 1
   _maxDamageReduction: 0.8
-  _defaultCritMultiplier: 1.5
+  _defaultCritMultiplier: 2
   _playerBaseHealth: 100
   _playerBaseAttack: 10
   _playerBaseCritChance: 0.05
@@ -27,7 +27,7 @@ MonoBehaviour:
   _dashCooldown: 1.5
   _dashIFrameDuration: 0.25
   _baseExperience: 100
-  _experienceGrowthFactor: 1.15
+  _experienceGrowthFactor: 1.4
   _maxHeroLevel: 50
   _upgradeChoiceCount: 3
   _rarityWeights:

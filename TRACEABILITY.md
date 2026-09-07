@@ -71,7 +71,7 @@ Paths are relative to `Assets/_Project/`.
 | EXP-007 | Pick one, close the panel | `Scripts/UI/LevelUpPanel.OnCardSelected` | Skeleton |
 | EXP-008 | Upgrade applies immediately | `Progression/UpgradeSystem.SelectUpgrade`, `PlayerStats.RecalculateFromBuild` | Skeleton |
 | EXP-009 | Fallback Pool tops up to 3 | `UpgradeRoller.cs` second loop | **Done** — `TopsUpFromFallbackPoolWhenTooFewNormalUpgradesRemain`, `ExhaustedNormalPoolIsFullyCoveredByFallback` |
-| SRS 10 model | `BaseXP × Growth^(level-1)` | `ExperienceCurve.ExperienceRequired`, `BalanceConfig` | **Done** — see OI-02 for the provisional values |
+| SRS 10 model | `BaseXP × Growth^(level-1)` | `ExperienceCurve.ExperienceRequired`, `BalanceConfig` | **Done** — see OI-02 for the confirmed values |
 
 ## 11 Roguelite Upgrade System
 
@@ -296,10 +296,10 @@ Every value below is copied verbatim from SRS 35 into `Data/BalanceConfig.asset`
 | Player Base HP | 100 | `PlayerBaseHealth` |
 | Player Base Attack | 10 | `PlayerBaseAttack` |
 | Crit Chance | 5% | `PlayerBaseCritChance` |
-| Crit Multiplier | 1.5 (range in SRS, see **OI-01**) | `DefaultCritMultiplier` |
-| Combo Window | 0.5 s (*provisional*, **OI-04**) | `DefaultComboWindow` |
+| Crit Multiplier | 2.0 | `DefaultCritMultiplier` |
+| Combo Window | 0.5 s (**OI-04**) | `DefaultComboWindow` |
 | Skill Cooldown | per-skill | `SkillData.Cooldown` |
-| XP Growth | 100 / 1.15 (*provisional*, **OI-02**) | `BaseExperience`, `ExperienceGrowthFactor` |
+| XP Growth | 100 / 1.4 | `BaseExperience`, `ExperienceGrowthFactor` |
 | Enemy HP Scaling | per stage | `StageData.EnemyHealthMultiplier` |
 | Enemy Damage Scaling | per stage | `StageData.EnemyDamageMultiplier` |
 | Upgrade Weight | per rarity | `RarityWeights` |
