@@ -49,7 +49,7 @@ namespace ChibiRift.Core
         }
 
         /// <summary>Uniform float in [0, 1).</summary>
-        public float NextFloat() => (NextUInt() >> 8) * (1.0f / 16777216.0f);
+        public float NextFloat() => (NextUInt() >> 8) * (1f / 16777216f);
 
         /// <summary>Uniform float in [minInclusive, maxExclusive).</summary>
         public float NextFloat(float minInclusive, float maxExclusive)

@@ -37,6 +37,10 @@ namespace ChibiRift.Data
         [Min(0f)]
         [SerializeField] private float _knockbackResistance = 0f;
 
+        [Tooltip("Seconds a corpse stays in the scene before returning to the pool (HPS-007). Long enough for the death feedback to read, short enough not to clutter a wave.")]
+        [Min(0f)]
+        [SerializeField] private float _corpseLingerSeconds = 0.5f;
+
         [Header("Rewards (EXP-001, SRS 16)")]
         [Tooltip("XP granted once on death (EXP-001, HPS-007). Granted exactly once (SRS 34).")]
         [Min(0f)]
@@ -82,6 +86,9 @@ namespace ChibiRift.Data
 
         /// <summary>Knockback resistance.</summary>
         public float KnockbackResistance => _knockbackResistance;
+
+        /// <summary>Seconds between death and the return to the pool (HPS-007, SRS 29).</summary>
+        public float CorpseLingerSeconds => _corpseLingerSeconds;
 
         /// <summary>XP granted on death (EXP-001).</summary>
         public float ExperienceReward => _experienceReward;

@@ -54,6 +54,8 @@ namespace ChibiRift.EditorTools
             BuildCamera(hero);
 
             new GameObject("DebugOverlay").AddComponent<DebugOverlay>();
+            BuildTrainingDummies();
+            BuildDamageNumberCanvas();
             BuildPostRunLink();
 
             var contextSo = new SerializedObject(context);
@@ -230,19 +232,125 @@ namespace ChibiRift.EditorTools
             capsule.direction = CapsuleDirection2D.Vertical;
             capsule.size = new Vector2(0.8f, 1.8f);
 
+            HeroData heroData = AssetDatabase.LoadAssetAtPath<HeroData>($"{DataRoot}/HERO_Knight.asset");
+            BalanceConfig balance = AssetDatabase.LoadAssetAtPath<BalanceConfig>($"{DataRoot}/BalanceConfig.asset");
+
             var motor = hero.AddComponent<PlayerMotor>();
             hero.AddComponent<PlayerController>();
 
+            // Health before stats: PlayerStats requires it and seeds it on Awake.
+            var health = hero.AddComponent<HealthComponent>();
+            var stats = hero.AddComponent<PlayerStats>();
+            var combat = hero.AddComponent<PlayerCombat>();
+
             var motorSo = new SerializedObject(motor);
-            motorSo.FindProperty("_heroData").objectReferenceValue =
-                AssetDatabase.LoadAssetAtPath<HeroData>($"{DataRoot}/HERO_Knight.asset");
-            motorSo.FindProperty("_spriteRenderer").objectReferenceValue = renderer;
+            motorSo.FindProperty("_heroData").objectReferenceValue = heroData;
             motorSo.ApplyModifiedPropertiesWithoutUndo();
+
+            var healthSo = new SerializedObject(health);
+            healthSo.FindProperty("_isPlayer").boolValue = true;
+            healthSo.FindProperty("_bodyCollider").objectReferenceValue = capsule;
+            healthSo.ApplyModifiedPropertiesWithoutUndo();
+
+            var statsSo = new SerializedObject(stats);
+            statsSo.FindProperty("_heroData").objectReferenceValue = heroData;
+            statsSo.FindProperty("_balanceConfig").objectReferenceValue = balance;
+            statsSo.ApplyModifiedPropertiesWithoutUndo();
+
+            var combatSo = new SerializedObject(combat);
+            combatSo.FindProperty("_heroData").objectReferenceValue = heroData;
+            // COM-009: PlayerCombat is the only writer of flipX from slice 2 on (OI-20).
+            combatSo.FindProperty("_spriteRenderer").objectReferenceValue = renderer;
+            combatSo.ApplyModifiedPropertiesWithoutUndo();
 
             string path = $"{PrefabRoot}/Hero.prefab";
             AssetDatabase.DeleteAsset(path);
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(hero, path);
             Object.DestroyImmediate(hero);
+
+            return prefab;
+        }
+
+        /// <summary>
+        /// Three inert targets at x = 3, 8 and 12 (P1 slice 2). Enemy AI is slice 3, but combat
+        /// needs something to hit before then. The middle one is fragile so death, the corpse
+        /// timer and the once-only EntityDiedEvent can be exercised by hand.
+        /// </summary>
+        private static void BuildTrainingDummies()
+        {
+            EnemyData sturdy =
+                AssetDatabase.LoadAssetAtPath<EnemyData>($"{DataRoot}/ENM_TrainingDummy.asset");
+            EnemyData fragile =
+                AssetDatabase.LoadAssetAtPath<EnemyData>($"{DataRoot}/ENM_TrainingDummyFragile.asset");
+
+            CreateDummy("Dummy_A", 3f, sturdy, new Color(0.55f, 0.30f, 0.32f));
+            CreateDummy("Dummy_B_Fragile", 8f, fragile, new Color(0.72f, 0.40f, 0.30f));
+            CreateDummy("Dummy_C", 12f, sturdy, new Color(0.55f, 0.30f, 0.32f));
+        }
+
+        private static void CreateDummy(string name, float x, EnemyData data, Color colour)
+        {
+            var dummy = new GameObject(name) { layer = LayerMask.NameToLayer(GameLayers.Enemy) };
+            dummy.transform.position = new Vector3(x, 1f, 0f);
+
+            var renderer = dummy.AddComponent<SpriteRenderer>();
+            renderer.sprite = CreateFlatSprite(colour);
+            renderer.transform.localScale = new Vector3(1f, 2f, 1f);
+
+            // Static: no Rigidbody2D, no AI, no retaliation. It exists to be hit.
+            var box = dummy.AddComponent<BoxCollider2D>();
+            box.size = Vector2.one;
+
+            var health = dummy.AddComponent<HealthComponent>();
+            var healthSo = new SerializedObject(health);
+            healthSo.FindProperty("_sourceData").objectReferenceValue = data;
+            healthSo.FindProperty("_isPlayer").boolValue = false;
+            healthSo.FindProperty("_bodyCollider").objectReferenceValue = box;
+            healthSo.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>Screen-space canvas hosting the floating damage numbers (HPS-008).</summary>
+        private static void BuildDamageNumberCanvas()
+        {
+            var root = new GameObject("DamageNumberCanvas",
+                typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+
+            var canvas = root.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+
+            var scaler = root.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
+
+            GameObject prefab = BuildDamageNumberPrefab();
+
+            var spawner = root.AddComponent<DamageNumberSpawner>();
+            var spawnerSo = new SerializedObject(spawner);
+            spawnerSo.FindProperty("_prefab").objectReferenceValue = prefab.GetComponent<DamageNumber>();
+            spawnerSo.FindProperty("_container").objectReferenceValue = root.GetComponent<RectTransform>();
+            spawnerSo.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static GameObject BuildDamageNumberPrefab()
+        {
+            var number = new GameObject("DamageNumber", typeof(RectTransform));
+
+            var label = number.AddComponent<Text>();
+            label.font = AssetDatabase.GetBuiltinExtraResource<Font>("LegacyRuntime.ttf");
+            label.alignment = TextAnchor.MiddleCenter;
+            label.horizontalOverflow = HorizontalWrapMode.Overflow;
+            label.verticalOverflow = VerticalWrapMode.Overflow;
+            label.text = "0";
+
+            var view = number.AddComponent<DamageNumber>();
+            var viewSo = new SerializedObject(view);
+            viewSo.FindProperty("_label").objectReferenceValue = label;
+            viewSo.ApplyModifiedPropertiesWithoutUndo();
+
+            string path = $"{PrefabRoot}/DamageNumber.prefab";
+            AssetDatabase.DeleteAsset(path);
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(number, path);
+            Object.DestroyImmediate(number);
 
             return prefab;
         }

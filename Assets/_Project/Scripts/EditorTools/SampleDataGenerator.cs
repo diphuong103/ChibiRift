@@ -16,7 +16,7 @@ namespace ChibiRift.EditorTools
         /// <summary>Where the shipped assets live; the target of the parameterless <see cref="Generate()"/>.</summary>
         public const string DefaultDataRoot = "Assets/_Project/Data";
 
-        /// <summary>Generates the ten baseline assets. Safe to re-run: existing assets are replaced.</summary>
+        /// <summary>Generates the baseline assets. Safe to re-run: existing assets are replaced.</summary>
         [MenuItem("ChibiRift/Setup/3. Generate Baseline Data Assets")]
         public static void Generate() => Generate(DefaultDataRoot);
 
@@ -110,6 +110,27 @@ namespace ChibiRift.EditorTools
                     so.FindProperty("_eliteRewardMultiplier").floatValue = 3f;
                 });
 
+            // COM-001..COM-004: frame data in seconds because P1 has no animation clips to hang
+            // Animation Events on (OI-18). Values confirmed by the project owner for slice 2.
+            AttackData basicAttack = Create<AttackData>(
+                "ATK_KnightBasic", "attack.knight.basic", "Knight Basic Chain",
+                "Three hit basic chain. Active windows are in seconds from swing start (OI-18).",
+                so =>
+                {
+                    SerializedProperty steps = so.FindProperty("_steps");
+                    AttackStep[] baseline = AttackData.BaselineSteps();
+                    steps.arraySize = baseline.Length;
+
+                    for (int i = 0; i < baseline.Length; i++)
+                    {
+                        SerializedProperty entry = steps.GetArrayElementAtIndex(i);
+                        entry.FindPropertyRelative("TotalDuration").floatValue = baseline[i].TotalDuration;
+                        entry.FindPropertyRelative("ActiveStartTime").floatValue = baseline[i].ActiveStartTime;
+                        entry.FindPropertyRelative("ActiveEndTime").floatValue = baseline[i].ActiveEndTime;
+                        entry.FindPropertyRelative("DamageMultiplier").floatValue = baseline[i].DamageMultiplier;
+                    }
+                });
+
             HeroData hero = Create<HeroData>(
                 "HERO_Knight", "hero.knight", "Knight",
                 "The MVP hero. Melee, 3 hit combo, dash with i-frames (SRS 12).",
@@ -119,6 +140,41 @@ namespace ChibiRift.EditorTools
                     SerializedProperty skills = so.FindProperty("_skills");
                     skills.arraySize = 1;
                     skills.GetArrayElementAtIndex(0).objectReferenceValue = skill;
+
+                    so.FindProperty("_basicAttack").objectReferenceValue = basicAttack;
+                });
+
+            // P1 slice 2 needs something to hit before enemy AI exists in slice 3. Two variants:
+            // one that survives any amount of testing, one that dies quickly so death, the corpse
+            // timer and the once-only EntityDiedEvent can be exercised.
+            Create<EnemyData>(
+                "ENM_TrainingDummy", "enemy.training_dummy", "Training Dummy",
+                "Inert target for combat testing. No AI, no movement, no retaliation.",
+                so =>
+                {
+                    SerializedProperty stats = so.FindProperty("_baseStats");
+                    stats.FindPropertyRelative("MaxHealth").floatValue = 9999f;
+                    stats.FindPropertyRelative("Attack").floatValue = 0f;
+                    stats.FindPropertyRelative("MoveSpeed").floatValue = 0f;
+                    stats.FindPropertyRelative("Defense").floatValue = 0f;
+                    stats.FindPropertyRelative("DamageReduction").floatValue = 0f;
+                    so.FindProperty("_experienceReward").floatValue = 0f;
+                    so.FindProperty("_goldReward").intValue = 0;
+                });
+
+            Create<EnemyData>(
+                "ENM_TrainingDummyFragile", "enemy.training_dummy_fragile", "Fragile Training Dummy",
+                "Low HP target so death, the corpse timer and EntityDiedEvent can be exercised.",
+                so =>
+                {
+                    SerializedProperty stats = so.FindProperty("_baseStats");
+                    stats.FindPropertyRelative("MaxHealth").floatValue = 30f;
+                    stats.FindPropertyRelative("Attack").floatValue = 0f;
+                    stats.FindPropertyRelative("MoveSpeed").floatValue = 0f;
+                    stats.FindPropertyRelative("Defense").floatValue = 0f;
+                    stats.FindPropertyRelative("DamageReduction").floatValue = 0f;
+                    so.FindProperty("_experienceReward").floatValue = 0f;
+                    so.FindProperty("_goldReward").intValue = 0;
                 });
 
             WaveData wave = Create<WaveData>(
@@ -175,7 +231,7 @@ namespace ChibiRift.EditorTools
                 });
 
             // Silences the unused-local warnings for assets referenced only by others.
-            if (balance == null || hero == null || upgrade == null)
+            if (balance == null || hero == null || upgrade == null || basicAttack == null)
                 Debug.LogError("[Setup] Asset creation returned null.");
 
             AssetDatabase.SaveAssets();

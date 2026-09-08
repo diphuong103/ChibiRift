@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 163dcc128da79bfe6a0a3e22b99c6151, type: 3}
-  m_Name: ENM_Melee
+  m_Name: ENM_TrainingDummy
   m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.EnemyData
-  _id: enemy.melee_grunt
-  _displayName: Melee Grunt
-  _description: Closes on the hero and attacks in melee (SRS 13).
+  _id: enemy.training_dummy
+  _displayName: Training Dummy
+  _description: Inert target for combat testing. No AI, no movement, no retaliation.
   _baseStats:
-    MaxHealth: 30
-    Attack: 5
+    MaxHealth: 9999
+    Attack: 0
     AttackSpeed: 1
-    MoveSpeed: 3
+    MoveSpeed: 0
     CritChance: 0.05
     CritMultiplier: 2
     Defense: 0
@@ -31,10 +31,9 @@ MonoBehaviour:
   _attackWindup: 0.3
   _knockbackResistance: 0
   _corpseLingerSeconds: 0.5
-  _experienceReward: 10
-  _goldReward: 1
+  _experienceReward: 0
+  _goldReward: 0
   _gemReward: 0
-  _eliteModifiers:
-  - {fileID: 11400000, guid: 0763aa08e1297e5c4a0f48fb3b50cfdd, type: 2}
+  _eliteModifiers: []
   _eliteRewardMultiplier: 3
   _prefab: {fileID: 0}

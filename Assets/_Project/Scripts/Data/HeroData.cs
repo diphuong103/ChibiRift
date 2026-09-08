@@ -34,6 +34,9 @@ namespace ChibiRift.Data
         [Min(0.01f)]
         [SerializeField] private float _comboWindow = 0.5f;
 
+        [Tooltip("Frame data and hitbox geometry for the basic-attack chain (COM-001, COM-002, COM-004).")]
+        [SerializeField] private AttackData _basicAttack;
+
         [Tooltip("Seconds of invulnerability after taking a hit (HPS-005). No SRS 35 baseline; set by the project owner to 0.8 (OI-05).")]
         [Min(0f)]
         [SerializeField] private float _hurtIFrameDuration = 0.8f;
@@ -77,6 +80,9 @@ namespace ChibiRift.Data
 
         /// <summary>Combo input window in seconds (COM-003).</summary>
         public float ComboWindow => _comboWindow;
+
+        /// <summary>Basic-attack chain: per-step frame data and hitbox size (COM-001, COM-002).</summary>
+        public AttackData BasicAttack => _basicAttack;
 
         /// <summary>Post-hit invulnerability in seconds (HPS-005).</summary>
         public float HurtIFrameDuration => _hurtIFrameDuration;

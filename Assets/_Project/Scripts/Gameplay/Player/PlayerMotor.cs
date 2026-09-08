@@ -30,9 +30,6 @@ namespace ChibiRift.Gameplay
         [Tooltip("Supplies the world bounds and the respawn point (MOV-004).")]
         [SerializeField] private SceneContext _sceneContext;
 
-        [Tooltip("Flipped to face the movement direction. Never scaled (MOV-001).")]
-        [SerializeField] private SpriteRenderer _spriteRenderer;
-
         /// <summary>Raised whenever the hero touches or leaves the ground.</summary>
         public event Action<bool> GroundedChanged;
 
@@ -62,6 +59,7 @@ namespace ChibiRift.Gameplay
         private EventBus _eventBus;
 
         private float _moveIntent;
+        private float _speedMultiplier = 1f;
         private bool _jumpHeld;
         private int _groundMask;
 
@@ -106,6 +104,12 @@ namespace ChibiRift.Gameplay
 
         /// <summary>Horizontal intent for this step, -1..1. Called by <see cref="PlayerController"/>.</summary>
         public void SetMoveIntent(float axis) => _moveIntent = Mathf.Clamp(axis, -1f, 1f);
+
+        /// <summary>
+        /// Scales top speed for this step, 0..1 (COM-001). An attack commits the hero by slowing
+        /// them rather than freezing them, so a swing never feels like a stutter.
+        /// </summary>
+        public void SetSpeedMultiplier(float multiplier) => _speedMultiplier = Mathf.Clamp01(multiplier);
 
         /// <summary>Whether the jump key is currently held, for the variable-height cut (MOV-002).</summary>
         public void SetJumpHeld(bool held) => _jumpHeld = held;
@@ -171,7 +175,7 @@ namespace ChibiRift.Gameplay
         private float ApplyHorizontal(float velocityX, float dt)
         {
             MovementConfig config = Config;
-            float target = _moveIntent * _heroData.BaseStats.MoveSpeed;
+            float target = _moveIntent * _heroData.BaseStats.MoveSpeed * _speedMultiplier;
 
             bool accelerating = !Mathf.Approximately(_moveIntent, 0f);
             float rate = IsGrounded
@@ -277,13 +281,21 @@ namespace ChibiRift.Gameplay
             JumpBufferTimer = 0f;
         }
 
-        /// <summary>MOV-001: flip the sprite, never the transform scale.</summary>
+        /// <summary>
+        /// Tracks which way the hero is travelling (MOV-001).
+        /// </summary>
+        /// <remarks>
+        /// This deliberately does <b>not</b> write <c>SpriteRenderer.flipX</c>. From P1 slice 2 the
+        /// sprite faces the mouse cursor (COM-009) and <see cref="PlayerCombat"/> is the single
+        /// writer; two writers produced a visible flicker whenever the cursor and the movement
+        /// direction disagreed. Running left with the cursor to the right therefore moonwalks,
+        /// which is the correct behaviour for a mouse-aimed game — see OI-20.
+        /// </remarks>
         private void UpdateFacing(float velocityX)
         {
             if (Mathf.Approximately(_moveIntent, 0f)) return;
 
             Facing = _moveIntent > 0f ? 1 : -1;
-            if (_spriteRenderer != null) _spriteRenderer.flipX = Facing < 0;
         }
 
         private void PublishState(Vector2 velocity)

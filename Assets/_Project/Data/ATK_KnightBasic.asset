@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 464d37810a6783942b9e88c3c9a00cb3, type: 3}
+  m_Name: ATK_KnightBasic
+  m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.AttackData
+  _id: attack.knight.basic
+  _displayName: Knight Basic Chain
+  _description: Three hit basic chain. Active windows are in seconds from swing start
+    (OI-18).
+  _steps:
+  - TotalDuration: 0.3
+    ActiveStartTime: 0.1
+    ActiveEndTime: 0.16
+    DamageMultiplier: 1
+  - TotalDuration: 0.3
+    ActiveStartTime: 0.1
+    ActiveEndTime: 0.16
+    DamageMultiplier: 1.1
+  - TotalDuration: 0.45
+    ActiveStartTime: 0.15
+    ActiveEndTime: 0.24
+    DamageMultiplier: 1.6
+  _hitboxWidth: 1.2
+  _hitboxHeight: 1
+  _hitboxOffsetDistance: 0.8
+  _moveSpeedMultiplierWhileAttacking: 0.3

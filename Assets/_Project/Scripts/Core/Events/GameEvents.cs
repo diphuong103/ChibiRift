@@ -262,6 +262,24 @@ namespace ChibiRift.Core
         }
     }
 
+    /// <summary>
+    /// The basic-attack chain advanced or reset (COM-002, COM-003).
+    /// <paramref name="Step"/> is 0 when idle, 1..3 while a chain is running.
+    /// </summary>
+    public readonly struct ComboChangedEvent
+    {
+        public readonly int Step;
+        public readonly int MaxStep;
+        public readonly float WindowRemaining;
+
+        public ComboChangedEvent(int step, int maxStep, float windowRemaining)
+        {
+            Step = step;
+            MaxStep = maxStep;
+            WindowRemaining = windowRemaining;
+        }
+    }
+
     /// <summary>Camera shake request (CAM-003). VFX and combat publish it; the camera rig consumes it.</summary>
     public readonly struct ScreenShakeRequestedEvent
     {

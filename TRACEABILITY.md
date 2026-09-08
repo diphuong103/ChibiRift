@@ -20,7 +20,7 @@ Paths are relative to `Assets/_Project/`.
 
 | ID | Requirement | Where | Status |
 |---|---|---|---|
-| MOV-001 | Move left/right with A/D | `Settings/ChibiRiftControls.inputactions` (1D-axis composite), `Scripts/Core/Services/InputReader.cs` (`MoveAxis`), `Scripts/Gameplay/Player/PlayerController.cs`, `PlayerMotor.ApplyHorizontal` + `UpdateFacing`, `Data/MovementConfig.cs` (`GroundAccel` / `GroundDecel` / `AirAccel` / `AirDecel`) | **Done** — `Test_MoveRight_VelocityConvergesToMoveSpeed`, `Test_ReleaseInput_StopsWithin150ms` |
+| MOV-001 | Move left/right with A/D | `Settings/ChibiRiftControls.inputactions` (1D-axis composite), `Scripts/Core/Services/InputReader.cs` (`MoveAxis`), `Scripts/Gameplay/Player/PlayerController.cs`, `PlayerMotor.ApplyHorizontal` (facing moved to `PlayerCombat` in slice 2, see COM-009 and OI-20), `Data/MovementConfig.cs` (`GroundAccel` / `GroundDecel` / `AirAccel` / `AirDecel`) | **Done** — `Test_MoveRight_VelocityConvergesToMoveSpeed`, `Test_ReleaseInput_StopsWithin150ms` |
 | MOV-002 | Jump with Space | `InputReader.JumpPressed` / `JumpHeld`, `PlayerMotor.RequestJump` + `ApplyJumpAndGravity`, `MovementConfig.JumpVelocity` / `GravityUp` / `FallMultiplier` / `LowJumpMultiplier` / `CoyoteTime` / `JumpBuffer` | **Done** — `Test_Jump_PeakHeightInRange`, `Test_CoyoteTime_JumpAfterEdge`, `Test_JumpBuffer_LandAndJump` |
 | MOV-003 | Double jump | `PlayerMotor.JumpCount` (reset on landing), `HeroData.MaxJumpCount` (2), `MovementConfig.DoubleJumpVelocity` (13, separate from the ground jump) | **Done** — `Test_DoubleJump_OnlyOnce` |
 | MOV-004 | Bounded by collision / world boundary | `PlayerMotor.UpdateGrounded` (`Physics2D.OverlapBox`, not `OnCollisionStay`), `PlayerMotor.ApplyBoundary` + `CheckFallLimit`, `Gameplay/SceneContext.cs` (`WorldHalfWidth` 20, `FallLimitY` -10, `SpawnPoint`), `Core/Utilities/GameLayers.cs` (`SolidWorldMask`), `ProjectSettings/Physics2DSettings.asset` | **Done** — `Test_WallCollision_NoPassThrough`, `Test_FallThroughHole_Respawn` |
@@ -32,28 +32,28 @@ Paths are relative to `Assets/_Project/`.
 
 | ID | Requirement | Where | Status |
 |---|---|---|---|
-| COM-001 | Mouse Left basic attack | `InputReader.AttackPressed`, `Scripts/Gameplay/Player/PlayerCombat.cs` | Skeleton — binding Done |
-| COM-002 | 3 hit combo | `PlayerCombat.cs`, `HeroData.ComboLength` (validated == 3) | Skeleton — Schema Done |
-| COM-003 | Combo resets on timeout | `PlayerCombat.ComboWindowRemaining`, `HeroData.ComboWindow` | Skeleton |
-| COM-004 | Clear hitbox / hurtbox, active frames only | `Scripts/Gameplay/Combat/Hitbox.cs`, collision matrix | Skeleton — matrix Done |
-| COM-005 | Damage, knockback, hit feedback | `PlayerCombat.ResolveHit`, `EnemyData.KnockbackResistance` | Skeleton |
+| COM-001 | Mouse Left basic attack | `InputReader.AttackPressed`, `PlayerController.Update`, `PlayerCombat.RequestAttack`; the swing slows the hero via `AttackData.MoveSpeedMultiplierWhileAttacking` and `PlayerMotor.SetSpeedMultiplier` | **Done** — `Test_Attack_SingleTargetHitOnce` |
+| COM-002 | 3 hit combo | `PlayerCombat.RequestAttack` / `BeginStep` / `EndStep`, `Data/AttackData.cs` (three `AttackStep`, multipliers 1.0 / 1.1 / 1.6), `HeroData.ComboLength` (validated == 3) | **Done** — `Test_Combo_ThreeHitsInWindow`, `Test_Attack3_DealsHighestDamage` |
+| COM-003 | Combo resets on timeout | `PlayerCombat.Update` + `ResetCombo`, `HeroData.ComboWindow` (0.5); also resets on leaving the ground. Publishes `ComboChangedEvent` | **Done** — `Test_Combo_ResetsAfterWindowExpires`, `Test_Combo_ResetsWhenLeavingGround` |
+| COM-004 | Clear hitbox / hurtbox, active frames only | `PlayerCombat.SweepHitbox` (`Physics2D.OverlapBox` inside `[ActiveStartTime, ActiveEndTime]`), per-swing `HashSet` for one hit per target, collision matrix. Frame data is in seconds, not Animation Events — see OI-18 | **Done** — `Test_Attack_HitboxOnlyActiveInWindow` |
+| COM-005 | Damage, knockback, hit feedback | `PlayerCombat.ResolveHit` -> `CombatSystem.DealDamage` (damage **Done**), `EnemyData.KnockbackResistance` | Damage **Done**, knockback Skeleton |
 | COM-006 | Critical hit | `Combat/DamageCalculator.cs` step 2 + `RollCritical` | **Done** — `DamageCalculatorTests.Step2_AppliesCriticalMultiplierOnlyOnCrit` |
 | COM-007 | Q/E/R special skills | `InputReader.WasSkillPressed`, `Scripts/Gameplay/Skills/SkillSystem.cs`, `Data/SkillData.cs` | Skeleton — bindings + Schema Done |
 | COM-008 | Cooldown only, no mana pool | `SkillSystem.cs`, `SkillData.Cooldown`; no resource field exists anywhere | Skeleton — by construction Done |
-| COM-009 | Mouse aim, no auto-target | `InputReader.AimWorldPosition` / `AimScreenPosition` | **Done** (input); consumption Skeleton |
+| COM-009 | Mouse aim, no auto-target | `InputReader.AimWorldPosition` -> `PlayerCombat.SetAimTarget`: sets `AimDirection`, places and rotates the hitbox at `HitboxOffsetDistance`, and is the single writer of `SpriteRenderer.flipX` (OI-20) | **Done** — `Test_MouseAim_HitboxFollowsCursorDirection`, `Test_MouseAim_SpriteFlipsCorrectly` |
 
 ## 9 Health, Damage and Death
 
 | ID | Requirement | Where | Status |
 |---|---|---|---|
-| HPS-001 | Hero Current/Max HP | `Gameplay/Player/PlayerStats.cs` (`Initialize` seeds both) | **Done** |
-| HPS-002 | Enemy HP/Max HP | `Gameplay/Enemy/EnemyController.cs` | Skeleton |
-| HPS-003 | One unified damage pipeline | `Combat/DamageCalculator.cs`, `Combat/CombatSystem.cs` | Calculator **Done**, system Skeleton |
-| HPS-004 | No damage to a dead target | `CombatSystem.DealDamage` TODO, `EnemyController.ApplyDamage` TODO | Skeleton |
-| HPS-005 | I-frames after a hit and during dash | `PlayerStats.IsInvulnerable` / `BeginInvulnerability`, `DashConfig.IFrameDuration` | Skeleton — Schema Done |
-| HPS-006 | Hero HP ≤ 0 enters Death | `PlayerStats.EnterDeathState` (guarded, fires `Died` once) | **Done** |
-| HPS-007 | Enemy death triggers reward/XP | `EnemyController.EnterDeathState` (guarded, fires `Died` once) | **Done** |
-| HPS-008 | Damage number on target | `Scripts/UI/HudController.SpawnDamageNumber`, `DamageAppliedEvent` | Skeleton — event Done |
+| HPS-001 | Hero Current/Max HP | `Gameplay/Combat/HealthComponent.cs`, seeded by `PlayerStats.ApplyStats` from `HeroData.BaseStats`. Publishes `HealthChangedEvent` | **Done** |
+| HPS-002 | Enemy HP/Max HP | The same `HealthComponent`, seeded by `HealthComponent.SeedFrom(EnemyData)` or by `EnemyController.Configure` | **Done** |
+| HPS-003 | One unified damage pipeline | `CombatSystem.DealDamage` is the only entry; it calls `DamageCalculator.Calculate` and is the only caller of `IDamageable.ApplyDamage` | **Done** — `DamagePipelineSourceTests` (text scan, OI-19) |
+| HPS-004 | No damage to a dead target | Guarded twice: `CombatSystem.DealDamage` refuses the hit (so no damage number appears) and `HealthComponent.ApplyDamage` refuses it again | **Done** — `Test_Damage_DeadTargetTakesNoMoreDamage` |
+| HPS-005 | I-frames after a hit and during dash | `HealthComponent.IsInvulnerable` / `BeginInvulnerability` (moved off `PlayerStats`: the gate belongs on the damage entry, and enemies have no stat component), `HeroData.HurtIFrameDuration` (0.8), `DashConfig.IFrameDuration` (0.25) | Window **Done**, the two callers land in slices 3 and 4 |
+| HPS-006 | Hero HP ≤ 0 enters Death | `HealthComponent.EnterDeathState`, guarded so `Died` and `EntityDiedEvent` fire once | **Done** — `Test_Death_FiresOnEntityDiedOnce` |
+| HPS-007 | Enemy death triggers reward/XP | The same guarded `HealthComponent.EnterDeathState`; `EnemyController.OnHealthDied` is where XP and gold hang. Corpse disables its collider and retires after `EnemyData.CorpseLingerSeconds` | Death **Done** — `Test_Death_FiresOnEntityDiedOnce`; reward grant Skeleton |
+| HPS-008 | Damage number on target | `UI/DamageNumberSpawner.cs` + `UI/DamageNumber.cs`, pooled with `ObjectPool<T>`, driven only by `DamageAppliedEvent`. Crit colour is set up although crits arrive in slice 4 | **Done** |
 | HPS-009 | Defense (flat) and DamageReduction on hero and enemy | `Data/StatBlock.cs`, `HeroData`, `EnemyData`, `Core/Interfaces/IDamageable` | **Done** — `Step3_SubtractsFlatDefenseBeforeApplyingDamageReduction`, `DamageReductionAboveCapIsClampedToPointEight` |
 | HPS-010 | FinalDamage ≥ MinDamage | `DamageCalculator.cs` step 4, `BalanceConfig.MinDamage` = 1 | **Done** — `Step4_NegativeDamageIsClampedToMinDamage`, `Step4_ZeroDamageIsClampedToMinDamage` |
 | SRS 9 formula | Mandatory 4-step order | `DamageCalculator.Calculate`; `DamageResult` exposes every intermediate | **Done** — `OrderIsMandatory_CritAppliesBeforeArmorSubtraction` |
@@ -229,8 +229,8 @@ Paths are relative to `Assets/_Project/`.
 | GameBootstrap / GameManager | `Core/Bootstrap/GameBootstrap.cs`, `GameManager.cs` | **Done** / Skeleton |
 | SceneFlowManager | `Core/Services/SceneFlowManager.cs` | **Done** |
 | InputManager (SRS 26) | `Core/Services/InputReader.cs` + `Settings/ChibiRiftControls.inputactions` | **Done** — Move and Jump wired; the other seven actions are bound and exposed but not yet consumed |
-| PlayerController / PlayerCombat / PlayerStats | `Gameplay/Player/` | `PlayerController` + `PlayerMotor` **Done** (movement), `PlayerCombat` Skeleton, `PlayerStats` **Done** |
-| CombatSystem / DamageSystem / StatusEffectSystem | `Gameplay/Combat/` | `DamageCalculator` **Done**, rest Skeleton |
+| PlayerController / PlayerCombat / PlayerStats | `Gameplay/Player/` | `PlayerController`, `PlayerMotor`, `PlayerCombat` **Done**; `PlayerStats` **Done** (stats only, health moved to `HealthComponent`) |
+| CombatSystem / DamageSystem / StatusEffectSystem | `Gameplay/Combat/` | `DamageCalculator`, `CombatSystem`, `HealthComponent` **Done**; `StatusEffectSystem` Skeleton |
 | SkillSystem / UpgradeSystem | `Gameplay/Skills/`, `Gameplay/Progression/` | `UpgradeRoller` **Done**, rest Skeleton |
 | EnemyController / EnemyAI / EnemySpawner | `Gameplay/Enemy/` | Skeleton |
 | WaveManager / StageManager / BossManager | `Gameplay/Wave|Stage|Boss/` | Skeleton |
@@ -254,7 +254,7 @@ Paths are relative to `Assets/_Project/`.
 | NFR-005 | New player understands the controls | `Scripts/UI/HowToPlayPanel.cs` | Skeleton |
 | NFR-006 | Volume controls and readable UI | `IAudioService`, `SettingsSave` | Backend **Done** |
 | NFR-007 | New content added via data/prefab | 9 ScriptableObject types; no content enumerated in code | **Done** |
-| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 70 EditMode + 8 PlayMode tests | **Done** |
+| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 88 EditMode + 18 PlayMode tests | **Done** |
 | NFR-009 | Basic save validation | `MetaSave.IsValid()`, checked before every write and after every read | **Done** |
 
 ## 30 Error Handling

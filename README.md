@@ -3,12 +3,15 @@
 Foundation skeleton for the 2D Action Roguelite RPG specified in
 `SRS_2D_Action_Roguelite_RPG_Unity_v1.1.docx`.
 
-The foundation is architecture only. On top of it, **P1 slice 1 (movement + camera)** is
-implemented and playable: the hero walks, jumps, double jumps, collides with the world and is
-followed by a confined Cinemachine camera.
+The foundation is architecture only. On top of it, two P1 slices are implemented and playable:
 
-Everything else is still skeleton — no attack, dash, skill, enemy AI, boss, animation, art,
-audio or level design. Placeholders are flat-colour geometric sprites.
+- **Slice 1 — movement and camera.** The hero walks, jumps, double jumps, collides with the world
+  and is followed by a confined Cinemachine camera.
+- **Slice 2 — combat.** Mouse-aimed basic attack, a three hit combo, a single damage pipeline,
+  health and death, and floating damage numbers. `Run_01` carries three training dummies to hit.
+
+Everything else is still skeleton — no dash, skills, enemy AI, boss, wave, animation, art, audio
+or level design. Placeholders are flat-colour geometric sprites.
 
 ---
 
@@ -99,7 +102,7 @@ Assets/_Project/
 │   └── EditorTools/  ChibiRift.EditorTools  editor-only generators (excluded from builds)
 ├── Data/       ScriptableObject assets (one baseline per type)
 ├── Scenes/     Boot, MainMenu, Hub, Run_01, PostRun
-├── Prefabs/    Hero.prefab
+├── Prefabs/    Hero.prefab, DamageNumber.prefab
 ├── Settings/   ChibiRiftControls.inputactions
 ├── Art/        (empty, P2)
 ├── Audio/      (empty, P2)
@@ -221,7 +224,7 @@ Headless:
   -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **70 EditMode + 8 PlayMode, all passing.**
+Current status: **88 EditMode + 18 PlayMode, all passing.**
 
 | Suite | Count | What it covers |
 |---|---|---|
@@ -229,8 +232,10 @@ Current status: **70 EditMode + 8 PlayMode, all passing.**
 | `ExperienceCurveTests` | 12 | The XP curve and its inverse |
 | `UpgradeRollerTests` | 15 | Three-card rolls, the no-duplicate rule, Fallback Pool top-up, an exhausted pool, the max-stack filter, seed reproducibility |
 | `InputActionsAssetTests` | 6 | The `.inputactions` asset itself: the map, all nine actions, the A/D composite and Space binding, and that W/S/F stay unbound (SRS 43 Q2) |
-| `DataDefaultsConsistencyTests` | 23 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
+| `DataDefaultsConsistencyTests` | 39 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
+| `DamagePipelineSourceTests` | 2 | Health is only ever reduced through `CombatSystem` (HPS-003). A text scan, not a compiler guarantee — see OI-19 |
 | `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
+| `PlayerCombatTests` (PlayMode) | 10 | TC-COM: the active window, one hit per target per swing, the three hit chain, both combo resets, mouse aim and sprite flip, damage to a corpse, death firing once, and step 3 out-damaging step 1 |
 
 ### Why `DataDefaultsConsistencyTests` matters
 

@@ -4,23 +4,26 @@ using ChibiRift.Core;
 namespace ChibiRift.Gameplay
 {
     /// <summary>
-    /// Turns input into motor intent (MOV-001 through MOV-003). Deliberately thin: it owns no
-    /// physics and no timers, so the split against <see cref="PlayerMotor"/> stays clean and the
-    /// motor can be tested without any input at all.
+    /// Turns input into requests on <see cref="PlayerMotor"/> and <see cref="PlayerCombat"/>.
+    /// Holds no physics and no combat rules of its own.
     /// </summary>
     /// <remarks>
-    /// Input is sampled in <c>Update</c>, not <c>FixedUpdate</c>, because a key tapped between two
-    /// physics steps would otherwise be dropped. The press is handed to the motor's jump buffer,
-    /// which is what makes it survive to the next step (MOV-005).
+    /// Input is sampled in <c>Update</c>, not <c>FixedUpdate</c>: a tap that begins and ends
+    /// between two physics steps would otherwise be dropped entirely (MOV-005).
     /// </remarks>
     [RequireComponent(typeof(PlayerMotor))]
     [DisallowMultipleComponent]
     public sealed class PlayerController : MonoBehaviour
     {
-        private PlayerMotor _motor;
         private IInputService _input;
+        private PlayerMotor _motor;
+        private PlayerCombat _combat;
 
-        private void Awake() => _motor = GetComponent<PlayerMotor>();
+        private void Awake()
+        {
+            _motor = GetComponent<PlayerMotor>();
+            _combat = GetComponent<PlayerCombat>();
+        }
 
         private void Start()
         {
@@ -41,10 +44,20 @@ namespace ChibiRift.Gameplay
             // MOV-002, MOV-003: the motor buffers the press and decides ground vs air jump.
             if (_input.JumpPressed) _motor.RequestJump();
 
+            if (_combat != null)
+            {
+                // COM-009: facing and hitbox placement follow the cursor, with no auto-target.
+                _combat.SetAimTarget(_input.AimWorldPosition);
+
+                // COM-001: one press starts one swing; the chain is PlayerCombat's decision.
+                if (_input.AttackPressed) _combat.RequestAttack();
+
+                // COM-001: an attack commits the hero by slowing them, not by freezing them.
+                _motor.SetSpeedMultiplier(_combat.MoveSpeedMultiplier);
+            }
+
             // TODO(MOV-006): dash on _input.DashPressed once the dash system exists.
-            // TODO(COM-001): basic attack on _input.AttackPressed.
             // TODO(COM-007): Q/E/R via _input.WasSkillPressed.
-            // TODO(COM-009): face the cursor using _input.AimWorldPosition instead of velocity.
         }
     }
 }

@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-17 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-20 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -255,3 +255,72 @@ surface's own motion (slope normal, platform velocity) as a separate term the mo
 than letting the physics engine bleed it out of `linearVelocity`. Alternatively drive horizontal
 motion through a `friction = 0` material but resolve slope support with an explicit ground-normal
 projection in `PlayerMotor.ApplyHorizontal`.
+
+---
+
+## OI-18 — Hitbox timing uses frame data in seconds, not Animation Events
+
+**SRS 21** and **COM-004** describe the attack hitbox being switched on and off by Animation
+Events on the attack clips.
+
+**P1 has no animation clips at all**, so there is no event to hang the toggle on. Building a
+placeholder Animator only to carry two events would be more machinery than the thing it drives.
+
+**Decision:** each combo step carries `activeStartTime` and `activeEndTime` in **seconds from the
+start of the swing** (`AttackStep` in `Data/AttackData.cs`), and `PlayerCombat.FixedUpdate` opens
+the hitbox inside that window. The observable behaviour is identical and the combo becomes
+testable without an Animator, which is how `Test_Attack_HitboxOnlyActiveInWindow` can exist at
+all. No `WaitForSeconds` and no `Invoke`: the elapsed time is accumulated from
+`Time.fixedDeltaTime`, so it follows the physics clock and pauses when the game does.
+
+`TODO(COM-004)` markers in `AttackData` and `PlayerCombat` record the migration. When real clips
+arrive in P2 the frame data stays in the asset as the source of truth and the Animation Events
+call into the same window, or the fields are read by the clip importer — either way the numbers
+do not move into code.
+
+---
+
+## OI-19 — The single-damage-pipeline rule is guarded by a text scan, not by the compiler
+
+**HPS-003** requires exactly one damage pipeline. `CombatSystem.DealDamage` is it: the death guard
+(HPS-004), the i-frame guard (HPS-005), the crit roll and the `DamageAppliedEvent` all live there,
+so a second path would silently skip all four.
+
+**This cannot currently be enforced by the type system.** `CombatSystem` and `HealthComponent` are
+in the same assembly, `ChibiRift.Gameplay`, so `internal` restricts nothing between them. A
+capability token minted in `ChibiRift.Core` would not work either, because Core cannot reference
+`ChibiRift.Gameplay` and so could never hand one to `CombatSystem`.
+
+**Decision for P1:** `DamagePipelineSourceTests` scans every `.cs` under `Scripts/` and fails if
+`ApplyDamage(` is called anywhere but `CombatSystem.cs`, or if `CurrentHealth` is written outside
+`HealthComponent.cs`. Comments and string literals are stripped first. This was verified to fail
+by injecting a second damage path deliberately.
+
+**Be clear about its strength:** it is a check on source text. A determined caller can route
+around it — through reflection, through a differently named wrapper, or by editing the allow-list
+in the test.
+
+**The real fix, deferred to P3:** move `HealthComponent` and `CombatSystem` into their own
+assembly, `ChibiRift.Combat`, and make `IDamageable.ApplyDamage` internal to it. `ChibiRift.Gameplay`
+would then reference `ChibiRift.Combat` and be unable to call `ApplyDamage` at all — a compile
+error rather than a failing test. Not done now because it means moving `IDamageable` out of Core
+and re-pointing every implementation, which is a larger change than this slice's scope allows.
+
+---
+
+## OI-20 — The hero moonwalks when the cursor and the movement direction disagree
+
+From P1 slice 2 the sprite faces the **mouse cursor** (COM-009), not the direction of travel.
+`PlayerCombat.SetAimTarget` is the only writer of `SpriteRenderer.flipX`; `PlayerMotor` stopped
+writing it. Before this there were two writers and the sprite flickered whenever they disagreed.
+
+**Consequence:** running left while the cursor is to the right shows the hero sliding backwards.
+
+**This is intended, not a bug.** It is the standard behaviour for a mouse-aimed action game, and
+COM-009 ("no auto-target") is the reason the cursor has to win: if facing followed velocity, the
+hitbox and the sprite would point in different directions during any strafe.
+
+**Needs a visual acceptance pass in slice 4**, once the attack animation exists and the effect is
+actually visible. If it reads badly then, **plan B** is to make facing follow the cursor only
+while attacking or holding aim, and follow velocity otherwise. That is a change inside
+`PlayerCombat.SetAimTarget` alone; nothing else reads facing.

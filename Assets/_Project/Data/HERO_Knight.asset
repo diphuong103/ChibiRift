@@ -48,6 +48,7 @@ MonoBehaviour:
   _maxJumpCount: 2
   _comboLength: 3
   _comboWindow: 0.5
+  _basicAttack: {fileID: 11400000, guid: 792ca30c948361e3b90e5b41e0d774c8, type: 2}
   _hurtIFrameDuration: 0.8
   _skills:
   - {fileID: 11400000, guid: e56b88de6b9133a7899872493063b136, type: 2}

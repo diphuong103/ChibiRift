@@ -8,6 +8,7 @@ using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using ChibiRift.Core;
+using ChibiRift.Gameplay;
 using ChibiRift.Meta;
 using ChibiRift.Save;
 using ChibiRift.Telemetry;
@@ -64,6 +65,15 @@ namespace ChibiRift.EditorTools
             bootstrap.AddComponent<TelemetryServiceInstaller>(); // Order 10
             bootstrap.AddComponent<SaveServiceInstaller>();      // Order 20
             bootstrap.AddComponent<MetaServiceInstaller>();      // Order 30
+
+            // P1 slice 2: CombatSystem needs BalanceConfig, which Core cannot reference. The
+            // installer is how ChibiRift.Gameplay reaches the composition root (SRS 26).
+            var gameplayInstaller = bootstrap.AddComponent<GameplayServiceInstaller>();
+            var installerSo = new SerializedObject(gameplayInstaller);
+            installerSo.FindProperty("_balanceConfig").objectReferenceValue =
+                AssetDatabase.LoadAssetAtPath<ChibiRift.Data.BalanceConfig>(
+                    "Assets/_Project/Data/BalanceConfig.asset");
+            installerSo.ApplyModifiedPropertiesWithoutUndo();
 
             CreateCamera();
             SaveScene(scene, SceneNames.Boot);
