@@ -20,27 +20,27 @@ Paths are relative to `Assets/_Project/`.
 
 | ID | Requirement | Where | Status |
 |---|---|---|---|
-| MOV-001 | Move left/right with A/D | `Scripts/Core/Services/InputManager.cs` (binding), `Scripts/Gameplay/Player/PlayerController.cs` | Skeleton — binding Done |
-| MOV-002 | Jump with Space | `InputManager.cs`, `PlayerController.cs`, `Data/HeroData.cs` (`JumpForce`) | Skeleton — binding Done |
-| MOV-003 | Double jump | `PlayerController.cs`, `HeroData.MaxJumpCount` (default 2) | Skeleton — Schema Done |
-| MOV-004 | Bounded by collision / world boundary | `Scripts/Core/Utilities/GameLayers.cs` (`SolidWorldMask`), `ProjectSettings/Physics2DSettings.asset` | Matrix Done, movement Skeleton |
-| MOV-005 | Input survives FPS variation | `InputManager.cs` (Input System, no legacy polling) | Skeleton |
-| MOV-006 | Dash on Left Shift with i-frames and cooldown | `PlayerController.StartDash`, `Data/DashConfig.cs`, `BalanceConfig.DashCooldown` / `DashIFrameDuration` | Skeleton — Schema + SRS 35 values Done |
-| MOV-007 | Dash cannot clip colliders or leave the arena | `PlayerController.StartDash` TODO, `GameLayers.SolidWorldMask` | Skeleton |
+| MOV-001 | Move left/right with A/D | `Settings/ChibiRiftControls.inputactions` (1D-axis composite), `Scripts/Core/Services/InputReader.cs` (`MoveAxis`), `Scripts/Gameplay/Player/PlayerController.cs`, `PlayerMotor.ApplyHorizontal` + `UpdateFacing`, `Data/MovementConfig.cs` (`GroundAccel` / `GroundDecel` / `AirAccel` / `AirDecel`) | **Done** — `Test_MoveRight_VelocityConvergesToMoveSpeed`, `Test_ReleaseInput_StopsWithin150ms` |
+| MOV-002 | Jump with Space | `InputReader.JumpPressed` / `JumpHeld`, `PlayerMotor.RequestJump` + `ApplyJumpAndGravity`, `MovementConfig.JumpVelocity` / `GravityUp` / `FallMultiplier` / `LowJumpMultiplier` / `CoyoteTime` / `JumpBuffer` | **Done** — `Test_Jump_PeakHeightInRange`, `Test_CoyoteTime_JumpAfterEdge`, `Test_JumpBuffer_LandAndJump` |
+| MOV-003 | Double jump | `PlayerMotor.JumpCount` (reset on landing), `HeroData.MaxJumpCount` (2), `MovementConfig.DoubleJumpVelocity` (13, separate from the ground jump) | **Done** — `Test_DoubleJump_OnlyOnce` |
+| MOV-004 | Bounded by collision / world boundary | `PlayerMotor.UpdateGrounded` (`Physics2D.OverlapBox`, not `OnCollisionStay`), `PlayerMotor.ApplyBoundary` + `CheckFallLimit`, `Gameplay/SceneContext.cs` (`WorldHalfWidth` 20, `FallLimitY` -10, `SpawnPoint`), `Core/Utilities/GameLayers.cs` (`SolidWorldMask`), `ProjectSettings/Physics2DSettings.asset` | **Done** — `Test_WallCollision_NoPassThrough`, `Test_FallThroughHole_Respawn` |
+| MOV-005 | Input survives FPS variation | `InputReader.cs` (Input System, no legacy polling); `PlayerController.Update` samples input every frame so a tap between physics steps is not dropped, while `PlayerMotor.FixedUpdate` integrates on a fixed `dt` | **Done** |
+| MOV-006 | Dash on Left Shift with i-frames and cooldown | `PlayerController.Update` `TODO(MOV-006)` (binding live via `InputReader.DashPressed`), `Data/DashConfig.cs`, `BalanceConfig.DashCooldown` / `DashIFrameDuration` | Skeleton — binding + Schema + SRS 35 values Done |
+| MOV-007 | Dash cannot clip colliders or leave the arena | `TODO(MOV-006)` in `PlayerController.Update`; will reuse `PlayerMotor.ApplyBoundary` and `GameLayers.SolidWorldMask` | Skeleton |
 
 ## 8.2 Combat & Attack
 
 | ID | Requirement | Where | Status |
 |---|---|---|---|
-| COM-001 | Mouse Left basic attack | `InputManager.AttackPressed`, `Scripts/Gameplay/Player/PlayerCombat.cs` | Skeleton — binding Done |
+| COM-001 | Mouse Left basic attack | `InputReader.AttackPressed`, `Scripts/Gameplay/Player/PlayerCombat.cs` | Skeleton — binding Done |
 | COM-002 | 3 hit combo | `PlayerCombat.cs`, `HeroData.ComboLength` (validated == 3) | Skeleton — Schema Done |
 | COM-003 | Combo resets on timeout | `PlayerCombat.ComboWindowRemaining`, `HeroData.ComboWindow` | Skeleton |
 | COM-004 | Clear hitbox / hurtbox, active frames only | `Scripts/Gameplay/Combat/Hitbox.cs`, collision matrix | Skeleton — matrix Done |
 | COM-005 | Damage, knockback, hit feedback | `PlayerCombat.ResolveHit`, `EnemyData.KnockbackResistance` | Skeleton |
 | COM-006 | Critical hit | `Combat/DamageCalculator.cs` step 2 + `RollCritical` | **Done** — `DamageCalculatorTests.Step2_AppliesCriticalMultiplierOnlyOnCrit` |
-| COM-007 | Q/E/R special skills | `InputManager.WasSkillPressed`, `Scripts/Gameplay/Skills/SkillSystem.cs`, `Data/SkillData.cs` | Skeleton — bindings + Schema Done |
+| COM-007 | Q/E/R special skills | `InputReader.WasSkillPressed`, `Scripts/Gameplay/Skills/SkillSystem.cs`, `Data/SkillData.cs` | Skeleton — bindings + Schema Done |
 | COM-008 | Cooldown only, no mana pool | `SkillSystem.cs`, `SkillData.Cooldown`; no resource field exists anywhere | Skeleton — by construction Done |
-| COM-009 | Mouse aim, no auto-target | `InputManager.AimWorldPosition` / `AimScreenPosition` | **Done** (input); consumption Skeleton |
+| COM-009 | Mouse aim, no auto-target | `InputReader.AimWorldPosition` / `AimScreenPosition` | **Done** (input); consumption Skeleton |
 
 ## 9 Health, Damage and Death
 
@@ -175,7 +175,7 @@ Paths are relative to `Assets/_Project/`.
 | SRS 19.3 | Level Up overlay, 3 cards, hover, mouse select | `Scripts/UI/LevelUpPanel.cs`, `UpgradeCardView.cs` | Skeleton |
 | SRS 19.4 | Settings: volumes, fullscreen, resolution, telemetry | `Scripts/UI/SettingsPanel.cs`, `Save/SettingsManager.cs`, `SettingsSave` | Backend **Done**, panel Skeleton |
 | SRS 19.4 | Key Rebind (Should), Language (Could) | — | **Chưa triển khai** — out of MVP (SRS 43 Q10) |
-| PAU-001 | ESC pauses and stops game time | `Core/Services/PauseManager.cs`, `InputManager.PausePressed` | **Done** |
+| PAU-001 | ESC pauses and stops game time | `Core/Services/PauseManager.cs`, `InputReader.PausePressed` | **Done** |
 | PAU-002 | Resume / Settings / How to Play / Abandon / Quit | `Scripts/UI/PauseMenuController.cs` (5 button fields) | Skeleton |
 | PAU-003 | Abandon and Quit need confirmation | `PauseMenuController._confirmationPanel` | Skeleton |
 | PAU-004 | Abandon still passes through Post-Run | `RunManager.AbandonRun` TODO | Skeleton |
@@ -185,8 +185,8 @@ Paths are relative to `Assets/_Project/`.
 
 | ID | Requirement | Where | Status |
 |---|---|---|---|
-| CAM-001 | Camera follows the hero stably | `Gameplay/Camera/CameraRig.SetFollowTarget` (Cinemachine 3.1.7 installed) | Skeleton |
-| CAM-002 | Camera stays inside level bounds | `CameraRig` TODO (CinemachineConfiner2D) | Skeleton |
+| CAM-001 | Camera follows the hero stably | `Gameplay/Camera/CameraRig.SetFollowTarget` / `ApplyConfig` (Cinemachine 3: `CinemachineCamera.Target.TrackingTarget` + `CinemachinePositionComposer` damping and lookahead), `Data/CameraConfig.cs` (`DampingX` 0.3, `DampingY` 0.5, `Lookahead` 0.2), `CM_Follow` in `Scenes/Run_01.unity` | **Done** — smoothness accepted by playtest, not by a test |
+| CAM-002 | Camera stays inside level bounds | `CameraRig` (`CinemachineConfiner2D` + `InvalidateConfinerCache`), `CameraConfiner` `PolygonCollider2D` (-20,0)-(20,12) in `Scenes/Run_01.unity` | **Done** |
 | CAM-003 | Configurable screen shake | `ScreenShakeRequestedEvent`, `Core/Services/VfxManager.RequestScreenShake`, `BalanceConfig.ScreenShakeAmplitude` / `Duration` | Event + config **Done**, shake Skeleton |
 | CAM-004 | Zoom for big events | `CameraRig.SetZoom` | Skeleton |
 | SRS 21 | Hit stop, flash, damage numbers, particles, trails | `VfxManager.cs`, `BalanceConfig.HitStopDuration` | Skeleton — **VFX chưa triển khai** (out of scope) |
@@ -228,8 +228,8 @@ Paths are relative to `Assets/_Project/`.
 |---|---|---|
 | GameBootstrap / GameManager | `Core/Bootstrap/GameBootstrap.cs`, `GameManager.cs` | **Done** / Skeleton |
 | SceneFlowManager | `Core/Services/SceneFlowManager.cs` | **Done** |
-| InputManager | `Core/Services/InputManager.cs` | **Done** |
-| PlayerController / PlayerCombat / PlayerStats | `Gameplay/Player/` | Skeleton |
+| InputManager (SRS 26) | `Core/Services/InputReader.cs` + `Settings/ChibiRiftControls.inputactions` | **Done** — Move and Jump wired; the other seven actions are bound and exposed but not yet consumed |
+| PlayerController / PlayerCombat / PlayerStats | `Gameplay/Player/` | `PlayerController` + `PlayerMotor` **Done** (movement), `PlayerCombat` Skeleton, `PlayerStats` **Done** |
 | CombatSystem / DamageSystem / StatusEffectSystem | `Gameplay/Combat/` | `DamageCalculator` **Done**, rest Skeleton |
 | SkillSystem / UpgradeSystem | `Gameplay/Skills/`, `Gameplay/Progression/` | `UpgradeRoller` **Done**, rest Skeleton |
 | EnemyController / EnemyAI / EnemySpawner | `Gameplay/Enemy/` | Skeleton |
@@ -254,7 +254,7 @@ Paths are relative to `Assets/_Project/`.
 | NFR-005 | New player understands the controls | `Scripts/UI/HowToPlayPanel.cs` | Skeleton |
 | NFR-006 | Volume controls and readable UI | `IAudioService`, `SettingsSave` | Backend **Done** |
 | NFR-007 | New content added via data/prefab | 9 ScriptableObject types; no content enumerated in code | **Done** |
-| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 41 EditMode tests | **Done** |
+| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 70 EditMode + 8 PlayMode tests | **Done** |
 | NFR-009 | Basic save validation | `MetaSave.IsValid()`, checked before every write and after every read | **Done** |
 
 ## 30 Error Handling

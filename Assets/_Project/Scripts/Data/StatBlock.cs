@@ -49,7 +49,7 @@ namespace ChibiRift.Data
             MaxHealth = 100f,
             Attack = 10f,
             AttackSpeed = 1f,
-            MoveSpeed = 6f,
+            MoveSpeed = 7f,
             CritChance = 0.05f,
             CritMultiplier = 2f,
             Defense = 0f,

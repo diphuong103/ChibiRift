@@ -149,6 +149,12 @@ namespace ChibiRift.Core
         /// <summary>True on the frame Space was pressed (MOV-002, MOV-003).</summary>
         bool JumpPressed { get; }
 
+        /// <summary>
+        /// True while Space is held. Releasing mid-rise cuts the jump short, so the motor needs
+        /// the held state and not just the press edge (MOV-002).
+        /// </summary>
+        bool JumpHeld { get; }
+
         /// <summary>True on the frame Left Shift was pressed (MOV-006).</summary>
         bool DashPressed { get; }
 

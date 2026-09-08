@@ -1,3 +1,4 @@
+using Unity.Cinemachine;
 using UnityEngine;
 using ChibiRift.Core;
 using ChibiRift.Data;
@@ -5,43 +6,75 @@ using ChibiRift.Data;
 namespace ChibiRift.Gameplay
 {
     /// <summary>
-    /// Cinemachine rig following the hero (SRS 20). Confiner keeps the view inside the level
-    /// (CAM-002) and an impulse source provides the shake of CAM-003, driven by
-    /// <see cref="ScreenShakeRequestedEvent"/> so combat code never touches the camera directly.
+    /// Drives the gameplay camera (CAM-001, CAM-002) through Cinemachine 3.
     /// </summary>
+    /// <remarks>
+    /// Follow damping and lookahead live on <see cref="CinemachinePositionComposer"/> and are read
+    /// from <see cref="CameraConfig"/>, so no framing number is written here (SRS 35).
+    /// <see cref="CinemachineConfiner2D"/> keeps the view inside the arena polygon, which is why
+    /// the confiner shape sits on its own object and not on the hero or the ground.
+    /// </remarks>
     [DisallowMultipleComponent]
     public sealed class CameraRig : MonoBehaviour
     {
-        [Header("Targets")]
-        [Tooltip("Transform the virtual camera follows (CAM-001).")]
-        [SerializeField] private Transform _followTarget;
+        [Header("Cinemachine")]
+        [Tooltip("The virtual camera that follows the hero (CAM-001).")]
+        [SerializeField] private CinemachineCamera _camera;
 
-        [Header("Shake (CAM-003)")]
-        [Tooltip("Amplitude and duration defaults come from here, never from a literal (SRS 35).")]
-        [SerializeField] private BalanceConfig _balanceConfig;
+        [Tooltip("Composer providing damping and lookahead. Values come from CameraConfig.")]
+        [SerializeField] private CinemachinePositionComposer _composer;
 
-        private void OnEnable()
+        [Tooltip("Keeps the view inside the arena polygon (CAM-002).")]
+        [SerializeField] private CinemachineConfiner2D _confiner;
+
+        [Header("Data")]
+        [Tooltip("Damping X/Y and lookahead. Never hard-coded in this script (SRS 35).")]
+        [SerializeField] private CameraConfig _cameraConfig;
+
+        private void Awake() => ApplyConfig();
+
+        /// <summary>Pushes <see cref="CameraConfig"/> onto the composer (CAM-001).</summary>
+        public void ApplyConfig()
         {
-            // TODO(CAM-003): subscribe to ScreenShakeRequestedEvent on the EventBus.
-        }
+            if (_composer == null || _cameraConfig == null) return;
 
-        private void OnDisable()
-        {
-            // TODO(CAM-003): unsubscribe, so a scene change leaves no dangling handler.
+            _composer.Damping = new Vector3(_cameraConfig.DampingX, _cameraConfig.DampingY, 0f);
+
+            LookaheadSettings lookahead = _composer.Lookahead;
+            lookahead.Enabled = _cameraConfig.Lookahead > 0f;
+            lookahead.Time = _cameraConfig.Lookahead;
+            _composer.Lookahead = lookahead;
         }
 
         /// <summary>Points the rig at the hero once the Run scene has spawned them (CAM-001).</summary>
         public void SetFollowTarget(Transform target)
         {
-            // TODO(CAM-001): assign the CinemachineCamera Follow target.
-            // TODO(CAM-002): assign the CinemachineConfiner2D bounding shape from the level boundary.
-            _followTarget = target;
+            if (_camera == null) return;
+
+            // Cinemachine 3 dropped the legacy Follow property; the target lives on CameraTarget.
+            _camera.Target.TrackingTarget = target;
+        }
+
+        /// <summary>
+        /// Cuts straight to the target instead of panning. Used after a respawn, where a smooth
+        /// pan across the whole arena would read as a camera glitch (MOV-004).
+        /// </summary>
+        public void SnapToTarget()
+        {
+            if (_camera != null) _camera.PreviousStateIsValid = false;
+        }
+
+        /// <summary>Rebuilds the confiner cache after the bounding shape changes (CAM-002).</summary>
+        public void InvalidateConfinerCache()
+        {
+            if (_confiner != null) _confiner.InvalidateBoundingShapeCache();
         }
 
         /// <summary>Zoom for a large event such as the boss entrance (CAM-004).</summary>
         public void SetZoom(float orthographicSize, float durationSeconds)
         {
-            // TODO(CAM-004): tween the CinemachineCamera lens size.
+            // TODO(CAM-004): tween _camera.Lens.OrthographicSize over durationSeconds.
+            GameLog.Info("Camera", $"SetZoom not implemented yet: {orthographicSize} over {durationSeconds}s.");
         }
     }
 }

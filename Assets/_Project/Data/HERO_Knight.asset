@@ -19,7 +19,7 @@ MonoBehaviour:
     MaxHealth: 100
     Attack: 10
     AttackSpeed: 1
-    MoveSpeed: 6
+    MoveSpeed: 7
     CritChance: 0.05
     CritMultiplier: 2
     Defense: 0
@@ -29,7 +29,22 @@ MonoBehaviour:
     Duration: 0.25
     IFrameDuration: 0.25
     Cooldown: 1.5
-  _jumpForce: 12
+  _movement:
+    GroundAccel: 60
+    GroundDecel: 80
+    AirAccel: 35
+    AirDecel: 20
+    GravityUp: 40
+    FallMultiplier: 1.6
+    LowJumpMultiplier: 2
+    MaxFallSpeed: 25
+    JumpVelocity: 15.5
+    DoubleJumpVelocity: 13
+    CoyoteTime: 0.1
+    JumpBuffer: 0.12
+    GroundCheckWidth: 0.7
+    GroundCheckHeight: 0.1
+    GroundCheckOffsetY: -0.9
   _maxJumpCount: 2
   _comboLength: 3
   _comboWindow: 0.5

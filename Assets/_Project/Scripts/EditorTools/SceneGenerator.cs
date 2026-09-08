@@ -51,7 +51,14 @@ namespace ChibiRift.EditorTools
             Scene scene = NewScene();
 
             var bootstrap = new GameObject("GameBootstrap");
-            bootstrap.AddComponent<GameBootstrap>();
+            var bootstrapComponent = bootstrap.AddComponent<GameBootstrap>();
+
+            // P1-01: the Boot scene supplies the control asset; InputReader is not a singleton.
+            var bootstrapSo = new SerializedObject(bootstrapComponent);
+            bootstrapSo.FindProperty("_controls").objectReferenceValue =
+                AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>(
+                    "Assets/_Project/Settings/ChibiRiftControls.inputactions");
+            bootstrapSo.ApplyModifiedPropertiesWithoutUndo();
 
             // Discovered by GameBootstrap via GetComponentsInChildren and run in Order.
             bootstrap.AddComponent<TelemetryServiceInstaller>(); // Order 10
@@ -110,8 +117,8 @@ namespace ChibiRift.EditorTools
         }
 
         /// <summary>
-        /// Run_01: the stage shell. Level design, spawn points and the arena are P1/P2 work;
-        /// the placeholder link exists only so the Run to PostRun leg is walkable today.
+        /// Run_01 placeholder. <see cref="RunSceneBuilder"/> replaces this with the real P1
+        /// slice 1 arena; the link to PostRun is preserved there.
         /// </summary>
         private static void CreateRunScene()
         {

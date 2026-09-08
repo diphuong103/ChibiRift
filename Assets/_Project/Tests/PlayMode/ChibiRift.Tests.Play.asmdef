@@ -1,21 +1,14 @@
 {
-    "name": "ChibiRift.Tests.Edit",
-    "rootNamespace": "ChibiRift.Tests.Edit",
+    "name": "ChibiRift.Tests.Play",
+    "rootNamespace": "ChibiRift.Tests.Play",
     "references": [
         "ChibiRift.Core",
         "ChibiRift.Data",
         "ChibiRift.Gameplay",
-        "ChibiRift.Save",
-        "ChibiRift.Meta",
-        "ChibiRift.Telemetry",
-        "ChibiRift.EditorTools",
-        "Unity.InputSystem",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,

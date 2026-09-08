@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-15 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-17 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -218,3 +218,40 @@ so additional stages become data plus a scene, with no change to `StageManager`.
 these budgets are in place (`ObjectPool<T>`, AI think-throttling in `EnemyAI.ThinkInterval`,
 spawn budget in `WaveData.SpawnBudget`, batched telemetry), but the numbers themselves cannot be
 verified until P1/P2 content exists. Marked "chưa đo được" in `TRACEABILITY.md`.
+
+---
+
+## OI-16 — The short-hop formula in the spec cuts the jump the wrong way
+
+The P1 slice 1 brief gives the released-jump gravity as `fallMultiplier x 0.5`. With the confirmed
+values that is `1.6 x 0.5 = 0.8`, so gravity while rising with the key released would be
+`40 x 0.8 = 32` — **less** than the 40 applied while the key is held. Releasing Space early would
+make the hero jump *higher*, which is the opposite of a short hop.
+
+**Decision:** use a separate `lowJumpMultiplier = 2.0`, giving gravity 80 while rising after
+release. `MovementConfig.LowJumpMultiplier` carries `[Min(1f)]` so the inverted case cannot be
+re-entered by editing the asset. Confirmed by the project owner on 2026-09-06.
+
+`Test_Jump_PeakHeightInRange` pins the held-jump peak at `15.5^2 / (2 x 40) = 3.003u`; the
+short hop is not yet covered by a test.
+
+---
+
+## OI-17 — Zero friction on the Hero collider is correct only while the world is flat
+
+`PlayerMotor.Awake` assigns the hero collider a `PhysicsMaterial2D` with `friction = 0`. This is
+not cosmetic: without it Unity applies contact friction *after* the motor writes
+`Rigidbody2D.linearVelocity` in the same physics step, so the hero topped out at 6.68 u/s against a
+configured `moveSpeed` of 7 — a bug that `Test_MoveRight_VelocityConvergesToMoveSpeed` caught.
+
+**Correct for P1**, where every surface is flat and static.
+
+**Breaks at P4**, when slopes and moving platforms arrive. With friction 0 the hero will slide down
+any slope instead of standing on it, and will not be carried by a moving platform.
+
+**What to do then:** do not simply turn friction back on — that reintroduces the speed loss above.
+Separate the axes instead: keep horizontal velocity authored entirely by the motor, and add the
+surface's own motion (slope normal, platform velocity) as a separate term the motor reads, rather
+than letting the physics engine bleed it out of `linearVelocity`. Alternatively drive horizontal
+motion through a `friction = 0` material but resolve slope support with an explicit ground-normal
+projection in `PlayerMotor.ApplyHorizontal`.

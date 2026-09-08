@@ -21,7 +21,7 @@ MonoBehaviour:
     AttackSpeed: 1
     MoveSpeed: 3
     CritChance: 0.05
-    CritMultiplier: 1.5
+    CritMultiplier: 2
     Defense: 0
     DamageReduction: 0
   _archetype: 0

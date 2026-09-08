@@ -17,10 +17,9 @@ namespace ChibiRift.Data
         [Tooltip("Distance, duration, i-frame window and cooldown. Cooldown 1.5s and i-frame 0.25s are SRS 35 baselines.")]
         [SerializeField] private DashConfig _dash = DashConfig.Baseline;
 
-        [Header("Movement (MOV-002, MOV-003)")]
-        [Tooltip("Upward velocity applied per jump.")]
-        [Min(0f)]
-        [SerializeField] private float _jumpForce = 12f;
+        [Header("Movement (MOV-001..MOV-004)")]
+        [Tooltip("Acceleration, gravity, jump and ground-probe tuning. Every locomotion number lives here (SRS 35).")]
+        [SerializeField] private MovementConfig _movement = MovementConfig.Baseline;
 
         [Tooltip("Jumps allowed before touching ground. 2 gives the double jump of MOV-003.")]
         [Min(1)]
@@ -35,9 +34,9 @@ namespace ChibiRift.Data
         [Min(0.01f)]
         [SerializeField] private float _comboWindow = 0.5f;
 
-        [Tooltip("Seconds of invulnerability after taking a hit (HPS-005). No SRS 35 baseline; set by the project owner (OI-05).")]
+        [Tooltip("Seconds of invulnerability after taking a hit (HPS-005). No SRS 35 baseline; set by the project owner to 0.8 (OI-05).")]
         [Min(0f)]
-        [SerializeField] private float _hurtIFrameDuration = 0.5f;
+        [SerializeField] private float _hurtIFrameDuration = 0.8f;
 
         [Header("Loadout (HER-002, HER-003)")]
         [Tooltip("Skills bound to Q / E / R (COM-007).")]
@@ -67,8 +66,8 @@ namespace ChibiRift.Data
         /// <summary>Dash tuning (HER-006, MOV-006).</summary>
         public DashConfig Dash => _dash;
 
-        /// <summary>Jump impulse (MOV-002).</summary>
-        public float JumpForce => _jumpForce;
+        /// <summary>Locomotion tuning: acceleration, gravity, jump, ground probe (MOV-001..MOV-004).</summary>
+        public MovementConfig Movement => _movement;
 
         /// <summary>Airborne jump allowance; 2 enables double jump (MOV-003).</summary>
         public int MaxJumpCount => _maxJumpCount;

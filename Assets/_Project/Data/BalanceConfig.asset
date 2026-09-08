@@ -47,3 +47,4 @@ MonoBehaviour:
   _hitStopDuration: 0.05
   _screenShakeAmplitude: 1
   _screenShakeDuration: 0.15
+  _enemyThinkInterval: 0.1

@@ -13,13 +13,26 @@ namespace ChibiRift.EditorTools
     /// </summary>
     public static class SampleDataGenerator
     {
-        private const string DataRoot = "Assets/_Project/Data";
+        /// <summary>Where the shipped assets live; the target of the parameterless <see cref="Generate()"/>.</summary>
+        public const string DefaultDataRoot = "Assets/_Project/Data";
 
-        /// <summary>Generates the nine baseline assets. Safe to re-run: existing assets are replaced.</summary>
+        /// <summary>Generates the ten baseline assets. Safe to re-run: existing assets are replaced.</summary>
         [MenuItem("ChibiRift/Setup/3. Generate Baseline Data Assets")]
-        public static void Generate()
+        public static void Generate() => Generate(DefaultDataRoot);
+
+        /// <summary>
+        /// Generates the baseline assets into <paramref name="dataRoot"/>.
+        /// The parameter exists so <c>DataDefaultsConsistencyTests</c> can generate into a scratch
+        /// folder and diff the result against the confirmed values without disturbing the shipped
+        /// assets. It must stay under <c>Assets/</c>: <c>AssetDatabase.CreateAsset</c> refuses any
+        /// path outside the project's asset tree.
+        /// </summary>
+        public static void Generate(string dataRoot)
         {
-            Directory.CreateDirectory(DataRoot);
+            if (string.IsNullOrEmpty(dataRoot))
+                throw new ArgumentException("dataRoot must be a path under Assets/.", nameof(dataRoot));
+
+            Directory.CreateDirectory(dataRoot);
 
             // SRS 35 lives here. Every default already matches the table, so nothing is overridden.
             BalanceConfig balance = Create<BalanceConfig>(
@@ -36,6 +49,11 @@ namespace ChibiRift.EditorTools
                     SetRarityWeight(weights, 3, Rarity.Epic, 12f);
                     SetRarityWeight(weights, 4, Rarity.Legendary, 4f);
                 });
+
+            // CAM-001 / CAM-002: framing values, deliberately not on HeroData.
+            Create<CameraConfig>(
+                "CameraConfig", "camera.default", "Default Camera",
+                "Cinemachine damping and lookahead for the gameplay camera (CAM-001).");
 
             SkillData skill = Create<SkillData>(
                 "SKL_Fireball", "skill.fireball", "Fireball",
@@ -162,7 +180,32 @@ namespace ChibiRift.EditorTools
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"[Setup] Baseline data assets generated in {DataRoot}.");
+            Debug.Log($"[Setup] Baseline data assets generated in {dataRoot}.");
+
+            // Local rather than static: it needs dataRoot, and nothing outside Generate creates assets.
+            T Create<T>(
+                string fileName,
+                string id,
+                string displayName,
+                string description,
+                Action<SerializedObject> configure = null) where T : GameDataAsset
+            {
+                string path = $"{dataRoot}/{fileName}.asset";
+                AssetDatabase.DeleteAsset(path);
+
+                var asset = ScriptableObject.CreateInstance<T>();
+                AssetDatabase.CreateAsset(asset, path);
+
+                var so = new SerializedObject(asset);
+                so.FindProperty("_id").stringValue = id;
+                so.FindProperty("_displayName").stringValue = displayName;
+                so.FindProperty("_description").stringValue = description;
+                configure?.Invoke(so);
+                so.ApplyModifiedPropertiesWithoutUndo();
+
+                EditorUtility.SetDirty(asset);
+                return asset;
+            }
         }
 
         private static void SetRarityWeight(SerializedProperty array, int index, Rarity rarity, float multiplier)
@@ -172,28 +215,5 @@ namespace ChibiRift.EditorTools
             element.FindPropertyRelative("WeightMultiplier").floatValue = multiplier;
         }
 
-        private static T Create<T>(
-            string fileName,
-            string id,
-            string displayName,
-            string description,
-            Action<SerializedObject> configure = null) where T : GameDataAsset
-        {
-            string path = $"{DataRoot}/{fileName}.asset";
-            AssetDatabase.DeleteAsset(path);
-
-            var asset = ScriptableObject.CreateInstance<T>();
-            AssetDatabase.CreateAsset(asset, path);
-
-            var so = new SerializedObject(asset);
-            so.FindProperty("_id").stringValue = id;
-            so.FindProperty("_displayName").stringValue = displayName;
-            so.FindProperty("_description").stringValue = description;
-            configure?.Invoke(so);
-            so.ApplyModifiedPropertiesWithoutUndo();
-
-            EditorUtility.SetDirty(asset);
-            return asset;
-        }
     }
 }

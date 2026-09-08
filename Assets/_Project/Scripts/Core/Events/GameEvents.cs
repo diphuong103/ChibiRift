@@ -238,6 +238,30 @@ namespace ChibiRift.Core
         }
     }
 
+    /// <summary>
+    /// Per-frame motor snapshot for the development overlay (P1 slice 1).
+    /// Published by the player motor and read only by <c>ChibiRift.UI</c>, so the overlay never
+    /// holds a reference into ChibiRift.Gameplay.
+    /// </summary>
+    public readonly struct PlayerMotorStateEvent
+    {
+        public readonly Vector2 Velocity;
+        public readonly bool IsGrounded;
+        public readonly int JumpCount;
+        public readonly float CoyoteTimer;
+        public readonly float JumpBufferTimer;
+
+        public PlayerMotorStateEvent(
+            Vector2 velocity, bool isGrounded, int jumpCount, float coyoteTimer, float jumpBufferTimer)
+        {
+            Velocity = velocity;
+            IsGrounded = isGrounded;
+            JumpCount = jumpCount;
+            CoyoteTimer = coyoteTimer;
+            JumpBufferTimer = jumpBufferTimer;
+        }
+    }
+
     /// <summary>Camera shake request (CAM-003). VFX and combat publish it; the camera rig consumes it.</summary>
     public readonly struct ScreenShakeRequestedEvent
     {

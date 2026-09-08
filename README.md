@@ -3,10 +3,12 @@
 Foundation skeleton for the 2D Action Roguelite RPG specified in
 `SRS_2D_Action_Roguelite_RPG_Unity_v1.1.docx`.
 
-This repository contains **architecture only**. There is no gameplay content yet: no animation,
-no enemy AI, no boss patterns, no level design, no VFX or SFX. The goal is that SRS phase **P1
-(Core Prototype)** can begin writing gameplay logic without first having to make structural
-decisions.
+The foundation is architecture only. On top of it, **P1 slice 1 (movement + camera)** is
+implemented and playable: the hero walks, jumps, double jumps, collides with the world and is
+followed by a confined Cinemachine camera.
+
+Everything else is still skeleton — no attack, dash, skill, enemy AI, boss, animation, art,
+audio or level design. Placeholders are flat-colour geometric sprites.
 
 ---
 
@@ -36,7 +38,28 @@ Only first-party Unity packages are used. No paid Asset Store content.
 | `com.unity.test-framework` | 1.6.0 | EditMode unit tests. |
 | `com.unity.ugui` | 2.0.0 | UI. |
 
-## 2. Opening the project
+## 2. Technical constants
+
+These six numbers fix the pixel-art pipeline. They are related, not independent: changing one
+without the others makes sprites shimmer or the camera crop wrong. Confirmed for P1 slice 1.
+
+| Constant | Value | Where it is set |
+|---|---|---|
+| Pixels per unit (PPU) | **32** | `PixelPerfectCamera.assetsPPU` in `Run_01`; sprite import setting |
+| Reference resolution | **640 x 360** | `PixelPerfectCamera.refResolution` (16:9, upscales cleanly to 1280x720 and 1920x1080) |
+| Camera orthographic size | **5.625** | Derived, not typed: `360 / 32 / 2 = 5.625`. The camera therefore shows exactly 20 x 11.25 world units |
+| Animation frame rate | **12 fps** | Animation clip sample rate (no clips exist yet; P2) |
+| Tile size | **16 x 16 px** | Tileset import (no tileset exists yet; P2) |
+| Hero height | **64 px = 2 units** | `64 / 32 = 2`. `CapsuleCollider2D` on `Hero.prefab` is 0.8 x 1.8, deliberately inside the sprite so shoulders do not catch on ledges |
+
+Sprite import settings that go with them: **Point (no filter)** filtering, **None** compression,
+**mipmaps off**. Bilinear filtering or compression would blur a 32-PPU sprite; mipmaps are pointless
+when the camera never scales the sprite.
+
+A tile is 16 px but PPU is 32, so one tile is **half a world unit**. That is intentional: it gives
+level geometry twice the placement resolution of the movement grid without shrinking the hero.
+
+## 3. Opening the project
 
 ```bash
 # Via Unity Hub: Add project from disk, select this folder, open with 6000.3.23f1.
@@ -56,10 +79,12 @@ Boot ──auto──▶ MainMenu ──[Play]──▶ Hub ──[Start Run]─
                                      └──[Return to Hub]── PostRun ◀──[End Run]──┘
 ```
 
-The scenes are intentionally empty shells. `Run_01` carries a placeholder "End Run" button purely
-so this loop is walkable before the Run systems exist.
+`Boot`, `MainMenu`, `Hub` and `PostRun` are still empty shells wired only for navigation.
+`Run_01` is a playable test arena: ground with a 3-unit gap at x = -8, boundary walls at +/-20,
+a platform at (6, 3), a spawn point, and a camera confiner. Press **F1** in Run_01 for the debug
+overlay (velocity, grounded, jump count, coyote and buffer timers).
 
-## 3. Folder structure
+## 4. Folder structure
 
 ```
 Assets/_Project/
@@ -74,19 +99,20 @@ Assets/_Project/
 │   └── EditorTools/  ChibiRift.EditorTools  editor-only generators (excluded from builds)
 ├── Data/       ScriptableObject assets (one baseline per type)
 ├── Scenes/     Boot, MainMenu, Hub, Run_01, PostRun
-├── Prefabs/    (empty, P1)
-├── Art/        (empty, P1)
-├── Audio/      (empty, P1)
-├── UI/         (empty, P1)
-├── Settings/   (empty, P1)
+├── Prefabs/    Hero.prefab
+├── Settings/   ChibiRiftControls.inputactions
+├── Art/        (empty, P2)
+├── Audio/      (empty, P2)
+├── UI/         (empty, P2)
 └── Tests/
-    └── EditMode/  ChibiRift.Tests.Edit
+    ├── EditMode/  ChibiRift.Tests.Edit
+    └── PlayMode/  ChibiRift.Tests.Play
 ```
 
 `Assets/Scenes/SampleScene.unity` and `Assets/Settings/` come from the Universal 2D template and
 are left untouched.
 
-## 4. Assembly dependency direction
+## 5. Assembly dependency direction
 
 Each module has its own assembly definition. This shortens compile time and, more importantly,
 makes the illegal directions **impossible to compile** rather than merely discouraged.
@@ -120,7 +146,8 @@ makes the illegal directions **impossible to compile** rather than merely discou
 | `ChibiRift.Telemetry` | Core |
 | `ChibiRift.UI` | Core, Data |
 | `ChibiRift.EditorTools` | all of the above (Editor platform only) |
-| `ChibiRift.Tests.Edit` | all runtime assemblies (Editor platform only) |
+| `ChibiRift.Tests.Edit` | all runtime assemblies + EditorTools (Editor platform only) |
+| `ChibiRift.Tests.Play` | Core, Data, Gameplay |
 
 ### Consequences worth knowing
 
@@ -132,7 +159,7 @@ makes the illegal directions **impossible to compile** rather than merely discou
   the only static access point in the project. Modules outside Core register themselves through
   `ServiceInstaller`, which is how Core stays dependency-free while still having one root.
 
-## 5. Naming conventions
+## 6. Naming conventions
 
 | Kind | Convention | Example |
 |---|---|---|
@@ -149,7 +176,7 @@ makes the illegal directions **impossible to compile** rather than merely discou
 Every skeleton method body carries a `TODO(<requirement id>)` so the implementer can trace back to
 the SRS clause without re-reading the document.
 
-## 6. The three systems that are actually implemented
+## 7. The three systems that are actually implemented
 
 Everything else is a skeleton. These three are complete, pure, and unit-tested, because SRS
 NFR-008 requires damage, XP and RNG to be independently testable.
@@ -175,9 +202,10 @@ The damage formula follows the **mandatory** order of SRS section 9:
 `DamageResult` exposes each intermediate value so the order itself is asserted by tests, not just
 the final number.
 
-## 7. Running the tests
+## 8. Running the tests
 
-From the editor: **Window → General → Test Runner → EditMode → Run All**.
+From the editor: **Window → General → Test Runner → Run All**, on both the EditMode and PlayMode
+tabs.
 
 Headless:
 
@@ -185,15 +213,38 @@ Headless:
 ~/Unity/Hub/Editor/6000.3.23f1/Editor/Unity \
   -batchmode -nographics -projectPath /home/dinhphuong/Linux/Game/ChibiRift \
   -runTests -testPlatform EditMode \
-  -testResults /tmp/results.xml -logFile -
+  -testResults /tmp/edit.xml -logFile -
+
+~/Unity/Hub/Editor/6000.3.23f1/Editor/Unity \
+  -batchmode -nographics -projectPath /home/dinhphuong/Linux/Game/ChibiRift \
+  -runTests -testPlatform PlayMode \
+  -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **41 tests, 41 passing**, covering the four-step damage order, the MinDamage
-clamp on negative and zero results, the 0.8 damage-reduction ceiling, the XP curve and its
-inverse, three-card rolls, the no-duplicate rule, Fallback Pool top-up, an exhausted pool, the
-max-stack filter and seed reproducibility.
+Current status: **70 EditMode + 8 PlayMode, all passing.**
 
-## 8. Regenerating the project scaffolding
+| Suite | Count | What it covers |
+|---|---|---|
+| `DamageCalculatorTests` | 14 | The four-step damage order, the MinDamage clamp on negative and zero results, the 0.8 damage-reduction ceiling |
+| `ExperienceCurveTests` | 12 | The XP curve and its inverse |
+| `UpgradeRollerTests` | 15 | Three-card rolls, the no-duplicate rule, Fallback Pool top-up, an exhausted pool, the max-stack filter, seed reproducibility |
+| `InputActionsAssetTests` | 6 | The `.inputactions` asset itself: the map, all nine actions, the A/D composite and Space binding, and that W/S/F stay unbound (SRS 43 Q2) |
+| `DataDefaultsConsistencyTests` | 23 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
+| `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
+
+### Why `DataDefaultsConsistencyTests` matters
+
+`SampleDataGenerator` deletes and recreates every data asset, so the generated values come from
+the field initialisers in `ChibiRift.Data`, not from the `.asset` files. Confirming a number by
+editing only the asset therefore looks right until the generator is re-run — at which point the
+initialiser silently wins. That already happened once with `hurtIFrameDuration` (asset 0.8,
+initialiser 0.5).
+
+The test runs the generator into a scratch folder and diffs the result against the confirmed
+values. **Every time a value is confirmed, add one row to `ConfirmedValues()`.** That list is the
+only thing standing between a confirmed number and a silent revert.
+
+## 9. Regenerating the project scaffolding
 
 `ChibiRift.EditorTools` can rebuild layers, the collision matrix, the baseline data assets and the
 five scenes from scratch. Menu: **ChibiRift → Setup → Run All**, or headless:
@@ -206,7 +257,7 @@ five scenes from scratch. Menu: **ChibiRift → Setup → Run All**, or headless
 
 This is destructive to `Assets/_Project/Data/*.asset` and `Assets/_Project/Scenes/*.unity`.
 
-## 9. Physics2D layers and collision matrix
+## 10. Physics2D layers and collision matrix
 
 Nine layers occupy slots 6 to 14 (0–5 are Unity built-ins):
 
@@ -248,7 +299,7 @@ Never write a raw layer index; use `ChibiRift.Core.GameLayers`.
 - **Layers 0–5 left alone.** Interactions involving Unity's built-in layers are untouched, so
   nothing outside the project's own model is silently disabled.
 
-## 10. Save and telemetry files
+## 11. Save and telemetry files
 
 Both live under `Application.persistentDataPath`
 (`~/.config/unity3d/DefaultCompany/ChibiRift/` on Linux):
@@ -267,7 +318,7 @@ appears in the frame budget (TEL-005), and it can be switched off in Settings.
 
 Nothing is ever sent over the network.
 
-## 11. Git and LFS
+## 12. Git and LFS
 
 `.gitattributes` routes `png/psd/wav/mp3/fbx` and other binaries through Git LFS.
 
@@ -278,9 +329,9 @@ Nothing is ever sent over the network.
 > Commit binary art before doing this and it will be stored as a normal blob; `git lfs migrate`
 > would then be needed. Install LFS **before** the first art commit.
 
-The repository has been initialised (`git init`) but nothing has been staged or committed.
+The repository is committed and pushed to `https://github.com/diphuong103/ChibiRift.git`.
 
-## 12. Related documents
+## 13. Related documents
 
 - `TRACEABILITY.md` — every SRS requirement ID mapped to the file that serves it.
 - `OPEN_ISSUES.md` — ambiguities found in the SRS and the decision taken for each.

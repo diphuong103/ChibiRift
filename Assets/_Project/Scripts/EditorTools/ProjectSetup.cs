@@ -20,6 +20,7 @@ namespace ChibiRift.EditorTools
             ProjectLayers.ConfigureCollisionMatrix();
             SampleDataGenerator.Generate();
             SceneGenerator.GenerateAll();
+            RunSceneBuilder.Build();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();

@@ -115,6 +115,11 @@ namespace ChibiRift.Data
         [Min(0f)]
         [SerializeField] private float _screenShakeDuration = 0.15f;
 
+        [Header("AI throttling (SRS 29)")]
+        [Tooltip("Seconds between enemy AI evaluations. Throttling keeps 30 concurrent enemies inside the NFR-001 budget.")]
+        [Min(0f)]
+        [SerializeField] private float _enemyThinkInterval = 0.1f;
+
         // Damage pipeline
         /// <summary>Damage floor (HPS-010, SRS 35 baseline 1).</summary>
         public float MinDamage => _minDamage;
@@ -184,6 +189,9 @@ namespace ChibiRift.Data
 
         /// <summary>Screen shake duration (CAM-003).</summary>
         public float ScreenShakeDuration => _screenShakeDuration;
+
+        /// <summary>Seconds between enemy AI evaluations (SRS 29).</summary>
+        public float EnemyThinkInterval => _enemyThinkInterval;
 
         /// <summary>
         /// Weight multiplier for <paramref name="rarity"/>, or 1 when unconfigured, so a missing

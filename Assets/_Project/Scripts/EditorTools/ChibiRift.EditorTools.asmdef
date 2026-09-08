@@ -9,7 +9,9 @@
         "ChibiRift.Telemetry",
         "ChibiRift.Meta",
         "ChibiRift.UI",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Unity.Cinemachine",
+        "Unity.RenderPipelines.Universal.2D.Runtime"
     ],
     "includePlatforms": [
         "Editor"

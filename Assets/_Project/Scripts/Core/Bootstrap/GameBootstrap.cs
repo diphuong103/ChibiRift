@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace ChibiRift.Core
 {
@@ -23,9 +24,13 @@ namespace ChibiRift.Core
         [Tooltip("Off lets a developer press Play directly inside Hub or Run_01 while iterating.")]
         [SerializeField] private bool _loadFirstSceneOnStart = true;
 
+        [Header("Input (P1-01)")]
+        [Tooltip("ChibiRiftControls.inputactions. Its Gameplay map holds the SRS 8.3 control scheme.")]
+        [SerializeField] private InputActionAsset _controls;
+
         private ServiceLocator _locator;
         private EventBus _eventBus;
-        private InputManager _input;
+        private InputReader _input;
 
         private void Awake()
         {
@@ -71,8 +76,9 @@ namespace ChibiRift.Core
             _locator.Register(_eventBus);
             _locator.Register<ICoroutineRunner>(this);
 
-            _input = new InputManager();
+            _input = new InputReader(_controls);
             _locator.Register<IInputService>(_input);
+            _locator.Register(_input);
 
             _locator.Register<ISceneFlowService>(new SceneFlowManager(this, _eventBus));
             _locator.Register<IPauseService>(new PauseManager(_eventBus, _input));
