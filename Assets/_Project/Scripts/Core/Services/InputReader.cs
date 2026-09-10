@@ -78,14 +78,23 @@ namespace ChibiRift.Core
             _aim = _gameplay.FindAction("Aim", throwIfNotFound: true);
             _pause = _gameplay.FindAction("Pause", throwIfNotFound: true);
 
-            // MOV-001 through MOV-003 are live this slice.
+            // Wired: an event is raised for anything a system already listens for.
+            //
+            // Note that the polling properties below (MoveAxis, AttackPressed, AimScreenPosition
+            // and the rest) work whether or not an event is wired here, because they read the
+            // action directly and the whole map is enabled at the end of this constructor.
+            // PlayerController polls; these events exist for systems that want an edge rather than
+            // a per-frame check. Aim has no event by design — a pointer position is a value that is
+            // read, not an edge that fires.
             _move.performed += OnMove;
             _move.canceled += OnMove;
             _jump.started += OnJumpStarted;
             _jump.canceled += OnJumpReleased;
+            _attack.started += OnAttack;
 
+            // Not wired because nothing consumes them yet; the actions are still bound and
+            // pollable, so wiring is a one-line change when the system arrives.
             // TODO(MOV-006): _dash.started += OnDash;
-            // TODO(COM-001): _attack.started += OnAttack;
             // TODO(COM-007): _skill1/_skill2/_skill3.started += OnSkill1/2/3;
             // TODO(PAU-001): _pause.started += OnPause;
 
@@ -149,6 +158,7 @@ namespace ChibiRift.Core
             _move.canceled -= OnMove;
             _jump.started -= OnJumpStarted;
             _jump.canceled -= OnJumpReleased;
+            _attack.started -= OnAttack;
 
             _gameplay.Disable();
         }

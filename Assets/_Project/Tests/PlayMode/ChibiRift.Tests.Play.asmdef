@@ -5,6 +5,9 @@
         "ChibiRift.Core",
         "ChibiRift.Data",
         "ChibiRift.Gameplay",
+        "ChibiRift.UI",
+        "Unity.InputSystem.TestFramework",
+        "Unity.InputSystem",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

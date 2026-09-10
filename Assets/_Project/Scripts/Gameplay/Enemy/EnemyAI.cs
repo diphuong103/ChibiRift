@@ -138,7 +138,7 @@ namespace ChibiRift.Gameplay
             switch (State)
             {
                 case EnemyLifecycleState.Idle: TickIdle(); break;
-                case EnemyLifecycleState.Chase: TickChase(dt); break;
+                case EnemyLifecycleState.Chase: TickChase(); break;
                 case EnemyLifecycleState.Attack: TickAttack(); break;
                 case EnemyLifecycleState.Recovery: TickRecovery(); break;
                 case EnemyLifecycleState.ReturnToSpawn: TickReturnToSpawn(); break;
@@ -149,6 +149,11 @@ namespace ChibiRift.Gameplay
         {
             if (StunRemaining > 0f) StunRemaining = Mathf.Max(StunRemaining - dt, 0f);
             if (_evadeRemaining > 0f) _evadeRemaining = Mathf.Max(_evadeRemaining - dt, 0f);
+
+            // Counted here, on the fixed clock, and not inside TickChase. TickChase runs at the
+            // think rate, so accumulating there advanced this timer at a fifth of real time and
+            // the configured 0.5s window silently became 2.5s.
+            if (State == EnemyLifecycleState.Chase) _stuckTimer += dt;
         }
 
         // ----- states ---------------------------------------------------------------------
@@ -162,7 +167,7 @@ namespace ChibiRift.Gameplay
         }
 
         /// <summary>AI-002 and AI-004: closes on the hero, attacks in range, gives up beyond lose range.</summary>
-        private void TickChase(float dt)
+        private void TickChase()
         {
             float distance = DistanceToTarget();
 
@@ -186,7 +191,7 @@ namespace ChibiRift.Gameplay
                 return;
             }
 
-            UpdateStuckDetection(dt);
+            UpdateStuckDetection();
             _motor.SetMoveIntent(_evadeRemaining > 0f ? _stuckEvadeDirection : DirectionToTarget());
         }
 
@@ -266,11 +271,9 @@ namespace ChibiRift.Gameplay
         /// AI-005: an enemy that has chased for a whole window without covering the minimum
         /// distance is wedged, so it sidesteps rather than grinding into whatever blocks it.
         /// </summary>
-        private void UpdateStuckDetection(float dt)
+        private void UpdateStuckDetection()
         {
             if (_evadeRemaining > 0f) return;
-
-            _stuckTimer += dt;
             if (_stuckTimer < _enemyData.StuckCheckWindow) return;
 
             float travelled = Mathf.Abs(transform.position.x - _stuckAnchorX);

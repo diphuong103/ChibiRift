@@ -327,6 +327,50 @@ namespace ChibiRift.Core
         }
     }
 
+    /// <summary>
+    /// Per-frame combat snapshot for the development overlay (P1 slice 3).
+    /// Published by the hero's combat component and read only by <c>ChibiRift.UI</c>.
+    /// </summary>
+    public readonly struct PlayerCombatStateEvent
+    {
+        public readonly bool IsAttacking;
+        public readonly bool IsHitboxActive;
+        public readonly int ComboStep;
+        public readonly float ComboWindowRemaining;
+        public readonly Vector2 AimDirection;
+
+        public PlayerCombatStateEvent(
+            bool isAttacking, bool isHitboxActive, int comboStep, float comboWindowRemaining, Vector2 aimDirection)
+        {
+            IsAttacking = isAttacking;
+            IsHitboxActive = isHitboxActive;
+            ComboStep = comboStep;
+            ComboWindowRemaining = comboWindowRemaining;
+            AimDirection = aimDirection;
+        }
+    }
+
+    /// <summary>
+    /// How many enemies are alive and what the closest one is doing (P1 slice 3, development only).
+    /// </summary>
+    /// <remarks>
+    /// Exists so the overlay can answer "why is nothing attacking me" without the UI assembly
+    /// needing to see an enemy, which the assembly graph forbids.
+    /// </remarks>
+    public readonly struct EnemyCensusEvent
+    {
+        public readonly int AliveCount;
+        public readonly EnemyLifecycleState NearestState;
+        public readonly float NearestDistance;
+
+        public EnemyCensusEvent(int aliveCount, EnemyLifecycleState nearestState, float nearestDistance)
+        {
+            AliveCount = aliveCount;
+            NearestState = nearestState;
+            NearestDistance = nearestDistance;
+        }
+    }
+
     /// <summary>Camera shake request (CAM-003). VFX and combat publish it; the camera rig consumes it.</summary>
     public readonly struct ScreenShakeRequestedEvent
     {

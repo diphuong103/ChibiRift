@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &9201296236349097521
+--- !u!1 &4068734258893807130
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,16 +8,16 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1107352167958739787}
-  - component: {fileID: 8584882415784208969}
-  - component: {fileID: 8117272304914517851}
-  - component: {fileID: 2146769554251069595}
-  - component: {fileID: 6153954644893614532}
-  - component: {fileID: 4026881388897807310}
-  - component: {fileID: 6737436493556708702}
-  - component: {fileID: 8840097549314829730}
-  - component: {fileID: 152179872968587857}
-  - component: {fileID: 5677040486980520312}
+  - component: {fileID: 3899976120703372553}
+  - component: {fileID: 7715467867528231251}
+  - component: {fileID: 7123428781496297067}
+  - component: {fileID: 5388357134200605993}
+  - component: {fileID: 8401652753196533868}
+  - component: {fileID: 4040721122156102941}
+  - component: {fileID: 284962752034470182}
+  - component: {fileID: 6719186390702050939}
+  - component: {fileID: 944378571635011970}
+  - component: {fileID: 581070110657870784}
   m_Layer: 6
   m_Name: Hero
   m_TagString: Player
@@ -25,13 +25,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1107352167958739787
+--- !u!4 &3899976120703372553
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -40,14 +40,14 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &8584882415784208969
+--- !u!212 &7715467867528231251
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -99,14 +99,14 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!50 &8117272304914517851
+--- !u!50 &7123428781496297067
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -126,13 +126,13 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!70 &2146769554251069595
+--- !u!70 &5388357134200605993
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -163,13 +163,13 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.8, y: 1.8}
   m_Direction: 0
---- !u!114 &6153954644893614532
+--- !u!114 &8401652753196533868
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49a276c546e79e29948503baeb5fd03, type: 3}
@@ -177,25 +177,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.PlayerMotor
   _heroData: {fileID: 11400000, guid: a21ace09338029ed1ac12e9039af337b, type: 2}
   _sceneContext: {fileID: 0}
---- !u!114 &4026881388897807310
+--- !u!114 &4040721122156102941
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51f2e61500811b46ca3e4926ecd60810, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.PlayerController
---- !u!114 &6737436493556708702
+--- !u!114 &284962752034470182
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 479269db015c19739af7f2c4ad800877, type: 3}
@@ -203,15 +203,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.HealthComponent
   _sourceData: {fileID: 0}
   _isPlayer: 1
-  _bodyCollider: {fileID: 2146769554251069595}
-  _hurtIFrameDuration: 0
---- !u!114 &8840097549314829730
+  _bodyCollider: {fileID: 5388357134200605993}
+  _hurtIFrameDuration: 0.8
+--- !u!114 &6719186390702050939
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c6cf6b122419b2dc884816807d67d8a0, type: 3}
@@ -219,31 +219,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.PlayerStats
   _heroData: {fileID: 11400000, guid: a21ace09338029ed1ac12e9039af337b, type: 2}
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
---- !u!114 &152179872968587857
+--- !u!114 &944378571635011970
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f742e1d3fefa5989ea4a203150ddf9d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.PlayerCombat
   _heroData: {fileID: 11400000, guid: a21ace09338029ed1ac12e9039af337b, type: 2}
-  _spriteRenderer: {fileID: 8584882415784208969}
---- !u!114 &5677040486980520312
+  _spriteRenderer: {fileID: 7715467867528231251}
+--- !u!114 &581070110657870784
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9201296236349097521}
+  m_GameObject: {fileID: 4068734258893807130}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c901a6081c0dd615b9954576d3964701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.HurtFlash
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
-  _spriteRenderer: {fileID: 8584882415784208969}
+  _spriteRenderer: {fileID: 7715467867528231251}

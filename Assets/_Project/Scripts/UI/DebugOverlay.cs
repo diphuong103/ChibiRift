@@ -17,8 +17,8 @@ namespace ChibiRift.UI
     [DisallowMultipleComponent]
     public sealed class DebugOverlay : MonoBehaviour
     {
-        private const float PanelWidth = 230f;
-        private const float PanelHeight = 130f;
+        private const float PanelWidth = 250f;
+        private const float PanelHeight = 220f;
         private const float PanelMargin = 10f;
 
         [Header("Visibility")]
@@ -27,6 +27,8 @@ namespace ChibiRift.UI
 
         private EventBus _eventBus;
         private PlayerMotorStateEvent _state;
+        private PlayerCombatStateEvent _combat;
+        private EnemyCensusEvent _census;
         private bool _visible;
         private GUIStyle _style;
 
@@ -38,12 +40,16 @@ namespace ChibiRift.UI
             if (!ServiceLocator.Current.TryGet(out _eventBus)) return;
 
             _eventBus.Subscribe<PlayerMotorStateEvent>(OnMotorState);
+            _eventBus.Subscribe<PlayerCombatStateEvent>(OnCombatState);
+            _eventBus.Subscribe<EnemyCensusEvent>(OnCensus);
         }
 
         private void OnDisable()
         {
             // Unsubscribing matters: the EventBus outlives the scene.
             _eventBus?.Unsubscribe<PlayerMotorStateEvent>(OnMotorState);
+            _eventBus?.Unsubscribe<PlayerCombatStateEvent>(OnCombatState);
+            _eventBus?.Unsubscribe<EnemyCensusEvent>(OnCensus);
             _eventBus = null;
         }
 
@@ -54,6 +60,10 @@ namespace ChibiRift.UI
         }
 
         private void OnMotorState(PlayerMotorStateEvent state) => _state = state;
+
+        private void OnCombatState(PlayerCombatStateEvent combat) => _combat = combat;
+
+        private void OnCensus(EnemyCensusEvent census) => _census = census;
 
         private void OnGUI()
         {
@@ -67,7 +77,7 @@ namespace ChibiRift.UI
                 PanelWidth,
                 PanelHeight);
 
-            GUI.Box(area, "Motor (F1)");
+            GUI.Box(area, "Debug (F1)");
             GUILayout.BeginArea(new Rect(area.x + PanelMargin, area.y + PanelMargin * 2f, PanelWidth, PanelHeight));
 
             GUILayout.Label($"velocity.x   {_state.Velocity.x,8:F3}", _style);
@@ -76,6 +86,24 @@ namespace ChibiRift.UI
             GUILayout.Label($"jumpCount    {_state.JumpCount,8}", _style);
             GUILayout.Label($"coyoteTimer  {_state.CoyoteTimer,8:F3}", _style);
             GUILayout.Label($"jumpBuffer   {_state.JumpBufferTimer,8:F3}", _style);
+
+            GUILayout.Space(6f);
+
+            // Attack lands only within roughly 1.4u of a target and has no animation yet, so
+            // without these lines a swing that simply missed is indistinguishable from broken input.
+            string attackState = _combat.IsAttacking
+                ? (_combat.IsHitboxActive ? "ACTIVE" : "swinging")
+                : "idle";
+
+            GUILayout.Label($"attackState  {attackState,8}", _style);
+            GUILayout.Label($"comboStep    {_combat.ComboStep,8}  (window {_combat.ComboWindowRemaining:F2})", _style);
+            GUILayout.Label($"aimDir       {_combat.AimDirection.x,5:F2},{_combat.AimDirection.y,5:F2}", _style);
+            GUILayout.Label($"enemyCount   {_census.AliveCount,8}", _style);
+            GUILayout.Label(
+                _census.NearestDistance < 0f
+                    ? "nearestEnemy      none"
+                    : $"nearestEnemy {_census.NearestState,8}  ({_census.NearestDistance:F1}u)",
+                _style);
 
             GUILayout.EndArea();
         }

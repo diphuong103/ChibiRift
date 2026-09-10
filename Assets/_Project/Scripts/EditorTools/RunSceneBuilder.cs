@@ -53,7 +53,12 @@ namespace ChibiRift.EditorTools
             Transform hero = BuildHero(heroPrefab, context, spawn);
             BuildCamera(hero);
 
-            new GameObject("DebugOverlay").AddComponent<DebugOverlay>();
+            var overlay = new GameObject("DebugOverlay");
+            overlay.AddComponent<DebugOverlay>();
+
+            // Feeds the enemy half of the overlay. Lives in Gameplay because it has to see enemies,
+            // which ChibiRift.UI cannot.
+            overlay.AddComponent<EnemyDebugCensus>();
             BuildEnemies();
             BuildTrainingDummies();
             BuildDamageNumberCanvas();
@@ -260,6 +265,12 @@ namespace ChibiRift.EditorTools
             var healthSo = new SerializedObject(health);
             healthSo.FindProperty("_isPlayer").boolValue = true;
             healthSo.FindProperty("_bodyCollider").objectReferenceValue = capsule;
+
+            // HPS-005. Without this the shipped hero had no post-hit invulnerability at all: the
+            // component supports it, but nothing had ever assigned the duration outside of tests.
+            healthSo.FindProperty("_hurtIFrameDuration").floatValue =
+                heroData != null ? heroData.HurtIFrameDuration : 0f;
+
             healthSo.ApplyModifiedPropertiesWithoutUndo();
 
             var statsSo = new SerializedObject(stats);
@@ -310,6 +321,12 @@ namespace ChibiRift.EditorTools
             // Static: no Rigidbody2D, no AI, no retaliation. It exists to be hit.
             var box = dummy.AddComponent<BoxCollider2D>();
             box.size = new Vector2(1f, 2f);
+
+            // A trigger, not a solid body. Dummies sit on the Enemy layer, and Enemy collides with
+            // Enemy, so solid dummies became walls: an enemy chasing the hero wedged itself behind
+            // the dummy at x = 3 and crawled 0.6u in six seconds. Attack sweeps include triggers,
+            // so the dummy still takes hits — it just stops being terrain.
+            box.isTrigger = true;
 
             var health = dummy.AddComponent<HealthComponent>();
             var healthSo = new SerializedObject(health);

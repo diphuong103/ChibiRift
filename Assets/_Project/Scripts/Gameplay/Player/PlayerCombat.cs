@@ -302,6 +302,19 @@ namespace ChibiRift.Gameplay
             _eventBus?.Publish(new ComboChangedEvent(ComboStep, maxSteps, ComboWindowRemaining));
         }
 
+        private void LateUpdate()
+        {
+            // A per-frame snapshot for the development overlay. Separate from ComboChangedEvent,
+            // which fires only on transitions: the overlay needs the aim vector and the live
+            // hitbox flag every frame, and neither of those is a transition.
+            _eventBus?.Publish(new PlayerCombatStateEvent(
+                State == CombatState.Attacking,
+                IsHitboxActive,
+                ComboStep,
+                ComboWindowRemaining,
+                AimDirection));
+        }
+
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {

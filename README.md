@@ -79,6 +79,11 @@ level geometry twice the placement resolution of the movement grid without shrin
 ~/Unity/Hub/Editor/6000.3.23f1/Editor/Unity -projectPath /home/dinhphuong/Linux/Game/ChibiRift
 ```
 
+Press **F1** in Run_01 for the development overlay: velocity, grounded, jump count, coyote and
+buffer timers, plus attack state, combo step, aim direction, enemy count and what the nearest enemy
+is doing. Combat has no animation or sound yet, so a swing that simply missed looks identical to
+broken input — the overlay is how you tell them apart (OI-25).
+
 **Always press Play from `Assets/_Project/Scenes/Boot.unity`.** Boot builds the
 `ServiceLocator`; entering any other scene directly leaves services unregistered and the
 navigation buttons will log an error and do nothing.
@@ -244,7 +249,7 @@ Headless:
   -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **132 EditMode + 37 PlayMode, all passing.**
+Current status: **132 EditMode + 41 PlayMode, all passing.**
 
 | Suite | Count | What it covers |
 |---|---|---|
@@ -258,7 +263,7 @@ Current status: **132 EditMode + 37 PlayMode, all passing.**
 | `AssetReferenceIntegrityTests` | 5 | No wave, stage or hero points at a missing asset, and no two assets share an id. Renaming an asset is the classic way to leave a reference that Unity only complains about at runtime |
 | `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
 | `PlayerCombatTests` (PlayMode) | 10 | TC-COM: the active window, one hit per target per swing, the three hit chain, both combo resets, mouse aim and sprite flip, damage to a corpse, death firing once, and step 3 out-damaging step 1 |
-| `Run01SceneTests` (PlayMode) | 3 | Plays the real Run_01 with the prefabs that ship in it: hero and enemies land, hero can jump. The only fixture that loads a scene rather than building actors in code |
+| `Run01SceneTests` (PlayMode) | 7 | **The only fixture that plays the real game.** Loads the real Boot scene so the real `InputReader` and `CombatSystem` are built, drives simulated mouse and keyboard, then plays Run_01 with the prefabs that ship in it: every wired action reaches its property, a real click damages a dummy, Space jumps, hero and enemies land, the nearest enemy actually closes distance, and a landed hit produces a visible health bar and damage number |
 | `EnemyAiTests` (PlayMode) | 16 | TC-AI: idle, chase, aggro hysteresis, walking home, attack window and cooldown, damage through the pipeline, hero i-frames, combo reset on being hit, knockback out and back, hurt stun, terminal death, and stats following the asset |
 
 ### Why `DataDefaultsConsistencyTests` matters

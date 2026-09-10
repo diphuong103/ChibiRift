@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-23 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-25 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -397,3 +397,47 @@ isolating logic but means none of them ever loaded the prefab that ships. `Run01
 plays the real scene, and `SceneActorVisualTests` checks in the editor that every actor draws
 something and that nothing is scaled through its Transform. Both were verified by reintroducing the
 original faults deliberately.
+
+---
+
+## OI-24 — Training dummies were walls
+
+Dummies sit on the `Enemy` layer so the hero's attack sweep can find them. `Enemy` collides with
+`Enemy`, so they were also solid bodies — and they sit at x = 3, 8 and 12, directly between the
+hero's spawn and the enemies at x = 5, 10 and 15.
+
+The enemy at x = 5 aggroed correctly, walked left, and wedged itself behind the dummy at x = 3. It
+covered **0.6 units in six seconds**, which reads as "the enemy is not chasing".
+
+**Decision:** dummy colliders are triggers. Attack sweeps include triggers, so a dummy still takes
+hits; it just stops being terrain. A test prop should never be able to block pathing.
+
+**Also fixed alongside it:** `EnemyAI.UpdateStuckDetection` accumulated its timer inside `TickChase`,
+which runs at the think rate rather than the fixed rate, so the configured 0.5s stuck window
+silently behaved as 2.5s. The timer now runs on the fixed clock in `TickTimers`. Even with that
+corrected, an enemy whose only evasive move is a 0.35s sidestep cannot get around a solid obstacle,
+which is why the obstacle had to stop existing.
+
+---
+
+## OI-25 — Two playtest reports that were not bugs, and why they looked like bugs
+
+Alongside the two real faults above, the same playtest reported "Mouse Left does nothing" and "the
+hero does not turn to face the cursor". Both systems were working. Measured in the real scene, with
+the real `InputReader` driven by a simulated mouse: a click next to a dummy took it from 9999 to
+9989 health, exactly the 10 damage the formula gives, and `AimDirection` tracked the cursor.
+
+They looked broken because **nothing shows them**:
+
+- The attack hitbox reaches about 1.4u. A click from further away is a clean miss, and a miss has
+  no animation, no swing arc, no sound and no number. It is indistinguishable from dead input.
+- Facing is `SpriteRenderer.flipX` on a **featureless solid rectangle**. Flipping it is a no-op to
+  the eye. There is no art asymmetry for the flip to act on.
+
+**Not "fixed", because nothing is broken.** What changed is that the F1 overlay now shows
+`attackState`, `comboStep`, `aimDirection`, `enemyCount` and `nearestEnemyState`, so a swing that
+merely missed can be told apart from input that never arrived.
+
+**The real fix is art and juice**, and it is correctly scheduled: attack animation is P2, hit VFX
+and sound are P2. Until then, expect combat to be legible only through the overlay and the damage
+numbers.
