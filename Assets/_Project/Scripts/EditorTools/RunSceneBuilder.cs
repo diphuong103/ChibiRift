@@ -54,6 +54,7 @@ namespace ChibiRift.EditorTools
             BuildCamera(hero);
 
             new GameObject("DebugOverlay").AddComponent<DebugOverlay>();
+            BuildEnemies();
             BuildTrainingDummies();
             BuildDamageNumberCanvas();
             BuildPostRunLink();
@@ -216,6 +217,10 @@ namespace ChibiRift.EditorTools
             var hero = new GameObject("Hero");
             hero.layer = LayerMask.NameToLayer(GameLayers.Player);
 
+            // AI-002: EnemyAI locates its target by this tag. Without it every enemy stays Idle
+            // forever and nothing in the arena reacts to the hero.
+            hero.tag = "Player";
+
             var renderer = hero.AddComponent<SpriteRenderer>();
             renderer.sprite = CreateFlatSprite(new Color(0.85f, 0.72f, 0.35f));
             // Hero is 64px tall at 32 PPU, i.e. 2 units.
@@ -243,6 +248,9 @@ namespace ChibiRift.EditorTools
             var stats = hero.AddComponent<PlayerStats>();
             var combat = hero.AddComponent<PlayerCombat>();
 
+            // HPS-005: the visible half of the i-frame window.
+            var flash = hero.AddComponent<HurtFlash>();
+
             var motorSo = new SerializedObject(motor);
             motorSo.FindProperty("_heroData").objectReferenceValue = heroData;
             motorSo.ApplyModifiedPropertiesWithoutUndo();
@@ -262,6 +270,8 @@ namespace ChibiRift.EditorTools
             // COM-009: PlayerCombat is the only writer of flipX from slice 2 on (OI-20).
             combatSo.FindProperty("_spriteRenderer").objectReferenceValue = renderer;
             combatSo.ApplyModifiedPropertiesWithoutUndo();
+
+            SetReferences(flash, ("_balanceConfig", balance), ("_spriteRenderer", renderer));
 
             string path = $"{PrefabRoot}/Hero.prefab";
             AssetDatabase.DeleteAsset(path);
@@ -307,6 +317,158 @@ namespace ChibiRift.EditorTools
             healthSo.FindProperty("_isPlayer").boolValue = false;
             healthSo.FindProperty("_bodyCollider").objectReferenceValue = box;
             healthSo.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>
+        /// Three melee enemies at x = 5, 10 and 15 (P1 slice 3), from a prefab built entirely out
+        /// of the EnemyData asset (NFR-007). They are placed above the ground and settle onto it.
+        /// </summary>
+        private static void BuildEnemies()
+        {
+            GameObject prefab = BuildEnemyPrefab();
+            if (prefab == null) return;
+
+            float[] positions = { 5f, 10f, 15f };
+            for (int i = 0; i < positions.Length; i++)
+            {
+                var enemy = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                enemy.name = $"Enemy_{i + 1}";
+
+                // Half the 2u body above the ground surface, so the ground probe finds ground on
+                // the first fixed step instead of the enemy starting inside the floor.
+                enemy.transform.position = new Vector3(positions[i], 1f, 0f);
+            }
+        }
+
+        /// <summary>
+        /// ENM_MeleeGrunt.prefab. Every number reaches the components through EnemyData, so
+        /// retuning the enemy is an asset edit and never a script edit (AI-001, NFR-007).
+        /// </summary>
+        private static GameObject BuildEnemyPrefab()
+        {
+            EnemyData data =
+                AssetDatabase.LoadAssetAtPath<EnemyData>($"{DataRoot}/ENM_MeleeGrunt.asset");
+            BalanceConfig balance =
+                AssetDatabase.LoadAssetAtPath<BalanceConfig>($"{DataRoot}/BalanceConfig.asset");
+
+            if (data == null)
+            {
+                Debug.LogError("[Setup] ENM_MeleeGrunt.asset is missing; run the data generator first.");
+                return null;
+            }
+
+            var enemy = new GameObject("ENM_MeleeGrunt")
+            {
+                layer = LayerMask.NameToLayer(GameLayers.Enemy)
+            };
+
+            var renderer = enemy.AddComponent<SpriteRenderer>();
+            renderer.sprite = CreateFlatSprite(new Color(0.62f, 0.28f, 0.34f));
+            renderer.transform.localScale = new Vector3(1f, 2f, 1f);
+
+            var body = enemy.AddComponent<Rigidbody2D>();
+            body.bodyType = RigidbodyType2D.Dynamic;
+            body.gravityScale = 0f;
+            body.freezeRotation = true;
+            body.interpolation = RigidbodyInterpolation2D.Interpolate;
+
+            var box = enemy.AddComponent<BoxCollider2D>();
+            box.size = new Vector2(0.8f, 1.8f);
+
+            // Ensure, not Add: these components declare RequireComponent on each other, so Unity
+            // adds some of them for us. A second AddComponent of a DisallowMultipleComponent type
+            // returns null, which then fails at the SerializedObject rather than at the cause.
+            var health = Ensure<HealthComponent>(enemy);
+            var motor = Ensure<EnemyMotor>(enemy);
+            var attack = Ensure<EnemyAttack>(enemy);
+            var ai = Ensure<EnemyAI>(enemy);
+            var controller = Ensure<EnemyController>(enemy);
+
+            SetReferences(health, ("_sourceData", data), ("_bodyCollider", box));
+            SetReferences(motor, ("_enemyData", data));
+            SetReferences(attack, ("_enemyData", data));
+            SetReferences(ai, ("_enemyData", data), ("_balanceConfig", balance));
+            SetReferences(controller, ("_enemyData", data));
+
+            BuildEnemyHealthBar(enemy, balance);
+
+            string path = $"{PrefabRoot}/ENM_MeleeGrunt.prefab";
+            AssetDatabase.DeleteAsset(path);
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(enemy, path);
+            Object.DestroyImmediate(enemy);
+
+            return prefab;
+        }
+
+        /// <summary>
+        /// World-space health bar, added as a CHILD of the enemy. That parenting is what lets a
+        /// component in ChibiRift.UI identify its owner by the parent's instance id without ever
+        /// referencing ChibiRift.Gameplay, and makes it follow the enemy with no code.
+        /// </summary>
+        private static void BuildEnemyHealthBar(GameObject enemy, BalanceConfig balance)
+        {
+            var barRoot = new GameObject("HealthBar", typeof(Canvas));
+            barRoot.transform.SetParent(enemy.transform, false);
+            barRoot.transform.localPosition = new Vector3(0f, 1.4f, 0f);
+
+            var canvas = barRoot.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+
+            var canvasRect = barRoot.GetComponent<RectTransform>();
+            canvasRect.sizeDelta = new Vector2(1.2f, 0.16f);
+            canvasRect.localScale = Vector3.one;
+
+            var background = new GameObject("Background", typeof(Image));
+            background.transform.SetParent(barRoot.transform, false);
+            StretchToParent(background.GetComponent<RectTransform>());
+            background.GetComponent<Image>().color = new Color(0.08f, 0.08f, 0.10f, 0.85f);
+
+            var fillObject = new GameObject("Fill", typeof(Image));
+            fillObject.transform.SetParent(barRoot.transform, false);
+            StretchToParent(fillObject.GetComponent<RectTransform>());
+
+            var fill = fillObject.GetComponent<Image>();
+            fill.color = new Color(0.78f, 0.22f, 0.24f);
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Horizontal;
+            fill.fillAmount = 1f;
+
+            var bar = barRoot.AddComponent<EnemyHealthBar>();
+            SetReferences(bar, ("_balanceConfig", balance), ("_canvas", canvas), ("_fill", fill));
+        }
+
+        private static void StretchToParent(RectTransform rect)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+
+        /// <summary>Returns the component, adding it only when it is not already there.</summary>
+        private static T Ensure<T>(GameObject target) where T : Component
+        {
+            T existing = target.GetComponent<T>();
+            return existing != null ? existing : target.AddComponent<T>();
+        }
+
+        /// <summary>Assigns several private serialized object references in one call.</summary>
+        private static void SetReferences(Object target, params (string Field, Object Value)[] fields)
+        {
+            var so = new SerializedObject(target);
+            for (int i = 0; i < fields.Length; i++)
+            {
+                SerializedProperty property = so.FindProperty(fields[i].Field);
+                if (property == null)
+                {
+                    Debug.LogError($"[Setup] {target.GetType().Name} has no field '{fields[i].Field}'.");
+                    continue;
+                }
+
+                property.objectReferenceValue = fields[i].Value;
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         /// <summary>Screen-space canvas hosting the floating damage numbers (HPS-008).</summary>

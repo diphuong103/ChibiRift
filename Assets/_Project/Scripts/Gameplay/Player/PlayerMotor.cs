@@ -20,7 +20,7 @@ namespace ChibiRift.Gameplay
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(CapsuleCollider2D))]
     [DisallowMultipleComponent]
-    public sealed class PlayerMotor : MonoBehaviour
+    public sealed class PlayerMotor : MonoBehaviour, IKnockbackReceiver
     {
         [Header("Data (SRS 35: no movement literal lives in this script)")]
         [Tooltip("Supplies move speed, acceleration, gravity, jump and ground-probe values.")]
@@ -61,6 +61,7 @@ namespace ChibiRift.Gameplay
         private float _moveIntent;
         private float _speedMultiplier = 1f;
         private bool _jumpHeld;
+        private KnockbackState _knockback;
         private int _groundMask;
 
         private MovementConfig Config => _heroData.Movement;
@@ -100,6 +101,25 @@ namespace ChibiRift.Gameplay
         {
             if (ServiceLocator.Current != null) ServiceLocator.Current.TryGet(out _eventBus);
             if (_sceneContext != null) Teleport(_sceneContext.SpawnPosition);
+
+            // Subscribed in Start rather than OnEnable because the bus is resolved here; the
+            // matching Unsubscribe in OnDisable is safe either way.
+            _eventBus?.Subscribe<DamageAppliedEvent>(OnDamageApplied);
+        }
+
+        private void OnDisable()
+        {
+            // The EventBus outlives the scene, so a handler left behind would fire into a
+            // destroyed component on the next Run.
+            _eventBus?.Unsubscribe<DamageAppliedEvent>(OnDamageApplied);
+        }
+
+        private void OnDamageApplied(DamageAppliedEvent evt)
+        {
+            if (evt.TargetEntityId != gameObject.GetInstanceID()) return;
+
+            Vector2 away = (Vector2)transform.position - evt.AttackerPosition;
+            ApplyKnockback(away, evt.KnockbackForce, evt.KnockbackDuration);
         }
 
         /// <summary>Horizontal intent for this step, -1..1. Called by <see cref="PlayerController"/>.</summary>
@@ -110,6 +130,24 @@ namespace ChibiRift.Gameplay
         /// them rather than freezing them, so a swing never feels like a stutter.
         /// </summary>
         public void SetSpeedMultiplier(float multiplier) => _speedMultiplier = Mathf.Clamp01(multiplier);
+
+        /// <inheritdoc />
+        public bool IsKnockedBack => _knockback.IsActive;
+
+        /// <inheritdoc />
+        /// <remarks>
+        /// Subscribed to <c>DamageAppliedEvent</c> in <see cref="OnEnable"/>: the hit announces
+        /// itself and the hero reacts, rather than the combat pipeline reaching in to push them.
+        /// </remarks>
+        public void ApplyKnockback(Vector2 direction, float force, float durationSeconds)
+        {
+            float velocityX = _knockback.Begin(direction, force, durationSeconds);
+            if (!_knockback.IsActive) return;
+
+            Vector2 velocity = _body.linearVelocity;
+            velocity.x = velocityX;
+            _body.linearVelocity = velocity;
+        }
 
         /// <summary>Whether the jump key is currently held, for the variable-height cut (MOV-002).</summary>
         public void SetJumpHeld(bool held) => _jumpHeld = held;
@@ -130,7 +168,12 @@ namespace ChibiRift.Gameplay
             TickTimers(dt);
 
             Vector2 velocity = _body.linearVelocity;
-            velocity.x = ApplyHorizontal(velocity.x, dt);
+
+            // COM-005: while a knockback runs the hero has no horizontal say. Without this the
+            // line below would overwrite the pushed velocity on the very next step and the
+            // knockback would never be visible.
+            if (!_knockback.Tick(dt)) velocity.x = ApplyHorizontal(velocity.x, dt);
+
             velocity.y = ApplyJumpAndGravity(velocity.y, dt);
 
             _body.linearVelocity = velocity;
@@ -279,6 +322,7 @@ namespace ChibiRift.Gameplay
             JumpCount = 0;
             CoyoteTimer = 0f;
             JumpBufferTimer = 0f;
+            _knockback.Clear();
         }
 
         /// <summary>

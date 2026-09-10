@@ -27,6 +27,25 @@ namespace ChibiRift.Core
     }
 
     /// <summary>Wave progression states driven by WaveManager (WAV-001..WAV-005).</summary>
+    /// <summary>
+    /// Enemy state machine states (AI-001, AI-003).
+    /// </summary>
+    /// <remarks>
+    /// Lives in Core rather than beside the state machine because <c>EnemyStateChangedEvent</c>
+    /// carries it and Core cannot reference ChibiRift.Gameplay. <see cref="Hurt"/> interrupts every
+    /// state except <see cref="Death"/>, and <see cref="Death"/> is terminal.
+    /// </remarks>
+    public enum EnemyLifecycleState
+    {
+        Idle = 0,
+        Chase = 1,
+        Attack = 2,
+        Recovery = 3,
+        Hurt = 4,
+        Death = 5,
+        ReturnToSpawn = 6
+    }
+
     public enum WaveState
     {
         Pending = 0,

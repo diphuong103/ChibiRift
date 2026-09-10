@@ -36,8 +36,22 @@ namespace ChibiRift.Gameplay
         public HealthComponent Health => _health;
 
         private HealthComponent _health;
+        private EnemyMotor _motor;
+        private EnemyAttack _attack;
+        private EnemyAI _ai;
 
-        private void Awake() => _health = GetComponent<HealthComponent>();
+        private void Awake()
+        {
+            _health = GetComponent<HealthComponent>();
+            _motor = GetComponent<EnemyMotor>();
+            _attack = GetComponent<EnemyAttack>();
+            _ai = GetComponent<EnemyAI>();
+
+            // NFR-007: one asset drives every component, so changing a number in the asset changes
+            // behaviour with no script edit. Done in Awake as well as in Configure so an enemy
+            // placed straight into a scene behaves the same as a spawned one.
+            if (_enemyData != null) Distribute(_enemyData);
+        }
 
         private void OnEnable()
         {
@@ -58,7 +72,24 @@ namespace ChibiRift.Gameplay
             _enemyData = data;
             IsElite = asElite;
 
-            if (_health != null && data != null) _health.SeedFrom(data);
+            Distribute(data);
+        }
+
+        /// <summary>
+        /// Pushes the archetype to every component that reads numbers from it (NFR-007).
+        /// One place does this, so a new component reading <see cref="EnemyData"/> is wired by
+        /// adding a line here rather than by remembering to set a field in the inspector.
+        /// </summary>
+        private void Distribute(EnemyData data)
+        {
+            if (data == null) return;
+
+            _enemyData = data;
+
+            if (_motor != null) _motor.Data = data;
+            if (_attack != null) _attack.Data = data;
+            if (_ai != null) _ai.Data = data;
+            if (_health != null) _health.SeedFrom(data);
         }
 
         /// <summary>

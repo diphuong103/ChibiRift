@@ -9,9 +9,12 @@ The foundation is architecture only. On top of it, two P1 slices are implemented
   and is followed by a confined Cinemachine camera.
 - **Slice 2 — combat.** Mouse-aimed basic attack, a three hit combo, a single damage pipeline,
   health and death, and floating damage numbers. `Run_01` carries three training dummies to hit.
+- **Slice 3 — enemy AI.** One melee archetype that notices the hero, chases, attacks on a
+  telegraphed rhythm, gets stunned and knocked back, dies, and walks home when it loses interest.
+  Knockback and post-hit invulnerability apply to the hero too.
 
-Everything else is still skeleton — no dash, skills, enemy AI, boss, wave, animation, art, audio
-or level design. Placeholders are flat-colour geometric sprites.
+Everything else is still skeleton — no dash, skills, boss, wave, elite, ranged or charger enemies,
+animation, art, audio or level design. Placeholders are flat-colour geometric sprites.
 
 ---
 
@@ -102,7 +105,7 @@ Assets/_Project/
 │   └── EditorTools/  ChibiRift.EditorTools  editor-only generators (excluded from builds)
 ├── Data/       ScriptableObject assets (one baseline per type)
 ├── Scenes/     Boot, MainMenu, Hub, Run_01, PostRun
-├── Prefabs/    Hero.prefab, DamageNumber.prefab
+├── Prefabs/    Hero.prefab, ENM_MeleeGrunt.prefab, DamageNumber.prefab
 ├── Settings/   ChibiRiftControls.inputactions
 ├── Art/        (empty, P2)
 ├── Audio/      (empty, P2)
@@ -164,6 +167,17 @@ makes the illegal directions **impossible to compile** rather than merely discou
 
 ## 6. Naming conventions
 
+### Two names that are easy to confuse
+
+| Name | Meaning |
+|---|---|
+| `CombatSystem.DealDamage` | **The single entry point.** Anything wanting to hurt something calls this, and only this (HPS-003). |
+| `IDamageable.ApplyDamage` | **The receiving end.** Applies an already-calculated result. Only `CombatSystem` calls it; `DamagePipelineSourceTests` fails the build if anything else does. |
+
+They read alike and mean opposite ends of the same transaction. Calling `ApplyDamage` directly
+skips the death guard, the i-frame guard, the crit roll and the damage event in one go.
+
+
 | Kind | Convention | Example |
 |---|---|---|
 | Namespace | `ChibiRift.<Module>` | `ChibiRift.Gameplay` |
@@ -224,7 +238,7 @@ Headless:
   -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **88 EditMode + 18 PlayMode, all passing.**
+Current status: **128 EditMode + 34 PlayMode, all passing.**
 
 | Suite | Count | What it covers |
 |---|---|---|
@@ -232,10 +246,12 @@ Current status: **88 EditMode + 18 PlayMode, all passing.**
 | `ExperienceCurveTests` | 12 | The XP curve and its inverse |
 | `UpgradeRollerTests` | 15 | Three-card rolls, the no-duplicate rule, Fallback Pool top-up, an exhausted pool, the max-stack filter, seed reproducibility |
 | `InputActionsAssetTests` | 6 | The `.inputactions` asset itself: the map, all nine actions, the A/D composite and Space binding, and that W/S/F stay unbound (SRS 43 Q2) |
-| `DataDefaultsConsistencyTests` | 39 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
+| `DataDefaultsConsistencyTests` | 74 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
 | `DamagePipelineSourceTests` | 2 | Health is only ever reduced through `CombatSystem` (HPS-003). A text scan, not a compiler guarantee — see OI-19 |
+| `AssetReferenceIntegrityTests` | 5 | No wave, stage or hero points at a missing asset, and no two assets share an id. Renaming an asset is the classic way to leave a reference that Unity only complains about at runtime |
 | `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
 | `PlayerCombatTests` (PlayMode) | 10 | TC-COM: the active window, one hit per target per swing, the three hit chain, both combo resets, mouse aim and sprite flip, damage to a corpse, death firing once, and step 3 out-damaging step 1 |
+| `EnemyAiTests` (PlayMode) | 16 | TC-AI: idle, chase, aggro hysteresis, walking home, attack window and cooldown, damage through the pipeline, hero i-frames, combo reset on being hit, knockback out and back, hurt stun, terminal death, and stats following the asset |
 
 ### Why `DataDefaultsConsistencyTests` matters
 

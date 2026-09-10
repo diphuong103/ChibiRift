@@ -66,6 +66,7 @@ namespace ChibiRift.Gameplay
 
         private PlayerStats _stats;
         private PlayerMotor _motor;
+        private HealthComponent _health;
         private EventBus _eventBus;
         private CombatSystem _combat;
 
@@ -87,6 +88,7 @@ namespace ChibiRift.Gameplay
         {
             _stats = GetComponent<PlayerStats>();
             _motor = GetComponent<PlayerMotor>();
+            _health = GetComponent<HealthComponent>();
             // Unity 6 deprecated OverlapBoxNonAlloc in favour of the ContactFilter2D overload.
             // Triggers are included: an enemy hurtbox may legitimately be a trigger and must
             // still be hittable.
@@ -151,6 +153,20 @@ namespace ChibiRift.Gameplay
 
             BeginStep(next);
         }
+
+        private void OnEnable()
+        {
+            // COM-003: taking a hit drops the chain. The rule was written in slice 2 but had
+            // nothing that could hit the hero until enemies existed.
+            if (_health != null) _health.Damaged += OnHeroDamaged;
+        }
+
+        private void OnDisable()
+        {
+            if (_health != null) _health.Damaged -= OnHeroDamaged;
+        }
+
+        private void OnHeroDamaged(HealthComponent health) => ResetCombo();
 
         private void Update()
         {
@@ -273,7 +289,8 @@ namespace ChibiRift.Gameplay
                 damageMultiplier,
                 0f,
                 DamageSource.BasicAttack,
-                target.transform.position);
+                target.transform.position,
+                transform.position);
         }
 
         private void PublishCombo()

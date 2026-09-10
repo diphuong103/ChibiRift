@@ -39,6 +39,7 @@ namespace ChibiRift.Tests.Edit
         private static BalanceConfig s_balance;
         private static HeroData s_hero;
         private static AttackData s_attack;
+        private static EnemyData s_enemy;
 
         [OneTimeSetUp]
         public void GenerateIntoScratchFolder()
@@ -51,10 +52,12 @@ namespace ChibiRift.Tests.Edit
             s_balance = AssetDatabase.LoadAssetAtPath<BalanceConfig>($"{ScratchRoot}/BalanceConfig.asset");
             s_hero = AssetDatabase.LoadAssetAtPath<HeroData>($"{ScratchRoot}/HERO_Knight.asset");
             s_attack = AssetDatabase.LoadAssetAtPath<AttackData>($"{ScratchRoot}/ATK_KnightBasic.asset");
+            s_enemy = AssetDatabase.LoadAssetAtPath<EnemyData>($"{ScratchRoot}/ENM_MeleeGrunt.asset");
 
             Assert.That(s_balance, Is.Not.Null, $"The generator produced no BalanceConfig in {ScratchRoot}.");
             Assert.That(s_hero, Is.Not.Null, $"The generator produced no HERO_Knight in {ScratchRoot}.");
             Assert.That(s_attack, Is.Not.Null, $"The generator produced no ATK_KnightBasic in {ScratchRoot}.");
+            Assert.That(s_enemy, Is.Not.Null, $"The generator produced no ENM_MeleeGrunt in {ScratchRoot}.");
         }
 
         [OneTimeTearDown]
@@ -63,6 +66,7 @@ namespace ChibiRift.Tests.Edit
             s_balance = null;
             s_hero = null;
             s_attack = null;
+            s_enemy = null;
             DeleteScratchFolder();
         }
 
@@ -75,12 +79,14 @@ namespace ChibiRift.Tests.Edit
             public readonly BalanceConfig Balance;
             public readonly HeroData Hero;
             public readonly AttackData Attack;
+            public readonly EnemyData Enemy;
 
-            public Generated(BalanceConfig balance, HeroData hero, AttackData attack)
+            public Generated(BalanceConfig balance, HeroData hero, AttackData attack, EnemyData enemy)
             {
                 Balance = balance;
                 Hero = hero;
                 Attack = attack;
+                Enemy = enemy;
             }
 
             /// <summary>Step <paramref name="index"/> of the basic chain, 0-based (COM-002).</summary>
@@ -149,13 +155,69 @@ namespace ChibiRift.Tests.Edit
             // out of this list it would revert on the next generator run exactly like OI-05 did.
             yield return Row("moveSpeedMultiplierWhileAttacking", 0.3f,
                 g => g.Attack.MoveSpeedMultiplierWhileAttacking);
+
+            // Melee enemy (P1 slice 3).
+            yield return Row("enemy.hp", 40f, g => g.Enemy.BaseStats.MaxHealth);
+            yield return Row("enemy.damage", 8f, g => g.Enemy.BaseStats.Attack);
+            yield return Row("enemy.defense", 0f, g => g.Enemy.BaseStats.Defense);
+            yield return Row("enemy.damageReduction", 0f, g => g.Enemy.BaseStats.DamageReduction);
+            yield return Row("enemy.moveSpeed", 3.0f, g => g.Enemy.BaseStats.MoveSpeed);
+
+            // AI-002: the gap between these two is the hysteresis and must not be closed.
+            yield return Row("enemy.detectionRange", 8.0f, g => g.Enemy.DetectionRange);
+            yield return Row("enemy.loseAggroRange", 12.0f, g => g.Enemy.LoseAggroRange);
+            yield return Row("enemy.attackRange", 1.2f, g => g.Enemy.AttackRange);
+
+            yield return Row("enemy.attackWindup", 0.35f, g => g.Enemy.Attack.Windup);
+            yield return Row("enemy.attackActive", 0.10f, g => g.Enemy.Attack.Active);
+            yield return Row("enemy.attackRecovery", 0.45f, g => g.Enemy.Attack.Recovery);
+            yield return Row("enemy.attackCooldown", 1.2f, g => g.Enemy.Attack.Cooldown);
+
+            yield return Row("enemy.hurtStunDuration", 0.2f, g => g.Enemy.HurtStunDuration);
+            yield return Row("enemy.corpseLingerSeconds", 1.0f, g => g.Enemy.CorpseLingerSeconds);
+
+            // Knockback (COM-005).
+            yield return Row("enemyKnockbackForce", 6.0f, g => g.Balance.EnemyKnockbackForce);
+            yield return Row("enemyKnockbackDuration", 0.15f, g => g.Balance.EnemyKnockbackDuration);
+            yield return Row("heroKnockbackForce", 4.0f, g => g.Balance.HeroKnockbackForce);
+            yield return Row("heroKnockbackDuration", 0.12f, g => g.Balance.HeroKnockbackDuration);
+
+            // Anti-stuck (AI-005).
+            yield return Row("stuckCheckWindow", 0.5f, g => g.Enemy.StuckCheckWindow);
+            yield return Row("stuckMinDisplacement", 0.1f, g => g.Enemy.StuckMinDisplacement);
+            yield return Row("separationRadius", 0.6f, g => g.Enemy.SeparationRadius);
+            yield return Row("separationForce", 2.0f, g => g.Enemy.SeparationForce);
+
+            // Not in the brief's list: the brief asked for "a few seconds" in prose. Left out of
+            // this list it would revert on the next generator run exactly like OI-05 did.
+            yield return Row("enemyHealthBarHideDelay", 3.0f, g => g.Balance.EnemyHealthBarHideDelay);
+
+            // Twelve more the brief did not list. They were about to be literals inside
+            // ChibiRift.Gameplay, which the banned-literal audit correctly refuses: an enemy's
+            // gravity and reach are balance numbers as much as its HP is. Defaults match what
+            // would otherwise have been hard-coded, and mirror the hero where the two should agree.
+            yield return Row("enemy.hitboxWidth", 1.2f, g => g.Enemy.Attack.HitboxWidth);
+            yield return Row("enemy.hitboxHeight", 1.0f, g => g.Enemy.Attack.HitboxHeight);
+            yield return Row("enemy.hitboxOffsetDistance", 0.8f, g => g.Enemy.Attack.HitboxOffsetDistance);
+
+            yield return Row("enemy.gravity", 40f, g => g.Enemy.Physics.Gravity);
+            yield return Row("enemy.maxFallSpeed", 25f, g => g.Enemy.Physics.MaxFallSpeed);
+            yield return Row("enemy.groundCheckWidth", 0.7f, g => g.Enemy.Physics.GroundCheckWidth);
+            yield return Row("enemy.groundCheckHeight", 0.1f, g => g.Enemy.Physics.GroundCheckHeight);
+            yield return Row("enemy.groundCheckOffsetY", -0.9f, g => g.Enemy.Physics.GroundCheckOffsetY);
+
+            yield return Row("enemy.spawnArrivalTolerance", 0.15f, g => g.Enemy.SpawnArrivalTolerance);
+            yield return Row("enemy.evadeDuration", 0.35f, g => g.Enemy.EvadeDuration);
+
+            yield return Row("hurtFlashesPerSecond", 8f, g => g.Balance.HurtFlashesPerSecond);
+            yield return Row("hurtFlashMinAlpha", 0.25f, g => g.Balance.HurtFlashMinAlpha);
         }
 
         [TestCaseSource(nameof(ConfirmedValues))]
         public void GeneratedAssetKeepsConfirmedValue(
             string name, float expected, Func<Generated, float> read)
         {
-            float actual = read(new Generated(s_balance, s_hero, s_attack));
+            float actual = read(new Generated(s_balance, s_hero, s_attack, s_enemy));
 
             Assert.That(
                 actual,

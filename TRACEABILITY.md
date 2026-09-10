@@ -34,9 +34,9 @@ Paths are relative to `Assets/_Project/`.
 |---|---|---|---|
 | COM-001 | Mouse Left basic attack | `InputReader.AttackPressed`, `PlayerController.Update`, `PlayerCombat.RequestAttack`; the swing slows the hero via `AttackData.MoveSpeedMultiplierWhileAttacking` and `PlayerMotor.SetSpeedMultiplier` | **Done** — `Test_Attack_SingleTargetHitOnce` |
 | COM-002 | 3 hit combo | `PlayerCombat.RequestAttack` / `BeginStep` / `EndStep`, `Data/AttackData.cs` (three `AttackStep`, multipliers 1.0 / 1.1 / 1.6), `HeroData.ComboLength` (validated == 3) | **Done** — `Test_Combo_ThreeHitsInWindow`, `Test_Attack3_DealsHighestDamage` |
-| COM-003 | Combo resets on timeout | `PlayerCombat.Update` + `ResetCombo`, `HeroData.ComboWindow` (0.5); also resets on leaving the ground. Publishes `ComboChangedEvent` | **Done** — `Test_Combo_ResetsAfterWindowExpires`, `Test_Combo_ResetsWhenLeavingGround` |
+| COM-003 | Combo resets on timeout | `PlayerCombat.Update` + `ResetCombo`, `HeroData.ComboWindow` (0.5); also resets on leaving the ground and on taking a hit. Publishes `ComboChangedEvent` | **Done** — `Test_Combo_ResetsAfterWindowExpires`, `Test_Combo_ResetsWhenLeavingGround`, `Test_Hero_HitResetsCombo` |
 | COM-004 | Clear hitbox / hurtbox, active frames only | `PlayerCombat.SweepHitbox` (`Physics2D.OverlapBox` inside `[ActiveStartTime, ActiveEndTime]`), per-swing `HashSet` for one hit per target, collision matrix. Frame data is in seconds, not Animation Events — see OI-18 | **Done** — `Test_Attack_HitboxOnlyActiveInWindow` |
-| COM-005 | Damage, knockback, hit feedback | `PlayerCombat.ResolveHit` -> `CombatSystem.DealDamage` (damage **Done**), `EnemyData.KnockbackResistance` | Damage **Done**, knockback Skeleton |
+| COM-005 | Damage, knockback, hit feedback | `DamageAppliedEvent` carries the attacker position and the force; the target applies it through `IKnockbackReceiver` (`PlayerMotor`, `EnemyMotor`) using the shared `Combat/KnockbackState.cs`. `CombatSystem` never pushes anyone: hit-stop and shake will subscribe to the same event. Horizontal only in P1 | **Done** — `Test_Knockback_MovesTargetAwayFromAttacker`, `Test_Knockback_ReturnsControlAfterDuration` |
 | COM-006 | Critical hit | `Combat/DamageCalculator.cs` step 2 + `RollCritical` | **Done** — `DamageCalculatorTests.Step2_AppliesCriticalMultiplierOnlyOnCrit` |
 | COM-007 | Q/E/R special skills | `InputReader.WasSkillPressed`, `Scripts/Gameplay/Skills/SkillSystem.cs`, `Data/SkillData.cs` | Skeleton — bindings + Schema Done |
 | COM-008 | Cooldown only, no mana pool | `SkillSystem.cs`, `SkillData.Cooldown`; no resource field exists anywhere | Skeleton — by construction Done |
@@ -47,10 +47,10 @@ Paths are relative to `Assets/_Project/`.
 | ID | Requirement | Where | Status |
 |---|---|---|---|
 | HPS-001 | Hero Current/Max HP | `Gameplay/Combat/HealthComponent.cs`, seeded by `PlayerStats.ApplyStats` from `HeroData.BaseStats`. Publishes `HealthChangedEvent` | **Done** |
-| HPS-002 | Enemy HP/Max HP | The same `HealthComponent`, seeded by `HealthComponent.SeedFrom(EnemyData)` or by `EnemyController.Configure` | **Done** |
+| HPS-002 | Enemy HP/Max HP | The same `HealthComponent`, seeded by `HealthComponent.SeedFrom(EnemyData)` or by `EnemyController.Distribute`. Shown by `UI/EnemyHealthBar.cs`, which identifies its owner by its parent's instance id and so needs no reference into gameplay | **Done** |
 | HPS-003 | One unified damage pipeline | `CombatSystem.DealDamage` is the only entry; it calls `DamageCalculator.Calculate` and is the only caller of `IDamageable.ApplyDamage` | **Done** — `DamagePipelineSourceTests` (text scan, OI-19) |
 | HPS-004 | No damage to a dead target | Guarded twice: `CombatSystem.DealDamage` refuses the hit (so no damage number appears) and `HealthComponent.ApplyDamage` refuses it again | **Done** — `Test_Damage_DeadTargetTakesNoMoreDamage` |
-| HPS-005 | I-frames after a hit and during dash | `HealthComponent.IsInvulnerable` / `BeginInvulnerability` (moved off `PlayerStats`: the gate belongs on the damage entry, and enemies have no stat component), `HeroData.HurtIFrameDuration` (0.8), `DashConfig.IFrameDuration` (0.25) | Window **Done**, the two callers land in slices 3 and 4 |
+| HPS-005 | I-frames after a hit and during dash | `HealthComponent.IsInvulnerable` / `BeginInvulnerability`; a surviving hit opens the window automatically for `HealthComponent.HurtIFrameDuration` (hero 0.8, enemies 0). `Gameplay/Player/HurtFlash.cs` shows it. A longer window never shortens a running one, so a dash cannot cut post-hit i-frames short | Post-hit **Done** — `Test_Hero_IFrameBlocksSecondHit`, `Test_Hero_IFrameExpiresAfterDuration`; dash lands in slice 4 |
 | HPS-006 | Hero HP ≤ 0 enters Death | `HealthComponent.EnterDeathState`, guarded so `Died` and `EntityDiedEvent` fire once | **Done** — `Test_Death_FiresOnEntityDiedOnce` |
 | HPS-007 | Enemy death triggers reward/XP | The same guarded `HealthComponent.EnterDeathState`; `EnemyController.OnHealthDied` is where XP and gold hang. Corpse disables its collider and retires after `EnemyData.CorpseLingerSeconds` | Death **Done** — `Test_Death_FiresOnEntityDiedOnce`; reward grant Skeleton |
 | HPS-008 | Damage number on target | `UI/DamageNumberSpawner.cs` + `UI/DamageNumber.cs`, pooled with `ObjectPool<T>`, driven only by `DamageAppliedEvent`. Crit colour is set up although crits arrive in slice 4 | **Done** |
@@ -103,11 +103,11 @@ Paths are relative to `Assets/_Project/`.
 
 | ID | Requirement | Where | Status |
 |---|---|---|---|
-| AI-001 | State machine Idle/Chase/Attack/Hurt/Death | `Gameplay/Enemy/EnemyAI.cs` (`EnemyState` enum) | Skeleton — states Done |
-| AI-002 | Detection range | `EnemyData.DetectionRange`, `EnemyAI.Update` TODO | Skeleton — Schema Done |
-| AI-003 | No attack while dead | `EnemyAI.Update` TODO, `EnemyController.IsDead` | Skeleton |
-| AI-004 | Attack cooldown / window | `EnemyData.AttackCooldown` / `AttackWindup` | Skeleton — Schema Done |
-| AI-005 | No infinite pathfinding loop | `EnemyAI.Update` TODO | Skeleton |
+| AI-001 | State machine Idle/Chase/Attack/Hurt/Death | `Gameplay/Enemy/EnemyAI.cs`, one method per state dispatched from a single switch; `EnemyLifecycleState` in Core (the state-change event carries it, and Core cannot see Gameplay). Hurt interrupts everything but Death | **Done** — `Test_Enemy_HurtStunInterruptsWindup` |
+| AI-002 | Detection range | `EnemyAI.TickIdle` / `TickChase` / `TickReturnToSpawn`, `EnemyData.DetectionRange` (8) and `LoseAggroRange` (12). The gap between the two is hysteresis: one threshold would flip state every evaluation for a hero standing on it | **Done** — `Test_Enemy_StaysIdleWhenPlayerFar`, `Test_Enemy_ChasesWhenPlayerInDetectionRange`, `Test_Enemy_LosesAggroBeyondLoseRange`, `Test_Enemy_ReturnsToSpawnAfterLosingAggro` |
+| AI-003 | No attack while dead | `EnemyAI.FixedUpdate` returns on `Death` before anything else; `EnemyMotor` also refuses the killing blow's own knockback so the corpse cannot slide (OI-21) | **Done** — `Test_Enemy_DeathStopsAllAI` |
+| AI-004 | Attack cooldown / window | `Gameplay/Enemy/EnemyAttack.cs`, three phases from `EnemyAttackConfig` (windup 0.35 / active 0.10 / recovery 0.45, cooldown 1.2 counted from the end of recovery). Hitbox open only inside the active window; the swing is committed at windup and plays out even if the hero leaves | **Done** — `Test_Enemy_AttacksWhenInRange`, `Test_Enemy_AttackRespectsCooldown`, `Test_Enemy_HitboxOnlyActiveInWindow` |
+| AI-005 | No infinite pathfinding loop | Two mechanisms: `EnemyAI.UpdateStuckDetection` sidesteps when a chase covers less than `StuckMinDisplacement` in `StuckCheckWindow`, and `EnemyMotor.SeparationPush` keeps a crowd from collapsing into one silhouette | **Done** |
 | AI-006 | Spawn/despawn owned by Wave System | `Gameplay/Enemy/EnemySpawner.cs`, `Core/Pooling/ObjectPool.cs` | Skeleton — pool **Done** |
 | ELT-001 | Elite = base + modifier + ×3 HP / ×1.5 dmg | `Data/EliteModifierData.cs`, `BalanceConfig.EliteHealthMultiplier` / `EliteDamageMultiplier` | Schema **Done** (SRS 35 values), behaviour Skeleton |
 | ELT-002 | ≥ 3 modifiers: Shielded, Enraged, Explosive | `EliteModifierType` enum + `EliteModifierData` fields for all three; `ELT_Enraged.asset` sample | Schema Done; 2 remaining assets chưa triển khai (content) |
@@ -232,7 +232,7 @@ Paths are relative to `Assets/_Project/`.
 | PlayerController / PlayerCombat / PlayerStats | `Gameplay/Player/` | `PlayerController`, `PlayerMotor`, `PlayerCombat` **Done**; `PlayerStats` **Done** (stats only, health moved to `HealthComponent`) |
 | CombatSystem / DamageSystem / StatusEffectSystem | `Gameplay/Combat/` | `DamageCalculator`, `CombatSystem`, `HealthComponent` **Done**; `StatusEffectSystem` Skeleton |
 | SkillSystem / UpgradeSystem | `Gameplay/Skills/`, `Gameplay/Progression/` | `UpgradeRoller` **Done**, rest Skeleton |
-| EnemyController / EnemyAI / EnemySpawner | `Gameplay/Enemy/` | Skeleton |
+| EnemyController / EnemyAI / EnemySpawner | `Gameplay/Enemy/` | `EnemyAI`, `EnemyMotor`, `EnemyAttack`, `EnemyController` **Done** (melee only); `EnemySpawner` Skeleton |
 | WaveManager / StageManager / BossManager | `Gameplay/Wave|Stage|Boss/` | Skeleton |
 | RunManager / RewardManager | `Gameplay/Run/` | Skeleton |
 | MetaProgressionManager / CurrencyManager | `Meta/` | `CurrencyManager` **Done** |
@@ -254,7 +254,7 @@ Paths are relative to `Assets/_Project/`.
 | NFR-005 | New player understands the controls | `Scripts/UI/HowToPlayPanel.cs` | Skeleton |
 | NFR-006 | Volume controls and readable UI | `IAudioService`, `SettingsSave` | Backend **Done** |
 | NFR-007 | New content added via data/prefab | 9 ScriptableObject types; no content enumerated in code | **Done** |
-| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 88 EditMode + 18 PlayMode tests | **Done** |
+| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 128 EditMode + 34 PlayMode tests | **Done** |
 | NFR-009 | Basic save validation | `MetaSave.IsValid()`, checked before every write and after every read | **Done** |
 
 ## 30 Error Handling

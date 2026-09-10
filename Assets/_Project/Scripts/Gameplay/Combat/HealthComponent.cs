@@ -38,11 +38,21 @@ namespace ChibiRift.Gameplay
         [Tooltip("Disabled the moment health reaches zero, so a corpse stops blocking and stops taking hits.")]
         [SerializeField] private Collider2D _bodyCollider;
 
+        [Tooltip("Seconds of invulnerability granted automatically after each hit that lands (HPS-005). Zero means none, which is what enemies use.")]
+        [Min(0f)]
+        [SerializeField] private float _hurtIFrameDuration;
+
         /// <summary>Raised on every health change. Local listeners; UI uses the EventBus instead.</summary>
         public event Action<float, float> HealthChanged;
 
         /// <summary>Raised exactly once, when health first reaches zero (HPS-006, HPS-007).</summary>
         public event Action<HealthComponent> Died;
+
+        /// <summary>
+        /// Raised on every hit that actually landed, before the death check. The enemy state
+        /// machine uses it to enter Hurt; the hero's combat component uses it to drop the combo.
+        /// </summary>
+        public event Action<HealthComponent> Damaged;
 
         /// <inheritdoc />
         public float CurrentHealth { get; private set; }
@@ -70,6 +80,13 @@ namespace ChibiRift.Gameplay
 
         /// <summary>Seconds until the corpse is retired; negative means no retirement is pending.</summary>
         public float CorpseTimeRemaining => _corpseRemaining;
+
+        /// <summary>Automatic post-hit invulnerability, in seconds (HPS-005). Zero disables it.</summary>
+        public float HurtIFrameDuration
+        {
+            get => _hurtIFrameDuration;
+            set => _hurtIFrameDuration = Mathf.Max(value, 0f);
+        }
 
         private EventBus _eventBus;
         private float _invulnerableRemaining;
@@ -196,7 +213,18 @@ namespace ChibiRift.Gameplay
             CurrentHealth = Mathf.Max(CurrentHealth - result.FinalDamage, 0f);
             PublishHealth();
 
-            if (CurrentHealth <= 0f) EnterDeathState(result.Source);
+            if (CurrentHealth <= 0f)
+            {
+                EnterDeathState(result.Source);
+                return;
+            }
+
+            // HPS-005: the post-hit window opens automatically, using the same mechanism a dash
+            // will use in slice 4, so there is only ever one notion of invulnerability. Opened
+            // only on a surviving hit: a corpse has nothing to be invulnerable for.
+            BeginInvulnerability(_hurtIFrameDuration);
+
+            Damaged?.Invoke(this);
         }
 
         /// <summary>

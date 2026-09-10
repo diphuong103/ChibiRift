@@ -36,6 +36,28 @@ namespace ChibiRift.Core
         void ApplyDamage(in DamageResult result);
     }
 
+    /// <summary>
+    /// Anything that can be pushed by a hit (COM-005).
+    /// </summary>
+    /// <remarks>
+    /// Implemented by the movement components, not by <see cref="IDamageable"/>, because being
+    /// damaged and being movable are separate: a training dummy takes damage but is bolted down.
+    /// The receiver subscribes to <c>DamageAppliedEvent</c> itself rather than being pushed by the
+    /// combat pipeline, which keeps that pipeline to the single job of resolving damage.
+    /// </remarks>
+    public interface IKnockbackReceiver
+    {
+        /// <summary>True while a knockback is running and self-driven movement is suspended.</summary>
+        bool IsKnockedBack { get; }
+
+        /// <summary>
+        /// Pushes the receiver along <paramref name="direction"/> at <paramref name="force"/>
+        /// units per second for <paramref name="durationSeconds"/>, during which its own movement
+        /// yields. A later knockback replaces a running one rather than stacking.
+        /// </summary>
+        void ApplyKnockback(UnityEngine.Vector2 direction, float force, float durationSeconds);
+    }
+
     /// <summary>Pooled objects get lifecycle callbacks instead of Instantiate/Destroy (SRS 29).</summary>
     public interface IPoolable
     {

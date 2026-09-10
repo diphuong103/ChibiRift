@@ -26,12 +26,32 @@ MonoBehaviour:
     Defense: 0
     DamageReduction: 0
   _archetype: 0
-  _detectionRange: 10
-  _attackRange: 1.5
-  _attackCooldown: 1.5
-  _attackWindup: 0.3
+  _detectionRange: 8
+  _loseAggroRange: 12
+  _attackRange: 1.2
+  _attack:
+    Windup: 0.35
+    Active: 0.1
+    Recovery: 0.45
+    Cooldown: 1.2
+    HitboxWidth: 1.2
+    HitboxHeight: 1
+    HitboxOffsetDistance: 0.8
+  _hurtStunDuration: 0.2
+  _physics:
+    Gravity: 40
+    MaxFallSpeed: 25
+    GroundCheckWidth: 0.7
+    GroundCheckHeight: 0.1
+    GroundCheckOffsetY: -0.9
+  _spawnArrivalTolerance: 0.15
+  _evadeDuration: 0.35
+  _stuckCheckWindow: 0.5
+  _stuckMinDisplacement: 0.1
+  _separationRadius: 0.6
+  _separationForce: 2
   _knockbackResistance: 0
-  _corpseLingerSeconds: 0.5
+  _corpseLingerSeconds: 1
   _experienceReward: 0
   _goldReward: 0
   _gemReward: 0

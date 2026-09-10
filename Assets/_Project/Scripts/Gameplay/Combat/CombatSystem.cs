@@ -10,10 +10,21 @@ namespace ChibiRift.Gameplay
     /// and the invulnerability rule (HPS-005), then publishes the feedback events the UI needs.
     /// </summary>
     /// <remarks>
-    /// No other type calls <see cref="IDamageable.ApplyDamage"/>; <c>DamagePipelineSourceTests</c>
-    /// asserts that, though only textually (OI-19). Keeping the single entry point matters for
-    /// more than tidiness: the death guard, the i-frame guard, the crit roll and the telemetry
-    /// event all live here, so a second path would silently skip all four.
+    /// <para><b>Naming.</b> <c>CombatSystem.DealDamage</c> is the single entry point; a caller
+    /// wanting to hurt something calls this. <c>IDamageable.ApplyDamage</c> is the receiving end,
+    /// which only this class calls. The two are easy to confuse and must not be swapped.</para>
+    ///
+    /// <para>No other type calls <see cref="IDamageable.ApplyDamage"/>;
+    /// <c>DamagePipelineSourceTests</c> asserts that, though only textually (OI-19). Keeping the
+    /// single entry point matters for more than tidiness: the death guard, the i-frame guard, the
+    /// crit roll and the telemetry event all live here, so a second path would silently skip all
+    /// four.</para>
+    ///
+    /// <para><b>What this class deliberately does not do.</b> It resolves damage and announces the
+    /// hit. Knockback (COM-005) is applied by the target, which subscribes to
+    /// <c>DamageAppliedEvent</c> through <see cref="IKnockbackReceiver"/>. Hit-stop and screen
+    /// shake will subscribe to the same event. Every one of those is a reaction to a hit, not part
+    /// of resolving it, and putting them here would mean editing this class once per reaction.</para>
     /// </remarks>
     public sealed class CombatSystem : IGameService
     {
@@ -41,6 +52,7 @@ namespace ChibiRift.Gameplay
         /// <param name="critChance">0..1. Pass 0 to skip the roll.</param>
         /// <param name="source">Attribution for the per-source damage log (TEL-003).</param>
         /// <param name="worldPosition">Where the floating number appears (HPS-008).</param>
+        /// <param name="attackerPosition">Origin of the hit. Sets the knockback direction (COM-005).</param>
         /// <returns>The full result, or <c>default</c> when the hit was refused by a guard.</returns>
         public DamageResult DealDamage(
             IDamageable target,
@@ -48,7 +60,8 @@ namespace ChibiRift.Gameplay
             float attackModifiers,
             float critChance,
             DamageSource source,
-            Vector2 worldPosition)
+            Vector2 worldPosition,
+            Vector2 attackerPosition)
         {
             if (target == null) return default;
 
@@ -83,10 +96,18 @@ namespace ChibiRift.Gameplay
 
             target.ApplyDamage(result);
 
-            // HPS-008: the floating number. EntityDiedEvent is published by HealthComponent, which
-            // is the only place that knows the hit was actually lethal.
+            // HPS-008 and COM-005: the one announcement of a landed hit. EntityDiedEvent is
+            // published by HealthComponent, which is the only place that knows the hit was lethal.
+            bool targetIsPlayer = TargetIsPlayer(target);
+
             _eventBus?.Publish(new DamageAppliedEvent(
-                EntityIdOf(target), result, worldPosition, TargetIsPlayer(target)));
+                EntityIdOf(target),
+                result,
+                worldPosition,
+                targetIsPlayer,
+                attackerPosition,
+                targetIsPlayer ? _balance.HeroKnockbackForce : _balance.EnemyKnockbackForce,
+                targetIsPlayer ? _balance.HeroKnockbackDuration : _balance.EnemyKnockbackDuration));
 
             return result;
         }

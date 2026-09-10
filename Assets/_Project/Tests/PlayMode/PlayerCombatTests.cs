@@ -273,13 +273,15 @@ namespace ChibiRift.Tests.Play
 
             var combatSystem = ServiceLocator.Current.Get<CombatSystem>();
 
-            combatSystem.DealDamage(fragile, HeroAttack, 1f, 0f, DamageSource.BasicAttack, Vector2.zero);
+            combatSystem.DealDamage(
+                    fragile, HeroAttack, 1f, 0f, DamageSource.BasicAttack, Vector2.zero, Vector2.zero);
             yield return null;
 
             Assert.That(fragile.IsDead, Is.True, "A 1 HP dummy should have died to a 10 damage hit.");
 
             // HPS-004: a corpse takes nothing further, however the hit arrives.
-            combatSystem.DealDamage(fragile, HeroAttack, 1f, 0f, DamageSource.BasicAttack, Vector2.zero);
+            combatSystem.DealDamage(
+                    fragile, HeroAttack, 1f, 0f, DamageSource.BasicAttack, Vector2.zero, Vector2.zero);
             Assert.That(fragile.CurrentHealth, Is.EqualTo(0f).Within(0.0001f),
                 "Health moved below zero after death (HPS-004).");
         }
@@ -306,7 +308,8 @@ namespace ChibiRift.Tests.Play
                 // would be granted once per hit that lands on the frame of death.
                 for (int i = 0; i < 3; i++)
                 {
-                    combatSystem.DealDamage(fragile, HeroAttack, 1f, 0f, DamageSource.BasicAttack, Vector2.zero);
+                    combatSystem.DealDamage(
+                    fragile, HeroAttack, 1f, 0f, DamageSource.BasicAttack, Vector2.zero, Vector2.zero);
                 }
 
                 yield return null;

@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-20 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-22 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -324,3 +324,44 @@ hitbox and the sprite would point in different directions during any strafe.
 actually visible. If it reads badly then, **plan B** is to make facing follow the cursor only
 while attacking or holding aim, and follow velocity otherwise. That is a change inside
 `PlayerCombat.SetAimTarget` alone; nothing else reads facing.
+
+---
+
+## OI-21 — Death suppresses the killing blow's own knockback
+
+`HealthComponent.ApplyDamage` runs the death transition, which halts the enemy motor. Only then
+does `CombatSystem` publish `DamageAppliedEvent`, which is what drives knockback. The push
+therefore arrived **after** the halt and undid it: the corpse slid roughly 0.9 units away before
+stopping. `Test_Enemy_DeathStopsAllAI` caught it.
+
+**Decision:** `EnemyMotor` ignores a knockback aimed at a target that is already dead. AI-003 makes
+Death terminal, and a corpse that keeps travelling is not terminal in any sense a player would
+recognise.
+
+**The alternative, deliberately not taken:** letting the killing blow throw the body is a common and
+good-looking effect. It was rejected here because P1 slice 3 has no death animation, so a sliding
+untextured rectangle reads as a bug rather than as impact. Worth revisiting once death animation
+exists in P2 — at which point the fix is to gate on "has a death animation", not to remove the
+guard.
+
+---
+
+## OI-22 — The banned-literal rule pushed twelve unlisted numbers into data
+
+The slice 3 brief listed twenty-two enemy values and banned a set of literals from
+`ChibiRift.Core` and `ChibiRift.Gameplay`. Writing the enemy needed twelve more numbers the brief
+did not name: hitbox width, height and offset; gravity, terminal fall speed and the three ground
+probe figures; the distance that counts as "home"; the length of an anti-stuck sidestep; and the
+rate and floor alpha of the invulnerability flash.
+
+Every one of them would have been a literal inside `ChibiRift.Gameplay`, which the audit correctly
+refuses.
+
+**Decision:** all twelve moved into `EnemyData` (via `EnemyAttackConfig` and the new
+`EnemyPhysicsConfig`) or `BalanceConfig`, and all twelve are covered by
+`DataDefaultsConsistencyTests`. Defaults are what would otherwise have been hard-coded, and mirror
+the hero where the two should agree — enemy gravity and fall speed match `MovementConfig`, and the
+enemy's reach matches the hero's chain, so trading blows at the edge of range is symmetrical.
+
+**Worth noting for later slices:** the rule is doing real work. It is not a formatting preference;
+it is what stopped an enemy's gravity from becoming a number only a programmer could find.

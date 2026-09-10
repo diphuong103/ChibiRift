@@ -89,15 +89,17 @@ namespace ChibiRift.EditorTools
                     so.FindProperty("_auraTint").colorValue = new Color(1f, 0.35f, 0.25f, 1f);
                 });
 
+            // Renamed from ENM_Melee in slice 3 so the asset and ENM_MeleeGrunt.prefab match.
+            // The id is unchanged, so save files and telemetry are unaffected.
             EnemyData enemyData = Create<EnemyData>(
-                "ENM_Melee", "enemy.melee_grunt", "Melee Grunt",
-                "Closes on the hero and attacks in melee (SRS 13).",
+                "ENM_MeleeGrunt", "enemy.melee_grunt", "Melee Grunt",
+                "Closes on the hero and attacks in melee (SRS 13). The only archetype in P1.",
                 so =>
                 {
                     so.FindProperty("_archetype").enumValueIndex = (int)EnemyArchetype.Melee;
                     SerializedProperty stats = so.FindProperty("_baseStats");
-                    stats.FindPropertyRelative("MaxHealth").floatValue = 30f;
-                    stats.FindPropertyRelative("Attack").floatValue = 5f;
+                    stats.FindPropertyRelative("MaxHealth").floatValue = 40f;
+                    stats.FindPropertyRelative("Attack").floatValue = 8f;
                     stats.FindPropertyRelative("MoveSpeed").floatValue = 3f;
                     stats.FindPropertyRelative("Defense").floatValue = 0f;
                     stats.FindPropertyRelative("DamageReduction").floatValue = 0f;
@@ -108,6 +110,43 @@ namespace ChibiRift.EditorTools
 
                     // SRS 35: elite reward multiplier follows the x3 HP figure.
                     so.FindProperty("_eliteRewardMultiplier").floatValue = 3f;
+
+                    // AI-002: gain aggro at 8, lose it at 12. The gap is hysteresis, so a hero
+                    // standing on the boundary does not flip the state every evaluation.
+                    so.FindProperty("_detectionRange").floatValue = 8f;
+                    so.FindProperty("_loseAggroRange").floatValue = 12f;
+                    so.FindProperty("_attackRange").floatValue = 1.2f;
+                    so.FindProperty("_hurtStunDuration").floatValue = 0.2f;
+                    so.FindProperty("_corpseLingerSeconds").floatValue = 1f;
+
+                    // AI-004: three phases in seconds; see OI-18 on why not Animation Events.
+                    SerializedProperty attack = so.FindProperty("_attack");
+                    EnemyAttackConfig melee = EnemyAttackConfig.MeleeBaseline;
+                    attack.FindPropertyRelative("Windup").floatValue = melee.Windup;
+                    attack.FindPropertyRelative("Active").floatValue = melee.Active;
+                    attack.FindPropertyRelative("Recovery").floatValue = melee.Recovery;
+                    attack.FindPropertyRelative("Cooldown").floatValue = melee.Cooldown;
+                    attack.FindPropertyRelative("HitboxWidth").floatValue = melee.HitboxWidth;
+                    attack.FindPropertyRelative("HitboxHeight").floatValue = melee.HitboxHeight;
+                    attack.FindPropertyRelative("HitboxOffsetDistance").floatValue = melee.HitboxOffsetDistance;
+
+                    // Gravity and the ground probe, mirroring the hero so both fall alike.
+                    SerializedProperty physics = so.FindProperty("_physics");
+                    EnemyPhysicsConfig body = EnemyPhysicsConfig.MeleeBaseline;
+                    physics.FindPropertyRelative("Gravity").floatValue = body.Gravity;
+                    physics.FindPropertyRelative("MaxFallSpeed").floatValue = body.MaxFallSpeed;
+                    physics.FindPropertyRelative("GroundCheckWidth").floatValue = body.GroundCheckWidth;
+                    physics.FindPropertyRelative("GroundCheckHeight").floatValue = body.GroundCheckHeight;
+                    physics.FindPropertyRelative("GroundCheckOffsetY").floatValue = body.GroundCheckOffsetY;
+
+                    so.FindProperty("_spawnArrivalTolerance").floatValue = 0.15f;
+                    so.FindProperty("_evadeDuration").floatValue = 0.35f;
+
+                    // AI-005.
+                    so.FindProperty("_stuckCheckWindow").floatValue = 0.5f;
+                    so.FindProperty("_stuckMinDisplacement").floatValue = 0.1f;
+                    so.FindProperty("_separationRadius").floatValue = 0.6f;
+                    so.FindProperty("_separationForce").floatValue = 2f;
                 });
 
             // COM-001..COM-004: frame data in seconds because P1 has no animation clips to hang

@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: Stage 1 - Wave 1
   _description: Five melee enemies, matching the SRS 14 example for Stage 1.
   _entries:
-  - Enemy: {fileID: 11400000, guid: 8785a2dc859519ba3bf0ac1dcaa880fd, type: 2}
+  - Enemy: {fileID: 11400000, guid: c84a118230c277ad79f3edcbd33dcca8, type: 2}
     Count: 5
     SpawnAsElite: 0
     StartDelay: 0

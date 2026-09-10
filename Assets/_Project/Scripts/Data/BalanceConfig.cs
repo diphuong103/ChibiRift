@@ -120,6 +120,37 @@ namespace ChibiRift.Data
         [Min(0f)]
         [SerializeField] private float _enemyThinkInterval = 0.1f;
 
+        [Header("Knockback (COM-005)")]
+        [Tooltip("Horizontal speed given to an enemy when it is hit. Enemies are pushed harder than the hero so a hit reads clearly on a crowd.")]
+        [Min(0f)]
+        [SerializeField] private float _enemyKnockbackForce = 6f;
+
+        [Tooltip("Seconds an enemy's own movement is suspended while knockback plays out.")]
+        [Min(0f)]
+        [SerializeField] private float _enemyKnockbackDuration = 0.15f;
+
+        [Tooltip("Horizontal speed given to the hero when hit. Lower than the enemy figure: losing control of the hero feels far worse than seeing an enemy shoved.")]
+        [Min(0f)]
+        [SerializeField] private float _heroKnockbackForce = 4f;
+
+        [Tooltip("Seconds the hero's input is ignored while knockback plays out. Deliberately the shortest of the four.")]
+        [Min(0f)]
+        [SerializeField] private float _heroKnockbackDuration = 0.12f;
+
+        [Header("Enemy HUD")]
+        [Tooltip("Seconds an enemy health bar stays visible after the last hit before it fades out again. Not in SRS 35; set by the project owner.")]
+        [Min(0f)]
+        [SerializeField] private float _enemyHealthBarHideDelay = 3f;
+
+        [Header("Hit feedback (HPS-005)")]
+        [Tooltip("Sprite flashes per second while the hero is invulnerable, so the state is visible without reading a number.")]
+        [Min(0.1f)]
+        [SerializeField] private float _hurtFlashesPerSecond = 8f;
+
+        [Tooltip("Alpha at the dimmest point of that flash. Never fully transparent, so the hero stays trackable in a crowd.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _hurtFlashMinAlpha = 0.25f;
+
         // Damage pipeline
         /// <summary>Damage floor (HPS-010, SRS 35 baseline 1).</summary>
         public float MinDamage => _minDamage;
@@ -192,6 +223,27 @@ namespace ChibiRift.Data
 
         /// <summary>Seconds between enemy AI evaluations (SRS 29).</summary>
         public float EnemyThinkInterval => _enemyThinkInterval;
+
+        /// <summary>Horizontal knockback speed applied to a struck enemy (COM-005).</summary>
+        public float EnemyKnockbackForce => _enemyKnockbackForce;
+
+        /// <summary>Seconds an enemy's movement is suspended by knockback (COM-005).</summary>
+        public float EnemyKnockbackDuration => _enemyKnockbackDuration;
+
+        /// <summary>Horizontal knockback speed applied to the struck hero (COM-005).</summary>
+        public float HeroKnockbackForce => _heroKnockbackForce;
+
+        /// <summary>Seconds the hero's input is suspended by knockback (COM-005).</summary>
+        public float HeroKnockbackDuration => _heroKnockbackDuration;
+
+        /// <summary>Seconds an enemy health bar lingers after the last hit.</summary>
+        public float EnemyHealthBarHideDelay => _enemyHealthBarHideDelay;
+
+        /// <summary>Invulnerability flashes per second (HPS-005).</summary>
+        public float HurtFlashesPerSecond => _hurtFlashesPerSecond;
+
+        /// <summary>Dimmest alpha of the invulnerability flash (HPS-005).</summary>
+        public float HurtFlashMinAlpha => _hurtFlashMinAlpha;
 
         /// <summary>
         /// Weight multiplier for <paramref name="rarity"/>, or 1 when unconfigured, so a missing

@@ -48,3 +48,10 @@ MonoBehaviour:
   _screenShakeAmplitude: 1
   _screenShakeDuration: 0.15
   _enemyThinkInterval: 0.1
+  _enemyKnockbackForce: 6
+  _enemyKnockbackDuration: 0.15
+  _heroKnockbackForce: 4
+  _heroKnockbackDuration: 0.12
+  _enemyHealthBarHideDelay: 3
+  _hurtFlashesPerSecond: 8
+  _hurtFlashMinAlpha: 0.25

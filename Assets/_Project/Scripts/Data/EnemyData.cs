@@ -17,29 +17,60 @@ namespace ChibiRift.Data
         [Tooltip("Archetype driving the state machine (SRS 13).")]
         [SerializeField] private EnemyArchetype _archetype = EnemyArchetype.Melee;
 
-        [Tooltip("Distance at which the enemy notices the hero (AI-002).")]
+        [Tooltip("Distance at which the enemy notices the hero and starts chasing (AI-002).")]
         [Min(0f)]
-        [SerializeField] private float _detectionRange = 10f;
+        [SerializeField] private float _detectionRange = 8f;
 
-        [Tooltip("Distance at which the enemy commits to an attack.")]
+        [Tooltip("Distance at which the enemy gives up and walks home. Deliberately larger than DetectionRange: the gap is hysteresis, so a hero standing on the boundary does not make the state flicker (AI-002).")]
         [Min(0f)]
-        [SerializeField] private float _attackRange = 1.5f;
+        [SerializeField] private float _loseAggroRange = 12f;
 
-        [Tooltip("Seconds between attacks (AI-004).")]
+        [Tooltip("Distance at which the enemy commits to an attack (AI-004).")]
         [Min(0f)]
-        [SerializeField] private float _attackCooldown = 1.5f;
+        [SerializeField] private float _attackRange = 1.2f;
 
-        [Tooltip("Seconds the hitbox stays active during an attack (COM-004).")]
+        [Tooltip("Windup, active and recovery phases plus the cooldown between attacks (AI-004).")]
+        [SerializeField] private EnemyAttackConfig _attack = EnemyAttackConfig.MeleeBaseline;
+
+        [Tooltip("Seconds the enemy is stunned after taking a hit. Long enough to read, short enough not to make it a punching bag.")]
         [Min(0f)]
-        [SerializeField] private float _attackWindup = 0.3f;
+        [SerializeField] private float _hurtStunDuration = 0.2f;
+
+        [Tooltip("Gravity, fall speed and ground probe. Mirrors the hero's MovementConfig so both fall under the same rules.")]
+        [SerializeField] private EnemyPhysicsConfig _physics = EnemyPhysicsConfig.MeleeBaseline;
+
+        [Tooltip("How close to its spawn point counts as home when walking back after losing aggro (AI-002).")]
+        [Min(0.01f)]
+        [SerializeField] private float _spawnArrivalTolerance = 0.15f;
+
+        [Tooltip("Seconds an anti-stuck sidestep runs before normal chasing resumes (AI-005).")]
+        [Min(0.01f)]
+        [SerializeField] private float _evadeDuration = 0.35f;
+
+        [Header("Anti-stuck (AI-005)")]
+        [Tooltip("Seconds of chasing over which displacement is measured. Moving less than the minimum below means the enemy is wedged.")]
+        [Min(0.01f)]
+        [SerializeField] private float _stuckCheckWindow = 0.5f;
+
+        [Tooltip("World units the enemy must cover within the check window to count as making progress (AI-005).")]
+        [Min(0f)]
+        [SerializeField] private float _stuckMinDisplacement = 0.1f;
+
+        [Tooltip("Enemies closer than this push each other apart, so a group reads as a crowd instead of one silhouette (SRS 5).")]
+        [Min(0f)]
+        [SerializeField] private float _separationRadius = 0.6f;
+
+        [Tooltip("Strength of that push, in units per second added to horizontal velocity.")]
+        [Min(0f)]
+        [SerializeField] private float _separationForce = 2f;
 
         [Tooltip("Resistance to knockback. Higher means less displacement (SRS 13 Tank).")]
         [Min(0f)]
         [SerializeField] private float _knockbackResistance = 0f;
 
-        [Tooltip("Seconds a corpse stays in the scene before returning to the pool (HPS-007). Long enough for the death feedback to read, short enough not to clutter a wave.")]
+        [Tooltip("Seconds a corpse stays in the scene before it is retired (HPS-007). Long enough for the death feedback to read, short enough not to clutter a wave.")]
         [Min(0f)]
-        [SerializeField] private float _corpseLingerSeconds = 0.5f;
+        [SerializeField] private float _corpseLingerSeconds = 1f;
 
         [Header("Rewards (EXP-001, SRS 16)")]
         [Tooltip("XP granted once on death (EXP-001, HPS-007). Granted exactly once (SRS 34).")]
@@ -72,17 +103,41 @@ namespace ChibiRift.Data
         /// <summary>Archetype (SRS 13).</summary>
         public EnemyArchetype Archetype => _archetype;
 
-        /// <summary>Detection range (AI-002).</summary>
+        /// <summary>Distance at which the enemy starts chasing (AI-002).</summary>
         public float DetectionRange => _detectionRange;
 
-        /// <summary>Attack commit range.</summary>
+        /// <summary>Distance at which the enemy gives up and returns to spawn (AI-002).</summary>
+        public float LoseAggroRange => _loseAggroRange;
+
+        /// <summary>Attack commit range (AI-004).</summary>
         public float AttackRange => _attackRange;
 
-        /// <summary>Seconds between attacks (AI-004).</summary>
-        public float AttackCooldown => _attackCooldown;
+        /// <summary>Attack phase timing and cooldown (AI-004, COM-004).</summary>
+        public EnemyAttackConfig Attack => _attack;
 
-        /// <summary>Telegraph window before the hitbox activates (COM-004).</summary>
-        public float AttackWindup => _attackWindup;
+        /// <summary>Seconds of stun after taking a hit.</summary>
+        public float HurtStunDuration => _hurtStunDuration;
+
+        /// <summary>Gravity, fall speed and ground probe (AI-001).</summary>
+        public EnemyPhysicsConfig Physics => _physics;
+
+        /// <summary>Distance from spawn that counts as having arrived home (AI-002).</summary>
+        public float SpawnArrivalTolerance => _spawnArrivalTolerance;
+
+        /// <summary>Seconds an anti-stuck sidestep lasts (AI-005).</summary>
+        public float EvadeDuration => _evadeDuration;
+
+        /// <summary>Seconds of chasing over which stuck detection measures displacement (AI-005).</summary>
+        public float StuckCheckWindow => _stuckCheckWindow;
+
+        /// <summary>Minimum distance covered in that window before the enemy counts as stuck (AI-005).</summary>
+        public float StuckMinDisplacement => _stuckMinDisplacement;
+
+        /// <summary>Distance within which enemies push each other apart (AI-005).</summary>
+        public float SeparationRadius => _separationRadius;
+
+        /// <summary>Strength of the separation push (AI-005).</summary>
+        public float SeparationForce => _separationForce;
 
         /// <summary>Knockback resistance.</summary>
         public float KnockbackResistance => _knockbackResistance;

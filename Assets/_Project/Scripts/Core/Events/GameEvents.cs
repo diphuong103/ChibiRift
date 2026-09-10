@@ -23,7 +23,20 @@ namespace ChibiRift.Core
         }
     }
 
-    /// <summary>A resolved hit. Spawns the floating damage number (HPS-008) and feeds telemetry (TEL-003).</summary>
+    /// <summary>
+    /// A resolved hit. Spawns the floating damage number (HPS-008), drives knockback (COM-005) and
+    /// feeds telemetry (TEL-003).
+    /// </summary>
+    /// <remarks>
+    /// This is the one announcement of a landed hit, and it carries everything a reaction needs:
+    /// who was hit, how hard, where, and from which direction. Knockback is applied by whoever was
+    /// hit, subscribing through <see cref="IKnockbackReceiver"/>, rather than by the combat
+    /// pipeline pushing them. Hit-stop and screen shake will subscribe here too, so adding them
+    /// costs a new subscriber and no change to <c>CombatSystem</c>.
+    ///
+    /// <para>Delivery is synchronous: <c>EventBus.Publish</c> invokes handlers on the calling
+    /// stack, so a subscriber reacts in the same frame the hit resolved, not the next one.</para>
+    /// </remarks>
     public readonly struct DamageAppliedEvent
     {
         public readonly int TargetEntityId;
@@ -31,12 +44,31 @@ namespace ChibiRift.Core
         public readonly Vector2 WorldPosition;
         public readonly bool TargetIsPlayer;
 
-        public DamageAppliedEvent(int targetEntityId, in DamageResult result, Vector2 worldPosition, bool targetIsPlayer)
+        /// <summary>Where the hit came from. Knockback direction is target minus this (COM-005).</summary>
+        public readonly Vector2 AttackerPosition;
+
+        /// <summary>Horizontal knockback speed for this hit, from config. Zero means no push.</summary>
+        public readonly float KnockbackForce;
+
+        /// <summary>Seconds the target's own movement yields to the knockback.</summary>
+        public readonly float KnockbackDuration;
+
+        public DamageAppliedEvent(
+            int targetEntityId,
+            in DamageResult result,
+            Vector2 worldPosition,
+            bool targetIsPlayer,
+            Vector2 attackerPosition,
+            float knockbackForce,
+            float knockbackDuration)
         {
             TargetEntityId = targetEntityId;
             Result = result;
             WorldPosition = worldPosition;
             TargetIsPlayer = targetIsPlayer;
+            AttackerPosition = attackerPosition;
+            KnockbackForce = knockbackForce;
+            KnockbackDuration = knockbackDuration;
         }
     }
 
@@ -277,6 +309,21 @@ namespace ChibiRift.Core
             Step = step;
             MaxStep = maxStep;
             WindowRemaining = windowRemaining;
+        }
+    }
+
+    /// <summary>
+    /// An enemy changed state (AI-001). Read by the development overlay; no gameplay depends on it.
+    /// </summary>
+    public readonly struct EnemyStateChangedEvent
+    {
+        public readonly int EntityId;
+        public readonly EnemyLifecycleState State;
+
+        public EnemyStateChangedEvent(int entityId, EnemyLifecycleState state)
+        {
+            EntityId = entityId;
+            State = state;
         }
     }
 
