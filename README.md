@@ -249,7 +249,7 @@ Headless:
   -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **132 EditMode + 41 PlayMode, all passing.**
+Current status: **135 EditMode + 41 PlayMode, all passing.**
 
 | Suite | Count | What it covers |
 |---|---|---|
@@ -259,12 +259,25 @@ Current status: **132 EditMode + 41 PlayMode, all passing.**
 | `InputActionsAssetTests` | 6 | The `.inputactions` asset itself: the map, all nine actions, the A/D composite and Space binding, and that W/S/F stay unbound (SRS 43 Q2) |
 | `DataDefaultsConsistencyTests` | 74 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
 | `DamagePipelineSourceTests` | 2 | Health is only ever reduced through `CombatSystem` (HPS-003). A text scan, not a compiler guarantee — see OI-19 |
+| `PrefabWiringTests` | 3 | Every serialized field on the hero and enemy prefabs is wired, or declared empty with a reason. Covers the third value path — prefab fields — which neither of the data suites can see (OI-26) |
 | `SceneActorVisualTests` | 4 | Every actor in Run_01 draws something, its sprite is a real asset, and nothing is scaled through its Transform. Covers what the logic suites structurally cannot see — see OI-23 |
 | `AssetReferenceIntegrityTests` | 5 | No wave, stage or hero points at a missing asset, and no two assets share an id. Renaming an asset is the classic way to leave a reference that Unity only complains about at runtime |
 | `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
 | `PlayerCombatTests` (PlayMode) | 10 | TC-COM: the active window, one hit per target per swing, the three hit chain, both combo resets, mouse aim and sprite flip, damage to a corpse, death firing once, and step 3 out-damaging step 1 |
 | `Run01SceneTests` (PlayMode) | 7 | **The only fixture that plays the real game.** Loads the real Boot scene so the real `InputReader` and `CombatSystem` are built, drives simulated mouse and keyboard, then plays Run_01 with the prefabs that ship in it: every wired action reaches its property, a real click damages a dummy, Space jumps, hero and enemies land, the nearest enemy actually closes distance, and a landed hit produces a visible health bar and damage number |
 | `EnemyAiTests` (PlayMode) | 16 | TC-AI: idle, chase, aggro hysteresis, walking home, attack window and cooldown, damage through the pipeline, hero i-frames, combo reset on being hit, knockback out and back, hurt stun, terminal death, and stats following the asset |
+
+### The three paths a value takes, and what watches each
+
+| Route | Guarded by |
+|---|---|
+| C# field initialiser in `ChibiRift.Data` | `DataDefaultsConsistencyTests` |
+| `SampleDataGenerator` writing a ScriptableObject | `DataDefaultsConsistencyTests` (it diffs real generator output) |
+| Serialized field on a prefab | `PrefabWiringTests` |
+
+All three have to hold. The hero once had the confirmed 0.8s invulnerability in its asset and in
+its initialiser, and still had none in game, because the prefab field was 0 and only the first two
+routes were checked (OI-26).
 
 ### Why `DataDefaultsConsistencyTests` matters
 

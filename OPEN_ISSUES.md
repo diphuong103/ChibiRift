@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-25 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-26 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -441,3 +441,38 @@ merely missed can be told apart from input that never arrived.
 **The real fix is art and juice**, and it is correctly scheduled: attack animation is P2, hit VFX
 and sound are P2. Until then, expect combat to be legible only through the overlay and the damage
 numbers.
+
+---
+
+## OI-26 — Three paths carry a value into the game; only two were watched
+
+A number reaches the running game by one of three routes:
+
+| # | Route | Watched by |
+|---|---|---|
+| 1 | A C# field initialiser in `ChibiRift.Data` | `DataDefaultsConsistencyTests` |
+| 2 | `SampleDataGenerator` writing a ScriptableObject | the same tests, which diff the generator's actual output |
+| 3 | **A serialized field on a prefab** | **nothing, until now** |
+
+Route 3 is how `Hero.prefab` shipped with `_hurtIFrameDuration = 0`. Every part of route 1 and 2
+was correct — `HeroData` carried the confirmed 0.8, the generator wrote it, the component
+implemented HPS-005 properly — and the hero still had no post-hit invulnerability, because nothing
+copied the value onto the prefab and nothing checked.
+
+**`PrefabWiringTests` now covers route 3**, in three parts:
+
+- Every numeric, boolean and object-reference field on `Hero.prefab` and `ENM_MeleeGrunt.prefab`
+  must be non-zero and non-null, or appear in a declared exemption list with a written reason.
+- Any field exempted as *"the scene assigns it"* is then checked on the actual instance in Run_01,
+  so that promise cannot be made and quietly broken.
+- Exemptions are checked against the current fields, so a renamed field cannot leave a stale entry
+  silencing a real zero.
+
+Verified by reintroducing both faults: setting `_hurtIFrameDuration` back to 0 and clearing
+`_sceneContext` on the scene instance each fail with the offending field named.
+
+**Four fields are legitimately empty** and are declared as such: `PlayerMotor._sceneContext` on the
+prefab (a prefab cannot reference a scene object), `HealthComponent._sourceData` on the hero (that
+is the enemy seeding path), and `_isPlayer` and `_hurtIFrameDuration` on the enemy (an enemy is not
+the player, and enemies take hurt stun rather than invulnerability — i-frames would make them
+immune for the rest of a combo and break COM-002).
