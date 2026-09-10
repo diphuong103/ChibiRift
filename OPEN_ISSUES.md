@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-22 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-23 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -365,3 +365,35 @@ enemy's reach matches the hero's chain, so trading blows at the edge of range is
 
 **Worth noting for later slices:** the rule is doing real work. It is not a formatting preference;
 it is what stopped an enemy's gravity from becoming a number only a programmer could find.
+
+---
+
+## OI-23 — Two shipped faults that 162 green tests could not see
+
+Playtesting P1 slice 3 found the hero invisible and unable to jump, while the whole suite was
+green. Both faults lived in `Hero.prefab`, and every existing test builds its actors in code.
+
+**Fault 1 — the sprite was never saved.** The generators built their placeholder with
+`new Texture2D` and `Sprite.Create` at edit time. Those are in-memory objects with no asset path. A
+scene embeds such an object in its own `.unity` file, which is why boxes and dummies created
+directly in the scene were visible; `PrefabUtility.SaveAsPrefabAsset` cannot serialise a reference
+to something with no path, so **both** prefabs came out with `Sprite = None`. The hero and all
+three enemies were invisible. Only the hero was reported, because the three visible red rectangles
+at x = 3, 8 and 12 are the training dummies, not the enemies at x = 5, 10 and 15.
+
+**Fault 2 — Transform scale.** The prefab carried scale (1, 2, 1) to stretch a 1x1 sprite to the
+documented 64px height. That scaled the `CapsuleCollider2D` from 0.8 x 1.8 to 0.8 x 3.6 as well,
+while `GroundCheckOffsetY` stayed in unscaled units, so the probe sat 0.9u inside the body.
+`IsGrounded` was permanently false: Space did nothing, double jump was unreachable, and the combo
+reset on leaving the ground could fire continuously.
+
+**Fixes.** Placeholder art is now a real asset (`Art/Placeholder/px_white.png`, imported at the P1
+constants: 32 PPU, Point, uncompressed, no mipmaps), tinted per renderer and sized through
+`SpriteRenderer.size`. No generated object scales a Transform any more. Both ground probes also
+multiply by `lossyScale`, so scaling an actor in future cannot silently reintroduce fault 2.
+
+**The lesson worth keeping.** Every PlayMode fixture built its actors in code, which is right for
+isolating logic but means none of them ever loaded the prefab that ships. `Run01SceneTests` now
+plays the real scene, and `SceneActorVisualTests` checks in the editor that every actor draws
+something and that nothing is scaled through its Transform. Both were verified by reintroducing the
+original faults deliberately.

@@ -60,7 +60,13 @@ without the others makes sprites shimmer or the camera crop wrong. Confirmed for
 
 Sprite import settings that go with them: **Point (no filter)** filtering, **None** compression,
 **mipmaps off**. Bilinear filtering or compression would blur a 32-PPU sprite; mipmaps are pointless
-when the camera never scales the sprite.
+when the camera never scales the sprite. `Art/Placeholder/px_white.png` is generated with exactly
+these settings by **ChibiRift → Setup → Generate Placeholder Art**.
+
+**Never size a sprite with Transform scale.** Use `SpriteRenderer.size` with `drawMode = Sliced`.
+These renderers sit on the actor root, so scaling the transform also scales the collider while
+probe and hitbox offsets stay in unscaled units — which is how the hero ended up unable to jump
+(OI-23). `SceneActorVisualTests` fails the build if an actor is scaled.
 
 A tile is 16 px but PPU is 32, so one tile is **half a world unit**. That is intentional: it gives
 level geometry twice the placement resolution of the movement grid without shrinking the hero.
@@ -107,7 +113,7 @@ Assets/_Project/
 ├── Scenes/     Boot, MainMenu, Hub, Run_01, PostRun
 ├── Prefabs/    Hero.prefab, ENM_MeleeGrunt.prefab, DamageNumber.prefab
 ├── Settings/   ChibiRiftControls.inputactions
-├── Art/        (empty, P2)
+├── Art/        Placeholder/px_white.png (tinted and sized per renderer)
 ├── Audio/      (empty, P2)
 ├── UI/         (empty, P2)
 └── Tests/
@@ -238,7 +244,7 @@ Headless:
   -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **128 EditMode + 34 PlayMode, all passing.**
+Current status: **132 EditMode + 37 PlayMode, all passing.**
 
 | Suite | Count | What it covers |
 |---|---|---|
@@ -248,9 +254,11 @@ Current status: **128 EditMode + 34 PlayMode, all passing.**
 | `InputActionsAssetTests` | 6 | The `.inputactions` asset itself: the map, all nine actions, the A/D composite and Space binding, and that W/S/F stay unbound (SRS 43 Q2) |
 | `DataDefaultsConsistencyTests` | 74 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
 | `DamagePipelineSourceTests` | 2 | Health is only ever reduced through `CombatSystem` (HPS-003). A text scan, not a compiler guarantee — see OI-19 |
+| `SceneActorVisualTests` | 4 | Every actor in Run_01 draws something, its sprite is a real asset, and nothing is scaled through its Transform. Covers what the logic suites structurally cannot see — see OI-23 |
 | `AssetReferenceIntegrityTests` | 5 | No wave, stage or hero points at a missing asset, and no two assets share an id. Renaming an asset is the classic way to leave a reference that Unity only complains about at runtime |
 | `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
 | `PlayerCombatTests` (PlayMode) | 10 | TC-COM: the active window, one hit per target per swing, the three hit chain, both combo resets, mouse aim and sprite flip, damage to a corpse, death firing once, and step 3 out-damaging step 1 |
+| `Run01SceneTests` (PlayMode) | 3 | Plays the real Run_01 with the prefabs that ship in it: hero and enemies land, hero can jump. The only fixture that loads a scene rather than building actors in code |
 | `EnemyAiTests` (PlayMode) | 16 | TC-AI: idle, chase, aggro hysteresis, walking home, attack window and cooldown, damage through the pipeline, hero i-frames, combo reset on being hit, knockback out and back, hurt stun, terminal death, and stats following the asset |
 
 ### Why `DataDefaultsConsistencyTests` matters

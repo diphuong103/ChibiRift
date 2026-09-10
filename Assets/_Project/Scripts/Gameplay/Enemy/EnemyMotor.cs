@@ -185,10 +185,18 @@ namespace ChibiRift.Gameplay
         private void UpdateGrounded()
         {
             EnemyPhysicsConfig config = Physics2DConfig;
-            var probeCentre = new Vector2(
-                transform.position.x, transform.position.y + config.GroundCheckOffsetY);
 
-            IsGrounded = Physics2D.OverlapBox(probeCentre, config.GroundCheckSize, 0f, _groundMask) != null;
+            // Scaled by lossyScale for the same reason as PlayerMotor: the probe offset is in
+            // collider units, so a scaled Transform would move the feet without moving the probe.
+            Vector3 scale = transform.lossyScale;
+            var probeCentre = new Vector2(
+                transform.position.x,
+                transform.position.y + config.GroundCheckOffsetY * scale.y);
+            var probeSize = new Vector2(
+                config.GroundCheckWidth * Mathf.Abs(scale.x),
+                config.GroundCheckHeight * Mathf.Abs(scale.y));
+
+            IsGrounded = Physics2D.OverlapBox(probeCentre, probeSize, 0f, _groundMask) != null;
         }
 
         /// <summary>

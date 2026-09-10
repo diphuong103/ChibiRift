@@ -221,10 +221,12 @@ namespace ChibiRift.EditorTools
             // forever and nothing in the arena reacts to the hero.
             hero.tag = "Player";
 
-            var renderer = hero.AddComponent<SpriteRenderer>();
-            renderer.sprite = CreateFlatSprite(new Color(0.85f, 0.72f, 0.35f));
-            // Hero is 64px tall at 32 PPU, i.e. 2 units.
-            renderer.transform.localScale = new Vector3(1f, 2f, 1f);
+            // 1 x 2 units, the 64px-at-32-PPU figure from README section 2. Sized through the
+            // renderer, never through Transform scale: this SpriteRenderer sits on the hero root,
+            // so scaling its transform scaled the capsule and every offset measured from
+            // transform.position along with it.
+            SpriteRenderer renderer = AddPlaceholderSprite(
+                hero, new Vector2(1f, 2f), new Color(0.85f, 0.72f, 0.35f));
 
             var body = hero.AddComponent<Rigidbody2D>();
             body.bodyType = RigidbodyType2D.Dynamic;
@@ -303,13 +305,11 @@ namespace ChibiRift.EditorTools
             var dummy = new GameObject(name) { layer = LayerMask.NameToLayer(GameLayers.Enemy) };
             dummy.transform.position = new Vector3(x, 1f, 0f);
 
-            var renderer = dummy.AddComponent<SpriteRenderer>();
-            renderer.sprite = CreateFlatSprite(colour);
-            renderer.transform.localScale = new Vector3(1f, 2f, 1f);
+            AddPlaceholderSprite(dummy, new Vector2(1f, 2f), colour);
 
             // Static: no Rigidbody2D, no AI, no retaliation. It exists to be hit.
             var box = dummy.AddComponent<BoxCollider2D>();
-            box.size = Vector2.one;
+            box.size = new Vector2(1f, 2f);
 
             var health = dummy.AddComponent<HealthComponent>();
             var healthSo = new SerializedObject(health);
@@ -362,9 +362,7 @@ namespace ChibiRift.EditorTools
                 layer = LayerMask.NameToLayer(GameLayers.Enemy)
             };
 
-            var renderer = enemy.AddComponent<SpriteRenderer>();
-            renderer.sprite = CreateFlatSprite(new Color(0.62f, 0.28f, 0.34f));
-            renderer.transform.localScale = new Vector3(1f, 2f, 1f);
+            AddPlaceholderSprite(enemy, new Vector2(1f, 2f), new Color(0.62f, 0.28f, 0.34f));
 
             var body = enemy.AddComponent<Rigidbody2D>();
             body.bodyType = RigidbodyType2D.Dynamic;
@@ -522,31 +520,36 @@ namespace ChibiRift.EditorTools
             var box = new GameObject(name) { layer = layer };
             box.transform.position = centre;
 
-            var renderer = box.AddComponent<SpriteRenderer>();
-            renderer.sprite = CreateFlatSprite(colour);
-            renderer.transform.localScale = new Vector3(size.x, size.y, 1f);
-
-            box.AddComponent<BoxCollider2D>().size = Vector2.one;
+            AddPlaceholderSprite(box, size, colour);
+            box.AddComponent<BoxCollider2D>().size = size;
         }
 
-        /// <summary>A 1x1 unit white sprite tinted by the renderer. Placeholder geometry only.</summary>
-        private static Sprite CreateFlatSprite(Color colour)
+        /// <summary>
+        /// Adds a placeholder sprite of exactly <paramref name="size"/> world units, tinted to
+        /// <paramref name="colour"/>.
+        /// </summary>
+        /// <remarks>
+        /// Two rules are enforced here rather than left to each caller, because breaking either one
+        /// produced a bug that shipped:
+        /// <list type="bullet">
+        ///   <item>The sprite is a real asset on disk. A sprite built in memory cannot be
+        ///   serialised into a prefab and silently becomes None.</item>
+        ///   <item>Size comes from <c>SpriteRenderer.size</c>, never from Transform scale. These
+        ///   renderers sit on the actor root, so scaling the transform also scales the collider and
+        ///   desynchronises every offset measured from <c>transform.position</c> — which is what
+        ///   left the hero permanently airborne with its ground probe 0.9u inside its own body.</item>
+        /// </list>
+        /// </remarks>
+        private static SpriteRenderer AddPlaceholderSprite(GameObject target, Vector2 size, Color colour)
         {
-            var texture = new Texture2D(PixelsPerUnit, PixelsPerUnit)
-            {
-                filterMode = FilterMode.Point
-            };
+            var renderer = target.AddComponent<SpriteRenderer>();
 
-            var pixels = new Color[PixelsPerUnit * PixelsPerUnit];
-            for (int i = 0; i < pixels.Length; i++) pixels[i] = colour;
-            texture.SetPixels(pixels);
-            texture.Apply();
+            renderer.sprite = PlaceholderArt.LoadOrCreateWhiteSprite();
+            renderer.color = colour;
+            renderer.drawMode = SpriteDrawMode.Sliced;
+            renderer.size = size;
 
-            return Sprite.Create(
-                texture,
-                new Rect(0f, 0f, PixelsPerUnit, PixelsPerUnit),
-                new Vector2(0.5f, 0.5f),
-                PixelsPerUnit);
+            return renderer;
         }
     }
 }

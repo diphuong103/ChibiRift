@@ -188,10 +188,19 @@ namespace ChibiRift.Gameplay
         private void UpdateGrounded()
         {
             MovementConfig config = Config;
+
+            // Scaled by lossyScale, not used raw. The probe offset is measured in the same units as
+            // the collider, so a scaled Transform moves the collider's feet without moving the
+            // probe: a hero prefab left at scale (1, 2, 1) put the probe 0.9u inside its own body
+            // and IsGrounded was false while standing still. The scale is 1 today; this keeps the
+            // two in step if anyone scales an actor again.
+            Vector3 scale = transform.lossyScale;
             var probeCentre = new Vector2(
                 transform.position.x,
-                transform.position.y + config.GroundCheckOffsetY);
-            var probeSize = new Vector2(config.GroundCheckWidth, config.GroundCheckHeight);
+                transform.position.y + config.GroundCheckOffsetY * scale.y);
+            var probeSize = new Vector2(
+                config.GroundCheckWidth * Mathf.Abs(scale.x),
+                config.GroundCheckHeight * Mathf.Abs(scale.y));
 
             bool grounded = Physics2D.OverlapBox(probeCentre, probeSize, 0f, _groundMask) != null;
 
