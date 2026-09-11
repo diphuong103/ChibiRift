@@ -55,8 +55,18 @@ namespace ChibiRift.UI
 
         private void Update()
         {
+            // Guarded, not because the overlay is expensive, but because reading a device directly
+            // is otherwise forbidden project-wide: input reaches gameplay through IInputService and
+            // the bound action map, never through Keyboard.current. A development toggle is a
+            // legitimate exception only while it cannot exist in a shipping build, which is what
+            // the guard enforces and DeviceInputSourceTests checks (OI-29).
+            //
+            // The method body is guarded rather than the whole class, so the component still exists
+            // in a player build and the scene reference to it does not break.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.f1Key.wasPressedThisFrame) _visible = !_visible;
+#endif
         }
 
         private void OnMotorState(PlayerMotorStateEvent state) => _state = state;

@@ -276,7 +276,7 @@ Headless:
   -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **155 EditMode + 56 PlayMode, all passing.**
+Current status: **156 EditMode + 56 PlayMode, all passing.**
 
 | Suite | Count | What it covers |
 |---|---|---|
@@ -288,6 +288,7 @@ Current status: **155 EditMode + 56 PlayMode, all passing.**
 | `DamagePipelineSourceTests` | 2 | Health is only ever reduced through `CombatSystem` (HPS-003). A text scan, not a compiler guarantee — see OI-19 |
 | `PrefabWiringTests` | 3 | Every serialized field on the hero and enemy prefabs is wired, or declared empty with a reason. Covers the third value path — prefab fields — which neither of the data suites can see (OI-26) |
 | `SceneActorVisualTests` | 4 | Every actor in Run_01 draws something, its sprite is a real asset, and nothing is scaled through its Transform. Covers what the logic suites structurally cannot see — see OI-23 |
+| `DeviceInputSourceTests` | 1 | `Keyboard/Mouse/Gamepad.current` appears only inside `#if UNITY_EDITOR \|\| DEVELOPMENT_BUILD`. Development tools are the one exception to input going through `IInputService`, and this is the fence around it (OI-29) |
 | `AssetReferenceIntegrityTests` | 5 | No wave, stage or hero points at a missing asset, and no two assets share an id. Renaming an asset is the classic way to leave a reference that Unity only complains about at runtime |
 | `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
 | `PlayerCombatTests` (PlayMode) | 10 | TC-COM: the active window, one hit per target per swing, the three hit chain, both combo resets, mouse aim and sprite flip, damage to a corpse, death firing once, and step 3 out-damaging step 1 |

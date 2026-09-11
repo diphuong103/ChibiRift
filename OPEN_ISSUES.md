@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-28 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-29 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -544,3 +544,38 @@ The waiting primitives moved into one shared `TestTime` class and all four fixtu
 so the guard cannot be present in some and missing from others. Twenty-nine bare
 `WaitForFixedUpdate` calls across the four fixtures were replaced. 20000ms is three times the
 slowest test measured (6.40s); raise it in the same commit that makes a test legitimately slower.
+
+---
+
+## OI-29 — The first exception to "gameplay never reads a device", and the fence around it
+
+Since P1 slice 1 the rule has been that input reaches gameplay only through `IInputService`, backed
+by the bound action map in `ChibiRiftControls.inputactions`. That is what makes rebinding a data
+change and the control scheme testable, and `InputActionsAssetTests` checks the bindings directly.
+
+**The exception.** Development tooling — the F1 overlay, and the F2/F3/F4 spawn keys coming in
+slice 4B — should not appear in the shipping control scheme at all. Putting them in the action map
+would mean a released build carries bindings for keys that do nothing. So they read
+`Keyboard.current` directly, and only inside `#if UNITY_EDITOR || DEVELOPMENT_BUILD`, which means
+the code cannot exist in a player build.
+
+**Found while fencing it:** `DebugOverlay` had already been reading `Keyboard.current` **unguarded**
+since slice 1. The precedent was sitting there before anyone decided to make one. It is now guarded
+at the method body rather than the whole class, so the component still exists in a build and the
+scene reference to it does not break.
+
+**Why this is a test and not this paragraph.** A first exception is harmless. The danger is the
+second one, argued for on the grounds that the first exists — and a note in this file stops nobody.
+`DeviceInputSourceTests` scans every runtime assembly (`Core`, `Data`, `Gameplay`, `Meta`, `Save`,
+`Telemetry`, `UI`) for `Keyboard.current`, `Mouse.current` and `Gamepad.current`, tracks
+preprocessor nesting including `#elif` and `#else`, and fails on any access that is not inside a
+development guard. The failure message states the rule and names the permitted exceptions.
+
+**A hole found in the test itself while proving it.** The first version used a lookbehind that
+excluded a preceding dot, so a fully qualified `UnityEngine.InputSystem.Keyboard.current` slipped
+straight through — which is exactly how someone adding a second exception without a `using` would
+write it. Verified by injecting both forms: the guarded-and-then-unguarded `DebugOverlay`, and a
+fully qualified access in `PlayerController`. Both are caught now.
+
+**Limit worth knowing.** The scan is textual, like `DamagePipelineSourceTests` (OI-19). Reflection,
+an alias, or a wrapper class would route around it.
