@@ -294,6 +294,33 @@ Current status: **155 EditMode + 56 PlayMode, all passing.**
 | `Run01SceneTests` (PlayMode) | 22 | **The only fixture that plays the real game.** Loads the real Boot scene so the real `InputReader` and `CombatSystem` are built, drives simulated mouse and keyboard, then plays Run_01 with the prefabs that ship in it: every wired action reaches its property, a real click damages a dummy, Space jumps, hero and enemies land, the nearest enemy actually closes distance, a landed hit produces a visible health bar and damage number, and from slice 4A the dash, crits, hit stop and shake are all exercised here too |
 | `EnemyAiTests` (PlayMode) | 16 | TC-AI: idle, chase, aggro hysteresis, walking home, attack window and cooldown, damage through the pipeline, hero i-frames, combo reset on being hit, knockback out and back, hurt stun, terminal death, and stats following the asset |
 
+### Writing a PlayMode test
+
+**From P1 slice 4A every landed hit freezes time.** `Time.timeScale` goes to zero for up to 0.14s,
+and `FixedUpdate` does not run at zero.
+
+- **Never write `yield return new WaitForFixedUpdate()` in a test.** Use `TestTime.Steps(n)`,
+  `TestTime.Seconds(s)` or `TestTime.RealSeconds(s)`. `Steps` waits each freeze out on frames
+  before every physics step, because frames advance at a zero time scale and physics steps do not.
+- Use `TestTime.RealSeconds` when the test itself is holding the freeze. A scaled wait there never
+  returns.
+- This applies to tests that never mention combat. An enemy landing a hit on the hero freezes time
+  in the middle of a test about jumping just as effectively.
+
+Two guards back the rule, and both were verified by deliberately breaking them:
+
+| Guard | Fires when | What you see |
+|---|---|---|
+| `TestTime.Steps` | Time stays frozen past 2 real seconds | `TimeoutException: Time is frozen (timeScale=0) — did a hit stop leak, or is a WaitForFixedUpdate waiting on frozen physics?` |
+| `[Timeout(20000)]` on every PlayMode fixture | A test runs past 20s for any other reason | `Timeout value of 20000 ms was exceeded.` |
+
+20s is three times the slowest test today (6.40s, `Test_Flash_DoesNotLeakMaterials`). Raise it in
+the same commit that makes a test legitimately slower.
+
+**Why this is a rule rather than advice.** A hang is not a failure. The run does not stop and does
+not report — it looks identical to "still in progress", and the first time it happened it cost a
+full test cycle to work out that anything was wrong at all (OI-28).
+
 ### The three paths a value takes, and what watches each
 
 | Route | Guarded by |

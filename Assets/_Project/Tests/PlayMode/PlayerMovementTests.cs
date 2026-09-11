@@ -18,7 +18,13 @@ namespace ChibiRift.Tests.Play
     /// layout or placeholder art cannot turn these red. Private serialized fields are set by
     /// reflection, not <c>SerializedObject</c>, so this assembly stays free of UnityEditor and can
     /// also run in a player build.
+    ///
+    /// <para><b>Timeout.</b> Three times the slowest test in this fixture today. Its longest test measured 5.08s. A
+    /// test that hangs — waiting on a physics step while time is frozen is how it happens here —
+    /// fails with a message rather than running forever. A run that never finishes reports nothing
+    /// at all, which is why this is a guard and not a convenience (OI-28).</para>
     /// </remarks>
+    [Timeout(20000)]
     public sealed class PlayerMovementTests
     {
         private const float SpawnY = 1f;
@@ -134,12 +140,12 @@ namespace ChibiRift.Tests.Play
 
             float startY = HeroY;
             _input.PressJump();          // jump stays held, so no low-jump cut applies
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             float peak = startY;
             while (_motor.Velocity.y > 0f)
             {
-                yield return new WaitForFixedUpdate();
+                yield return TestTime.Steps(1);
                 peak = Mathf.Max(peak, HeroY);
             }
 
@@ -165,7 +171,7 @@ namespace ChibiRift.Tests.Play
 
             float before = _motor.Velocity.y;
             _input.PressJump();
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             Assert.That(_motor.JumpCount, Is.EqualTo(2), "A third jump must be refused (MOV-003).");
             Assert.That(_motor.Velocity.y, Is.LessThan(before + 0.01f),
@@ -181,15 +187,15 @@ namespace ChibiRift.Tests.Play
             Object.DestroyImmediate(_ground);
             _spawned.Remove(_ground);
 
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
+            yield return TestTime.Steps(1);
 
             Assert.That(_motor.IsGrounded, Is.False, "Should be airborne once the floor is gone.");
             Assert.That(_motor.CoyoteTimer, Is.GreaterThan(0f),
                 $"Coyote window should still be open within {Config.CoyoteTime}s.");
 
             _input.PressJump();
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             Assert.That(_motor.Velocity.y, Is.GreaterThan(0f),
                 "A jump inside the coyote window must still launch.");
@@ -213,7 +219,7 @@ namespace ChibiRift.Tests.Play
             // that height depends on the two jumps above it.
             while (true)
             {
-                yield return new WaitForFixedUpdate();
+                yield return TestTime.Steps(1);
                 if (_motor.IsGrounded) Assert.Fail("Landed before the buffered press was issued.");
 
                 float fallSpeed = -_motor.Velocity.y;
@@ -235,7 +241,7 @@ namespace ChibiRift.Tests.Play
             bool jumpedOnLanding = false;
             for (float t = 0f; t < 0.5f; t += Time.fixedDeltaTime)
             {
-                yield return new WaitForFixedUpdate();
+                yield return TestTime.Steps(1);
                 if (_motor.JumpCount == 1 && _motor.Velocity.y > 0f)
                 {
                     jumpedOnLanding = true;
@@ -275,7 +281,7 @@ namespace ChibiRift.Tests.Play
 
             for (float t = 0f; t < 5f; t += Time.fixedDeltaTime)
             {
-                yield return new WaitForFixedUpdate();
+                yield return TestTime.Steps(1);
 
                 if (HeroY < FallLimitY) fellPastLimit = true;
                 if (fellPastLimit && Mathf.Abs(HeroY - SpawnY) < 0.5f)
@@ -292,14 +298,11 @@ namespace ChibiRift.Tests.Play
 
         private IEnumerator SettleOnGround()
         {
-            for (int i = 0; i < 30 && !_motor.IsGrounded; i++) yield return new WaitForFixedUpdate();
+            for (int i = 0; i < 30 && !_motor.IsGrounded; i++) yield return TestTime.Steps(1);
             Assert.That(_motor.IsGrounded, Is.True, "Hero failed to settle on the ground.");
         }
 
-        private static IEnumerator RunSeconds(float seconds)
-        {
-            for (float t = 0f; t < seconds; t += Time.fixedDeltaTime) yield return new WaitForFixedUpdate();
-        }
+        private static IEnumerator RunSeconds(float seconds) => TestTime.Seconds(seconds);
 
         private GameObject Track(GameObject spawned)
         {

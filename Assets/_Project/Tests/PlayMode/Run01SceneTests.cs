@@ -25,7 +25,13 @@ namespace ChibiRift.Tests.Play
     ///
     /// <para>Nothing here is faked except the input devices themselves, which
     /// <see cref="InputTestFixture"/> replaces with a deterministic backend.</para>
+    ///
+    /// <para><b>Timeout.</b> Three times the slowest test in this fixture today. Boot plus a scene load per test makes this the slowest fixture; its longest test measured 6.40s. A
+    /// test that hangs — waiting on a physics step while time is frozen is how it happens here —
+    /// fails with a message rather than running forever. A run that never finishes reports nothing
+    /// at all, which is why this is a guard and not a convenience (OI-28).</para>
     /// </remarks>
+    [Timeout(20000)]
     public sealed class Run01SceneTests : InputTestFixture
     {
         private const string BootScene = "Boot";
@@ -787,7 +793,7 @@ namespace ChibiRift.Tests.Play
         private static IEnumerator WaitForDashToEnd(PlayerMotor motor)
         {
             int budget = StepsFor(2f);
-            for (int i = 0; i < budget && motor.IsDashing; i++) yield return new WaitForFixedUpdate();
+            for (int i = 0; i < budget && motor.IsDashing; i++) yield return TestTime.Steps(1);
 
             Assert.That(motor.IsDashing, Is.False, "The dash never ended.");
         }
@@ -808,15 +814,7 @@ namespace ChibiRift.Tests.Play
             return null;
         }
 
-        /// <summary>
-        /// Waits in real time. Scaled waits never finish while a hit stop holds the scale at zero,
-        /// which is exactly the state these tests need to wait out.
-        /// </summary>
-        private static IEnumerator WaitForRealSeconds(float seconds)
-        {
-            float until = Time.realtimeSinceStartup + seconds;
-            while (Time.realtimeSinceStartup < until) yield return null;
-        }
+        private static IEnumerator WaitForRealSeconds(float seconds) => TestTime.RealSeconds(seconds);
 
         private static PlayerMotor FindHeroMotor()
         {
@@ -845,27 +843,8 @@ namespace ChibiRift.Tests.Play
             return best;
         }
 
-        /// <summary>
-        /// Waits <paramref name="count"/> physics steps, surviving a hit stop.
-        /// </summary>
-        /// <remarks>
-        /// <c>FixedUpdate</c> does not run while <c>Time.timeScale</c> is zero, so a plain
-        /// <c>WaitForFixedUpdate</c> deadlocks for as long as a freeze lasts — and from slice 4A
-        /// any landed hit freezes time, including one an enemy lands on the hero in the middle of
-        /// an unrelated test. Waiting the freeze out on frames first keeps the step semantics and
-        /// removes the deadlock. The guard is generous: it only has to outlast a 0.14s freeze.
-        /// </remarks>
-        private static IEnumerator Steps(int count)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                float guardUntil = Time.realtimeSinceStartup + 1f;
-                while (Time.timeScale <= 0f && Time.realtimeSinceStartup < guardUntil) yield return null;
+        private static IEnumerator Steps(int count) => TestTime.Steps(count);
 
-                yield return new WaitForFixedUpdate();
-            }
-        }
-
-        private static int StepsFor(float seconds) => Mathf.CeilToInt(seconds / Time.fixedDeltaTime) + 1;
+        private static int StepsFor(float seconds) => TestTime.StepsFor(seconds);
     }
 }

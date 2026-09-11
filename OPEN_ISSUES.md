@@ -532,3 +532,15 @@ Found the hard way: the first run of the slice 4A suite hung indefinitely inside
 **Worth remembering for later slices:** anything that can stop time turns every scaled wait in the
 test suite into a potential hang, and a hang looks nothing like a failure — the run simply never
 finishes.
+
+**Hardened afterwards into two guards that apply to every PlayMode fixture:**
+
+| Guard | Fires when | Verified by |
+|---|---|---|
+| `TestTime.Steps` throws `TimeoutException` | Time stays frozen past 2 real seconds | Leaking a freeze deliberately: fails in 3.5s with the message naming the cause |
+| `[Timeout(20000)]` on all four fixtures | A test runs past 20s for any other reason | An outright `while (true) yield return null`: failed at exactly 20.01s |
+
+The waiting primitives moved into one shared `TestTime` class and all four fixtures delegate to it,
+so the guard cannot be present in some and missing from others. Twenty-nine bare
+`WaitForFixedUpdate` calls across the four fixtures were replaced. 20000ms is three times the
+slowest test measured (6.40s); raise it in the same commit that makes a test legitimately slower.

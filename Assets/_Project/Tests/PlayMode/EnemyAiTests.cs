@@ -22,7 +22,13 @@ namespace ChibiRift.Tests.Play
     /// <para>The arena is built in code, private serialized fields are set by reflection so this
     /// assembly needs no UnityEditor reference, and only objects this fixture created are
     /// destroyed.</para>
+    ///
+    /// <para><b>Timeout.</b> Three times the slowest test in this fixture today. Its longest test measured 5.20s. A
+    /// test that hangs — waiting on a physics step while time is frozen is how it happens here —
+    /// fails with a message rather than running forever. A run that never finishes reports nothing
+    /// at all, which is why this is a guard and not a convenience (OI-28).</para>
     /// </remarks>
+    [Timeout(20000)]
     public sealed class EnemyAiTests
     {
         private const float GroundSurfaceY = 0f;
@@ -229,7 +235,7 @@ namespace ChibiRift.Tests.Play
             int steps = StepsFor(config.TotalDuration);
             for (int i = 0; i < steps; i++)
             {
-                yield return new WaitForFixedUpdate();
+                yield return TestTime.Steps(1);
                 samples.Add((_attack.Elapsed, _attack.IsHitboxActive));
             }
 
@@ -298,7 +304,7 @@ namespace ChibiRift.Tests.Play
 
             Combat.DealDamage(_heroHealth, EnemyDamage, 1f, 0f, DamageSource.BasicAttack,
                 _heroObject.transform.position, new Vector2(5f, StandY));
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             float afterFirst = _heroHealth.CurrentHealth;
             Assert.That(afterFirst, Is.EqualTo(HeroHealth - EnemyDamage).Within(0.001f),
@@ -308,7 +314,7 @@ namespace ChibiRift.Tests.Play
 
             Combat.DealDamage(_heroHealth, EnemyDamage, 1f, 0f, DamageSource.BasicAttack,
                 _heroObject.transform.position, new Vector2(5f, StandY));
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             Assert.That(_heroHealth.CurrentHealth, Is.EqualTo(afterFirst).Within(0.001f),
                 "The second hit landed during i-frames and should have been refused (HPS-005).");
@@ -321,7 +327,7 @@ namespace ChibiRift.Tests.Play
 
             Combat.DealDamage(_heroHealth, EnemyDamage, 1f, 0f, DamageSource.BasicAttack,
                 _heroObject.transform.position, new Vector2(5f, StandY));
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             float afterFirst = _heroHealth.CurrentHealth;
 
@@ -332,7 +338,7 @@ namespace ChibiRift.Tests.Play
 
             Combat.DealDamage(_heroHealth, EnemyDamage, 1f, 0f, DamageSource.BasicAttack,
                 _heroObject.transform.position, new Vector2(5f, StandY));
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             Assert.That(_heroHealth.CurrentHealth, Is.EqualTo(afterFirst - EnemyDamage).Within(0.001f),
                 "Once the window closed the next hit should land in full.");
@@ -351,7 +357,7 @@ namespace ChibiRift.Tests.Play
 
             Combat.DealDamage(_heroHealth, EnemyDamage, 1f, 0f, DamageSource.BasicAttack,
                 _heroObject.transform.position, new Vector2(5f, StandY));
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             // COM-003 was written in slice 2 but could not be tested until something could hit back.
             Assert.That(combat.ComboStep, Is.EqualTo(0),
@@ -364,7 +370,7 @@ namespace ChibiRift.Tests.Play
         public IEnumerator Test_Knockback_MovesTargetAwayFromAttacker()
         {
             BuildEnemy(new Vector2(6f, StandY));
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             float before = EnemyX;
 
@@ -385,7 +391,7 @@ namespace ChibiRift.Tests.Play
         public IEnumerator Test_Knockback_ReturnsControlAfterDuration()
         {
             BuildEnemy(new Vector2(6f, StandY));
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             Combat.DealDamage(_enemyHealth, 1f, 1f, 0f, DamageSource.BasicAttack,
                 _enemyObject.transform.position, new Vector2(EnemyX - 2f, StandY));
@@ -436,12 +442,12 @@ namespace ChibiRift.Tests.Play
         public IEnumerator Test_Enemy_DeathStopsAllAI()
         {
             BuildEnemy(new Vector2(AttackRange - 0.2f, StandY));
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             // One overwhelming hit, so death cannot be confused with a stun.
             Combat.DealDamage(_enemyHealth, EnemyHealth * 10f, 1f, 0f, DamageSource.BasicAttack,
                 _enemyObject.transform.position, new Vector2(EnemyX - 2f, StandY));
-            yield return new WaitForFixedUpdate();
+            yield return TestTime.Steps(1);
 
             Assert.That(_enemyHealth.IsDead, Is.True, "Setup failed: the enemy survived.");
             Assert.That(_ai.State, Is.EqualTo(EnemyLifecycleState.Death), "Death should be entered at once.");
@@ -592,19 +598,15 @@ namespace ChibiRift.Tests.Play
         private IEnumerator WaitUntilAttacking()
         {
             int budget = StepsFor(1f);
-            for (int i = 0; i < budget && !_attack.IsAttacking; i++) yield return new WaitForFixedUpdate();
+            for (int i = 0; i < budget && !_attack.IsAttacking; i++) yield return TestTime.Steps(1);
 
             Assert.That(_attack.IsAttacking, Is.True,
                 "The enemy never started a swing, so nothing downstream was tested.");
         }
 
-        private static IEnumerator Steps(int count)
-        {
-            for (int i = 0; i < count; i++) yield return new WaitForFixedUpdate();
-        }
+        private static IEnumerator Steps(int count) => TestTime.Steps(count);
 
-        private static int StepsFor(float seconds)
-            => Mathf.CeilToInt(seconds / Time.fixedDeltaTime) + 1;
+        private static int StepsFor(float seconds) => TestTime.StepsFor(seconds);
 
         private GameObject Track(GameObject spawned)
         {

@@ -19,7 +19,13 @@ namespace ChibiRift.Tests.Play
     /// to Run_01 cannot turn these red, private serialized fields are set by reflection so the
     /// assembly needs no UnityEditor reference, and every created object is tracked and destroyed
     /// rather than wiping the scene.
+    ///
+    /// <para><b>Timeout.</b> Three times the slowest test in this fixture today. Its longest test measured 1.2s. A
+    /// test that hangs — waiting on a physics step while time is frozen is how it happens here —
+    /// fails with a message rather than running forever. A run that never finishes reports nothing
+    /// at all, which is why this is a guard and not a convenience (OI-28).</para>
     /// </remarks>
+    [Timeout(20000)]
     public sealed class PlayerCombatTests
     {
         private const float ArenaHalfWidth = 20f;
@@ -119,7 +125,7 @@ namespace ChibiRift.Tests.Play
             var samples = new List<(float Elapsed, bool Active)>();
             for (float t = 0f; t <= step.TotalDuration; t += Time.fixedDeltaTime)
             {
-                yield return new WaitForFixedUpdate();
+                yield return TestTime.Steps(1);
                 samples.Add((t + Time.fixedDeltaTime, _combat.IsHitboxActive));
             }
 
@@ -216,7 +222,7 @@ namespace ChibiRift.Tests.Play
 
             // The jump is consumed in FixedUpdate, so wait on physics steps: in batch mode frames
             // are far shorter than the fixed timestep and 30 of them can pass without one.
-            for (int i = 0; i < 30 && _motor.IsGrounded; i++) yield return new WaitForFixedUpdate();
+            for (int i = 0; i < 30 && _motor.IsGrounded; i++) yield return TestTime.Steps(1);
 
             // The combo reset itself is detected in Update, so let one run after the transition.
             yield return null;
@@ -408,13 +414,16 @@ namespace ChibiRift.Tests.Play
 
         private IEnumerator SettleOnGround()
         {
-            for (int i = 0; i < 30 && !_motor.IsGrounded; i++) yield return new WaitForFixedUpdate();
+            for (int i = 0; i < 30 && !_motor.IsGrounded; i++) yield return TestTime.Steps(1);
             Assert.That(_motor.IsGrounded, Is.True, "Hero failed to settle on the ground.");
         }
 
         private static IEnumerator RunSeconds(float seconds)
         {
-            for (float t = 0f; t < seconds; t += Time.fixedDeltaTime) yield return new WaitForFixedUpdate();
+            yield return TestTime.Seconds(seconds);
+
+            // One extra frame so an Update runs after the last fixed step. Several assertions read
+            // state that PlayerCombat.Update produces, not state FixedUpdate produces.
             yield return null;
         }
 
