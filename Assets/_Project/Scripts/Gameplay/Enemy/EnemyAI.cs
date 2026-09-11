@@ -113,6 +113,26 @@ namespace ChibiRift.Gameplay
         /// <summary>Places this enemy's home position, used when aggro is lost (AI-002).</summary>
         public void SetSpawnPosition(Vector2 position) => SpawnPosition = position;
 
+        /// <summary>
+        /// Returns the machine to its starting state for a reused instance (SRS 29).
+        /// </summary>
+        /// <remarks>
+        /// Death is terminal for a living enemy, but a pooled instance is a new life, so this is
+        /// the one path out of it. Every timer is cleared too: an enemy that came back mid-stun
+        /// would stand still for the remainder of a stun it took in its previous life.
+        /// </remarks>
+        public void ResetToIdle()
+        {
+            State = EnemyLifecycleState.Idle;
+            StunRemaining = 0f;
+            _thinkTimer = 0f;
+            _stuckTimer = 0f;
+            _stuckAnchorX = transform.position.x;
+            _evadeRemaining = 0f;
+            _stuckEvadeDirection = 0;
+            SpawnPosition = transform.position;
+        }
+
         private void FixedUpdate()
         {
             if (_enemyData == null) return;

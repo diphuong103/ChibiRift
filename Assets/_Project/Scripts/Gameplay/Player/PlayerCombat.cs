@@ -34,6 +34,9 @@ namespace ChibiRift.Gameplay
         [Tooltip("Supplies combo length, combo window and the basic-attack chain.")]
         [SerializeField] private HeroData _heroData;
 
+        [Tooltip("Supplies the sweep buffer size, which is a performance budget tied to NFR-001.")]
+        [SerializeField] private BalanceConfig _balanceConfig;
+
         [Header("Presentation")]
         [Tooltip("Flipped to face the cursor (COM-009). This component is its only writer.")]
         [SerializeField] private SpriteRenderer _spriteRenderer;
@@ -71,24 +74,22 @@ namespace ChibiRift.Gameplay
         private CombatSystem _combat;
 
         private readonly HashSet<int> _hitThisSwing = new HashSet<int>();
-        private readonly Collider2D[] _overlapBuffer = new Collider2D[MaxTargetsPerSweep];
+        private Collider2D[] _overlapBuffer;
 
         private float _stepElapsed;
         private ContactFilter2D _enemyFilter;
         private bool _wasGrounded = true;
-
-        /// <summary>
-        /// Upper bound on colliders one sweep reports. Sized well above the 30 concurrent enemies
-        /// of NFR-001 that could plausibly overlap a 1.2 x 1.0 box at once, and fixed so the sweep
-        /// allocates nothing per frame.
-        /// </summary>
-        private const int MaxTargetsPerSweep = 16;
 
         private void Awake()
         {
             _stats = GetComponent<PlayerStats>();
             _motor = GetComponent<PlayerMotor>();
             _health = GetComponent<HealthComponent>();
+
+            // Allocated once from the configured budget. A fixed array is the point: the sweep runs
+            // every fixed step of every swing and must not allocate (NFR-002).
+            int capacity = _balanceConfig != null ? _balanceConfig.MaxTargetsPerSweep : 1;
+            _overlapBuffer = new Collider2D[capacity];
             // Unity 6 deprecated OverlapBoxNonAlloc in favour of the ContactFilter2D overload.
             // Triggers are included: an enemy hurtbox may legitimately be a trigger and must
             // still be hittable.

@@ -93,9 +93,12 @@ namespace ChibiRift.Core
             _attack.started += OnAttack;
             _dash.started += OnDash;
 
-            // Not wired because nothing consumes them yet; the actions are still bound and
-            // pollable, so wiring is a one-line change when the system arrives.
-            // TODO(COM-007): _skill1/_skill2/_skill3.started += OnSkill1/2/3;
+            _skill1.started += OnSkill1;
+            _skill2.started += OnSkill2;
+            _skill3.started += OnSkill3;
+
+            // Not wired because nothing consumes it yet; the action is still bound and pollable,
+            // so wiring is a one-line change when the Pause Menu arrives.
             // TODO(PAU-001): _pause.started += OnPause;
 
             _gameplay.Enable();
@@ -160,6 +163,9 @@ namespace ChibiRift.Core
             _jump.canceled -= OnJumpReleased;
             _attack.started -= OnAttack;
             _dash.started -= OnDash;
+            _skill1.started -= OnSkill1;
+            _skill2.started -= OnSkill2;
+            _skill3.started -= OnSkill3;
 
             _gameplay.Disable();
         }
@@ -186,19 +192,16 @@ namespace ChibiRift.Core
 
         private void OnSkill1(InputAction.CallbackContext context)
         {
-            // TODO(COM-007): Q skill.
             SkillStarted?.Invoke(SkillSlot.Skill1);
         }
 
         private void OnSkill2(InputAction.CallbackContext context)
         {
-            // TODO(COM-007): E skill.
             SkillStarted?.Invoke(SkillSlot.Skill2);
         }
 
         private void OnSkill3(InputAction.CallbackContext context)
         {
-            // TODO(COM-007): R ultimate.
             SkillStarted?.Invoke(SkillSlot.Ultimate);
         }
 

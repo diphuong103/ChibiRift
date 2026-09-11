@@ -19,12 +19,14 @@ namespace ChibiRift.Gameplay
         private PlayerMotor _motor;
         private PlayerCombat _combat;
         private PlayerDash _dash;
+        private SkillSystem _skills;
 
         private void Awake()
         {
             _motor = GetComponent<PlayerMotor>();
             _combat = GetComponent<PlayerCombat>();
             _dash = GetComponent<PlayerDash>();
+            _skills = GetComponent<SkillSystem>();
         }
 
         private void Start()
@@ -61,7 +63,13 @@ namespace ChibiRift.Gameplay
             // MOV-006: the dash buffers the press and decides direction and cooldown itself.
             if (_dash != null && _input.DashPressed) _dash.RequestDash();
 
-            // TODO(COM-007): Q/E/R via _input.WasSkillPressed.
+            // COM-007: each slot buffers its own press and decides its own cooldown.
+            if (_skills != null)
+            {
+                if (_input.WasSkillPressed(SkillSlot.Skill1)) _skills.RequestCast(SkillSlot.Skill1);
+                if (_input.WasSkillPressed(SkillSlot.Skill2)) _skills.RequestCast(SkillSlot.Skill2);
+                if (_input.WasSkillPressed(SkillSlot.Ultimate)) _skills.RequestCast(SkillSlot.Ultimate);
+            }
         }
     }
 }

@@ -64,6 +64,10 @@ namespace ChibiRift.Data
         [Min(0f)]
         public float JumpBuffer;
 
+        [Tooltip("Fraction of one step of gravity charged on the frame a jump launches. Coefficient of the semi-implicit Euler scheme — NOT a tuning knob. Changing it makes the integration wrong, not the game easier or harder.")]
+        [Range(0f, 1f)]
+        public float LaunchGravityFraction;
+
         [Header("Ground probe (MOV-004)")]
         [Tooltip("Width of the OverlapBox probe. Slightly narrower than the collider so a wall does not read as ground.")]
         [Min(0.01f)]
@@ -91,6 +95,7 @@ namespace ChibiRift.Data
             DoubleJumpVelocity = 13f,
             CoyoteTime = 0.1f,
             JumpBuffer = 0.12f,
+            LaunchGravityFraction = 0.5f,
             GroundCheckWidth = 0.7f,
             GroundCheckHeight = 0.1f,
             GroundCheckOffsetY = -0.9f

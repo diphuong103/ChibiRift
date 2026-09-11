@@ -40,6 +40,9 @@ namespace ChibiRift.Tests.Edit
         private static HeroData s_hero;
         private static AttackData s_attack;
         private static EnemyData s_enemy;
+        private static SkillData s_skillQ;
+        private static SkillData s_skillE;
+        private static SkillData s_skillR;
 
         [OneTimeSetUp]
         public void GenerateIntoScratchFolder()
@@ -53,11 +56,17 @@ namespace ChibiRift.Tests.Edit
             s_hero = AssetDatabase.LoadAssetAtPath<HeroData>($"{ScratchRoot}/HERO_Knight.asset");
             s_attack = AssetDatabase.LoadAssetAtPath<AttackData>($"{ScratchRoot}/ATK_KnightBasic.asset");
             s_enemy = AssetDatabase.LoadAssetAtPath<EnemyData>($"{ScratchRoot}/ENM_MeleeGrunt.asset");
+            s_skillQ = AssetDatabase.LoadAssetAtPath<SkillData>($"{ScratchRoot}/SKL_Q_Fireball.asset");
+            s_skillE = AssetDatabase.LoadAssetAtPath<SkillData>($"{ScratchRoot}/SKL_E_Shockwave.asset");
+            s_skillR = AssetDatabase.LoadAssetAtPath<SkillData>($"{ScratchRoot}/SKL_R_Cataclysm.asset");
 
             Assert.That(s_balance, Is.Not.Null, $"The generator produced no BalanceConfig in {ScratchRoot}.");
             Assert.That(s_hero, Is.Not.Null, $"The generator produced no HERO_Knight in {ScratchRoot}.");
             Assert.That(s_attack, Is.Not.Null, $"The generator produced no ATK_KnightBasic in {ScratchRoot}.");
             Assert.That(s_enemy, Is.Not.Null, $"The generator produced no ENM_MeleeGrunt in {ScratchRoot}.");
+            Assert.That(s_skillQ, Is.Not.Null, $"The generator produced no SKL_Q_Fireball in {ScratchRoot}.");
+            Assert.That(s_skillE, Is.Not.Null, $"The generator produced no SKL_E_Shockwave in {ScratchRoot}.");
+            Assert.That(s_skillR, Is.Not.Null, $"The generator produced no SKL_R_Cataclysm in {ScratchRoot}.");
         }
 
         [OneTimeTearDown]
@@ -67,6 +76,9 @@ namespace ChibiRift.Tests.Edit
             s_hero = null;
             s_attack = null;
             s_enemy = null;
+            s_skillQ = null;
+            s_skillE = null;
+            s_skillR = null;
             DeleteScratchFolder();
         }
 
@@ -80,13 +92,26 @@ namespace ChibiRift.Tests.Edit
             public readonly HeroData Hero;
             public readonly AttackData Attack;
             public readonly EnemyData Enemy;
+            public readonly SkillData SkillQ;
+            public readonly SkillData SkillE;
+            public readonly SkillData SkillR;
 
-            public Generated(BalanceConfig balance, HeroData hero, AttackData attack, EnemyData enemy)
+            public Generated(
+                BalanceConfig balance,
+                HeroData hero,
+                AttackData attack,
+                EnemyData enemy,
+                SkillData skillQ,
+                SkillData skillE,
+                SkillData skillR)
             {
                 Balance = balance;
                 Hero = hero;
                 Attack = attack;
                 Enemy = enemy;
+                SkillQ = skillQ;
+                SkillE = skillE;
+                SkillR = skillR;
             }
 
             /// <summary>Step <paramref name="index"/> of the basic chain, 0-based (COM-002).</summary>
@@ -244,13 +269,65 @@ namespace ChibiRift.Tests.Edit
 
             // Not in the brief's list: MOV-007 needs a threshold for "the wall stopped me".
             yield return Row("dashWallStopFraction", 0.1f, g => g.Hero.Dash.WallStopFraction);
+
+            // Not in the brief's list: this is the coefficient of the jump's integration scheme,
+            // which lived as a literal in ChibiRift.Gameplay until the audit list reached it. It is
+            // in data so no tuning number sits in that assembly, not because it is tunable.
+            yield return Row("launchGravityFraction", 0.5f, g => g.Hero.Movement.LaunchGravityFraction);
+
+            // Skill Q, a projectile (COM-007).
+            yield return Row("skillQ.damageMult", 1.5f, g => g.SkillQ.DamageMultiplier);
+            yield return Row("skillQ.cooldown", 3.0f, g => g.SkillQ.Cooldown);
+            yield return Row("skillQ.projectileSpeed", 12.0f, g => g.SkillQ.ProjectileSpeed);
+            yield return Row("skillQ.projectileLifetime", 2.0f, g => g.SkillQ.ProjectileLifetime);
+            yield return Row("skillQ.projectileRadius", 0.25f, g => g.SkillQ.ProjectileRadius);
+
+            // Skill E, an area blast around the hero (COM-007).
+            yield return Row("skillE.damageMult", 2.0f, g => g.SkillE.DamageMultiplier);
+            yield return Row("skillE.cooldown", 6.0f, g => g.SkillE.Cooldown);
+            yield return Row("skillE.radius", 2.5f, g => g.SkillE.Radius);
+            yield return Row("skillE.windup", 0.20f, g => g.SkillE.Windup);
+
+            // Skill R, the ultimate. One cast kills a full-health melee grunt: 10 x 4.0 = 40.
+            yield return Row("skillR.damageMult", 4.0f, g => g.SkillR.DamageMultiplier);
+            yield return Row("skillR.cooldown", 15.0f, g => g.SkillR.Cooldown);
+            yield return Row("skillR.radius", 3.5f, g => g.SkillR.Radius);
+            yield return Row("skillR.windup", 0.35f, g => g.SkillR.Windup);
+
+            // Flat damage stays 0 on all three: P1 skills scale off Attack (see SkillData).
+            yield return Row("skillQ.baseDamage", 0f, g => g.SkillQ.BaseDamage);
+            yield return Row("skillE.baseDamage", 0f, g => g.SkillE.BaseDamage);
+            yield return Row("skillR.baseDamage", 0f, g => g.SkillR.BaseDamage);
+
+            // Pooling (SRS 29, AI-006).
+            yield return Row("enemyPoolPrewarm", 16f, g => g.Balance.EnemyPoolPrewarm);
+            yield return Row("projectilePoolPrewarm", 24f, g => g.Balance.ProjectilePoolPrewarm);
+
+            // Not in the brief's list: ObjectPool needs a ceiling, or a bug that fires every frame
+            // allocates until the process dies.
+            yield return Row("enemyPoolMax", 48f, g => g.Balance.EnemyPoolMax);
+            yield return Row("projectilePoolMax", 64f, g => g.Balance.ProjectilePoolMax);
+
+            // Profiler harness (NFR-001, NFR-002).
+            yield return Row("stressEnemyCount", 30f, g => g.Balance.StressEnemyCount);
+            yield return Row("stressDurationSeconds", 10f, g => g.Balance.StressDurationSeconds);
+
+            // Performance budgets that used to be literals in Core and Gameplay.
+            yield return Row("sfxVoiceCount", 16f, g => g.Balance.SfxVoiceCount);
+            yield return Row("maxTargetsPerSweep", 16f, g => g.Balance.MaxTargetsPerSweep);
+
+            // Not in the brief's list: the F2/F3 keys need a scatter radius.
+            yield return Row("debugSpawnRadius", 8f, g => g.Balance.DebugSpawnRadius);
+
+            // Not in the brief's list: skills buffer their presses like everything else does.
+            yield return Row("skillBufferSeconds", 0.12f, g => g.Balance.SkillBufferSeconds);
         }
 
         [TestCaseSource(nameof(ConfirmedValues))]
         public void GeneratedAssetKeepsConfirmedValue(
             string name, float expected, Func<Generated, float> read)
         {
-            float actual = read(new Generated(s_balance, s_hero, s_attack, s_enemy));
+            float actual = read(new Generated(s_balance, s_hero, s_attack, s_enemy, s_skillQ, s_skillE, s_skillR));
 
             Assert.That(
                 actual,

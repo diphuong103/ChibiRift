@@ -36,6 +36,7 @@ namespace ChibiRift.Gameplay
         public HealthComponent Health => _health;
 
         private HealthComponent _health;
+        private EnemySpawner _spawner;
         private EnemyMotor _motor;
         private EnemyAttack _attack;
         private EnemyAI _ai;
@@ -55,12 +56,39 @@ namespace ChibiRift.Gameplay
 
         private void OnEnable()
         {
-            if (_health != null) _health.Died += OnHealthDied;
+            if (_health == null) return;
+
+            _health.Died += OnHealthDied;
+            _health.CorpseExpired += OnCorpseExpired;
         }
 
         private void OnDisable()
         {
-            if (_health != null) _health.Died -= OnHealthDied;
+            if (_health == null) return;
+
+            _health.Died -= OnHealthDied;
+            _health.CorpseExpired -= OnCorpseExpired;
+        }
+
+        /// <summary>Records which spawner owns this instance, so the corpse goes back to it.</summary>
+        public void SetSpawner(EnemySpawner spawner) => _spawner = spawner;
+
+        /// <summary>Places the home position the AI walks back to on losing aggro (AI-002).</summary>
+        public void SetSpawnPosition(Vector2 position)
+        {
+            if (_ai != null) _ai.SetSpawnPosition(position);
+        }
+
+        /// <summary>
+        /// AI-006: the corpse goes back to the pool. A scene-placed enemy has no spawner, so it
+        /// simply deactivates — the two cases are separated here rather than inside HealthComponent,
+        /// which has no business knowing whether it is pooled.
+        /// </summary>
+        private void OnCorpseExpired(HealthComponent health)
+        {
+            if (_spawner != null && _spawner.Despawn(this)) return;
+
+            gameObject.SetActive(false);
         }
 
         /// <summary>Configures the instance for a wave, applying stage and elite scaling.</summary>
@@ -104,17 +132,29 @@ namespace ChibiRift.Gameplay
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        /// Every piece of per-life state, in one place. A field missed here does not fail on the
+        /// first reuse — it fails on a busy wave, as an enemy that spawns already hurt, already
+        /// invulnerable, still sliding, or with no collider.
+        /// </remarks>
         public void OnSpawnedFromPool()
         {
-            if (_health != null && _enemyData != null) _health.SeedFrom(_enemyData);
+            if (_health != null && _enemyData != null)
+            {
+                _health.SeedFrom(_enemyData);       // health, i-frames, collider, corpse timer
+                _health.ClearInvulnerability();
+            }
 
-            // TODO(SRS-29): reset the state machine and VFX so a recycled enemy behaves like new.
+            if (_motor != null) _motor.ResetMotion();   // velocity and any knockback window
+            if (_attack != null) _attack.CancelAttack();
+            if (_ai != null) _ai.ResetToIdle();         // state machine, stun, think timer
         }
 
         /// <inheritdoc />
         public void OnReturnedToPool()
         {
-            // TODO(SRS-29): clear timers so the instance holds no stale references.
+            if (_motor != null) _motor.ResetMotion();
+            if (_attack != null) _attack.CancelAttack();
         }
     }
 }

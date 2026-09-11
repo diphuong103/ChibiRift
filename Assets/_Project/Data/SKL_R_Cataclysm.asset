@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 738d53a8041d7a098975fde65b0a229f, type: 3}
+  m_Name: SKL_R_Cataclysm
+  m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.SkillData
+  _id: skill.cataclysm
+  _displayName: Cataclysm
+  _description: 'The ultimate: a wide blast. One cast kills a full-health melee grunt
+    (COM-007).'
+  _slot: 2
+  _type: 2
+  _baseDamage: 0
+  _damageMultiplier: 4
+  _windup: 0.35
+  _projectileSpeed: 0
+  _projectileLifetime: 0
+  _projectileRadius: 0
+  _cooldown: 15
+  _duration: 0
+  _radius: 3.5
+  _projectileCount: 1
+  _maxLevel: 5
+  _rarity: 0
+  _icon: {fileID: 0}

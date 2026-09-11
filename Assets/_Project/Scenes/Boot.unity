@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1028328558
+--- !u!1 &61613941
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,8 +127,109 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1028328560}
-  - component: {fileID: 1028328559}
+  - component: {fileID: 61613947}
+  - component: {fileID: 61613946}
+  - component: {fileID: 61613945}
+  - component: {fileID: 61613944}
+  - component: {fileID: 61613943}
+  - component: {fileID: 61613942}
+  m_Layer: 0
+  m_Name: GameBootstrap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &61613942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61613941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d2515b78e1a152ccb850b5f80851028, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.GameplayServiceInstaller
+  _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
+  _combatSeed: 0
+--- !u!114 &61613943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61613941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f032756d3e3c9f78ba4dd9d3f9c0961c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ChibiRift.Meta::ChibiRift.Meta.MetaServiceInstaller
+--- !u!114 &61613944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61613941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cd744073544c447f803407be999323b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ChibiRift.Save::ChibiRift.Save.SaveServiceInstaller
+--- !u!114 &61613945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61613941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c89098ebe6861a24d85458d6254e2ed4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ChibiRift.Telemetry::ChibiRift.Telemetry.TelemetryServiceInstaller
+--- !u!114 &61613946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61613941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26207d969424331c7972e10a0dead75d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ChibiRift.Core::ChibiRift.Core.GameBootstrap
+  _firstScene: MainMenu
+  _loadFirstSceneOnStart: 1
+  _controls: {fileID: -944628639613478452, guid: f2fb485775f2328bda3b3eceec3307da, type: 3}
+--- !u!4 &61613947
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61613941}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &321336201
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 321336203}
+  - component: {fileID: 321336202}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -136,13 +237,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!20 &1028328559
+--- !u!20 &321336202
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028328558}
+  m_GameObject: {fileID: 321336201}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
@@ -187,117 +288,16 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!4 &1028328560
+--- !u!4 &321336203
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028328558}
+  m_GameObject: {fileID: 321336201}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -10}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1256467068
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1256467074}
-  - component: {fileID: 1256467073}
-  - component: {fileID: 1256467072}
-  - component: {fileID: 1256467071}
-  - component: {fileID: 1256467070}
-  - component: {fileID: 1256467069}
-  m_Layer: 0
-  m_Name: GameBootstrap
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1256467069
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1256467068}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d2515b78e1a152ccb850b5f80851028, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.GameplayServiceInstaller
-  _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
-  _combatSeed: 0
---- !u!114 &1256467070
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1256467068}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f032756d3e3c9f78ba4dd9d3f9c0961c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ChibiRift.Meta::ChibiRift.Meta.MetaServiceInstaller
---- !u!114 &1256467071
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1256467068}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2cd744073544c447f803407be999323b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ChibiRift.Save::ChibiRift.Save.SaveServiceInstaller
---- !u!114 &1256467072
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1256467068}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c89098ebe6861a24d85458d6254e2ed4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ChibiRift.Telemetry::ChibiRift.Telemetry.TelemetryServiceInstaller
---- !u!114 &1256467073
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1256467068}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26207d969424331c7972e10a0dead75d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ChibiRift.Core::ChibiRift.Core.GameBootstrap
-  _firstScene: MainMenu
-  _loadFirstSceneOnStart: 1
-  _controls: {fileID: -944628639613478452, guid: f2fb485775f2328bda3b3eceec3307da, type: 3}
---- !u!4 &1256467074
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1256467068}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -307,5 +307,5 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1256467074}
-  - {fileID: 1028328560}
+  - {fileID: 61613947}
+  - {fileID: 321336203}

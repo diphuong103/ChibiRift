@@ -142,6 +142,50 @@ namespace ChibiRift.Data
         [Min(0f)]
         [SerializeField] private float _enemyHealthBarHideDelay = 3f;
 
+        [Header("Pooling (SRS 29, AI-006)")]
+        [Tooltip("Enemies created before play starts. Nothing may be instantiated during a wave (SRS 29).")]
+        [Min(0)]
+        [SerializeField] private int _enemyPoolPrewarm = 16;
+
+        [Tooltip("Hard ceiling on pooled enemies. NFR-001 caps 30 alive at once; the margin above that catches a leak instead of letting it grow unbounded.")]
+        [Min(1)]
+        [SerializeField] private int _enemyPoolMax = 48;
+
+        [Tooltip("Projectiles created before play starts.")]
+        [Min(0)]
+        [SerializeField] private int _projectilePoolPrewarm = 24;
+
+        [Tooltip("Hard ceiling on pooled projectiles. Without one, a bug that fires every frame would allocate until the process died.")]
+        [Min(1)]
+        [SerializeField] private int _projectilePoolMax = 64;
+
+        [Header("Performance budget (NFR-001, NFR-002)")]
+        [Tooltip("Concurrent SFX voices. Above the 30 concurrent enemies of NFR-001 so a busy wave never silences a cue, and fixed so playing a sound allocates nothing.")]
+        [Min(1)]
+        [SerializeField] private int _sfxVoiceCount = 16;
+
+        [Tooltip("Upper bound on colliders one attack sweep reports. Sized for the NFR-001 crowd overlapping one hitbox, and fixed so the sweep allocates nothing per frame.")]
+        [Min(1)]
+        [SerializeField] private int _maxTargetsPerSweep = 16;
+
+        [Header("Profiler harness (NFR-001, NFR-002)")]
+        [Tooltip("Enemies the frame-time harness spawns. Matches the NFR-001 concurrency cap.")]
+        [Min(1)]
+        [SerializeField] private int _stressEnemyCount = 30;
+
+        [Tooltip("Seconds the harness samples for. Long enough for a GC spike to show up in p99.")]
+        [Min(1f)]
+        [SerializeField] private float _stressDurationSeconds = 10f;
+
+        [Tooltip("Seconds a skill press is remembered (P1-07). Its own field, like the jump, dash and attack buffers, so retuning one cannot silently change how the others feel.")]
+        [Min(0f)]
+        [SerializeField] private float _skillBufferSeconds = 0.12f;
+
+        [Header("Development tools")]
+        [Tooltip("Radius around the hero that the F2/F3 debug spawn keys scatter enemies into.")]
+        [Min(0f)]
+        [SerializeField] private float _debugSpawnRadius = 8f;
+
         [Header("Game feel (SRS 21, CAM-003)")]
         [Tooltip("How long the game freezes per weight of hit. The main thing separating combo step 1 from step 3.")]
         [SerializeField] private HitStopConfig _hitStop = HitStopConfig.Baseline;
@@ -248,6 +292,36 @@ namespace ChibiRift.Data
 
         /// <summary>Seconds an enemy health bar lingers after the last hit.</summary>
         public float EnemyHealthBarHideDelay => _enemyHealthBarHideDelay;
+
+        /// <summary>Enemies created before play starts (SRS 29).</summary>
+        public int EnemyPoolPrewarm => _enemyPoolPrewarm;
+
+        /// <summary>Ceiling on pooled enemies (SRS 29).</summary>
+        public int EnemyPoolMax => _enemyPoolMax;
+
+        /// <summary>Projectiles created before play starts (SRS 29).</summary>
+        public int ProjectilePoolPrewarm => _projectilePoolPrewarm;
+
+        /// <summary>Ceiling on pooled projectiles (SRS 29).</summary>
+        public int ProjectilePoolMax => _projectilePoolMax;
+
+        /// <summary>Concurrent SFX voices (NFR-001).</summary>
+        public int SfxVoiceCount => _sfxVoiceCount;
+
+        /// <summary>Upper bound on colliders one attack sweep reports (NFR-001).</summary>
+        public int MaxTargetsPerSweep => _maxTargetsPerSweep;
+
+        /// <summary>Enemies the frame-time harness spawns (NFR-001).</summary>
+        public int StressEnemyCount => _stressEnemyCount;
+
+        /// <summary>Seconds the frame-time harness samples for (NFR-002).</summary>
+        public float StressDurationSeconds => _stressDurationSeconds;
+
+        /// <summary>Seconds a skill press is remembered (P1-07).</summary>
+        public float SkillBufferSeconds => _skillBufferSeconds;
+
+        /// <summary>Scatter radius for the debug spawn keys.</summary>
+        public float DebugSpawnRadius => _debugSpawnRadius;
 
         /// <summary>Freeze durations per weight of hit (SRS 21).</summary>
         public HitStopConfig HitStop => _hitStop;

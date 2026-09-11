@@ -10,18 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 738d53a8041d7a098975fde65b0a229f, type: 3}
-  m_Name: SKL_Fireball
+  m_Name: SKL_E_Shockwave
   m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.SkillData
-  _id: skill.fireball
-  _displayName: Fireball
-  _description: Launches a fireball toward the cursor. Cooldown only, no resource
+  _id: skill.shockwave
+  _displayName: Shockwave
+  _description: Damages everything close to the hero. Cooldown only, no resource
     cost (COM-008).
-  _slot: 0
-  _type: 1
-  _baseDamage: 15
-  _cooldown: 5
+  _slot: 1
+  _type: 2
+  _baseDamage: 0
+  _damageMultiplier: 2
+  _windup: 0.2
+  _projectileSpeed: 0
+  _projectileLifetime: 0
+  _projectileRadius: 0
+  _cooldown: 6
   _duration: 0
-  _radius: 0
+  _radius: 2.5
   _projectileCount: 1
   _maxLevel: 5
   _rarity: 0

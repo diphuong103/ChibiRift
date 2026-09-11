@@ -18,9 +18,30 @@ namespace ChibiRift.Data
         [SerializeField] private SkillType _type = SkillType.Melee;
 
         [Header("Balance (SRS 35: all values configurable)")]
-        [Tooltip("Base damage before attack modifiers. Feeds step 1 of the SRS 9 formula.")]
+        [Tooltip("Flat damage, independent of the hero's Attack, feeding step 1 of the SRS 9 formula. Left at 0 in P1: all three skills scale off Attack through DamageMultiplier below. This is the path for a future flat-damage skill, and SkillSystem ignores it while it is 0.")]
         [Min(0f)]
         [SerializeField] private float _baseDamage = 0f;
+
+        [Tooltip("Damage as a multiple of the hero's Attack stat, the same model the combo uses (COM-002).")]
+        [Min(0f)]
+        [SerializeField] private float _damageMultiplier = 1f;
+
+        [Tooltip("Seconds of telegraph before the effect lands. Gives the player, and later the enemy, something to read.")]
+        [Min(0f)]
+        [SerializeField] private float _windup = 0f;
+
+        [Header("Projectile (COM-007)")]
+        [Tooltip("Travel speed in units per second. Unused by area skills.")]
+        [Min(0f)]
+        [SerializeField] private float _projectileSpeed = 0f;
+
+        [Tooltip("Seconds before an unspent projectile is retired. Speed times lifetime is its reach.")]
+        [Min(0f)]
+        [SerializeField] private float _projectileLifetime = 0f;
+
+        [Tooltip("Overlap radius of the projectile itself, not of an area effect.")]
+        [Min(0f)]
+        [SerializeField] private float _projectileRadius = 0f;
 
         [Tooltip("Seconds before the skill is usable again. The only gate in MVP (COM-008).")]
         [Min(0f)]
@@ -58,6 +79,24 @@ namespace ChibiRift.Data
 
         /// <summary>Base damage fed into the damage pipeline (HPS-003).</summary>
         public float BaseDamage => _baseDamage;
+
+        /// <summary>Damage as a multiple of the caster's Attack (COM-007).</summary>
+        public float DamageMultiplier => _damageMultiplier;
+
+        /// <summary>Telegraph before the effect lands, in seconds.</summary>
+        public float Windup => _windup;
+
+        /// <summary>Projectile speed in units per second (COM-007).</summary>
+        public float ProjectileSpeed => _projectileSpeed;
+
+        /// <summary>Seconds before an unspent projectile is retired.</summary>
+        public float ProjectileLifetime => _projectileLifetime;
+
+        /// <summary>Overlap radius of the projectile body.</summary>
+        public float ProjectileRadius => _projectileRadius;
+
+        /// <summary>How far a projectile travels before it expires. Speed times lifetime.</summary>
+        public float ProjectileRange => _projectileSpeed * _projectileLifetime;
 
         /// <summary>Cooldown in seconds. The only activation gate in MVP (COM-008).</summary>
         public float Cooldown => _cooldown;

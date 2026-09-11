@@ -25,6 +25,9 @@ namespace ChibiRift.EditorTools
         private const string PrefabRoot = "Assets/_Project/Prefabs";
         private const string DataRoot = "Assets/_Project/Data";
 
+        /// <summary>Scene object that parents every pooled world-space instance.</summary>
+        private const string PooledRootName = "PooledObjects";
+
         // Technical constants from the P1 slice 1 brief.
         private const int PixelsPerUnit = 32;
         private const int ReferenceWidth = 640;
@@ -60,6 +63,8 @@ namespace ChibiRift.EditorTools
             // which ChibiRift.UI cannot.
             overlay.AddComponent<EnemyDebugCensus>();
             BuildEnemies();
+            BuildSpawnerAndTools(hero);
+            BuildHud();
             BuildTrainingDummies();
             BuildDamageNumberCanvas();
             BuildPostRunLink();
@@ -160,6 +165,13 @@ namespace ChibiRift.EditorTools
             var motorSo = new SerializedObject(hero.GetComponent<PlayerMotor>());
             motorSo.FindProperty("_sceneContext").objectReferenceValue = context;
             motorSo.ApplyModifiedPropertiesWithoutUndo();
+
+            // Scene references, so they cannot live in the prefab. Pooled world-space objects hang
+            // off a scene root rather than off the hero: a projectile or an afterimage parented to
+            // a moving actor is carried along by it, which defeats both.
+            Transform pooled = PooledRoot();
+            SetReferences(hero.GetComponent<ProjectileSkill>(), ("_container", pooled));
+            SetReferences(hero.GetComponentInChildren<DashTrail>(), ("_container", pooled));
 
             return hero.transform;
         }
@@ -272,6 +284,11 @@ namespace ChibiRift.EditorTools
             var shake = hero.AddComponent<ScreenShakeService>();
             var sfx = hero.AddComponent<SfxPlayer>();
 
+            // COM-007: one caster, two behaviours, three assets.
+            var projectileSkill = hero.AddComponent<ProjectileSkill>();
+            var areaSkill = hero.AddComponent<AoeSkill>();
+            var skills = hero.AddComponent<SkillSystem>();
+
             var motorSo = new SerializedObject(motor);
             motorSo.FindProperty("_heroData").objectReferenceValue = heroData;
             motorSo.ApplyModifiedPropertiesWithoutUndo();
@@ -305,6 +322,29 @@ namespace ChibiRift.EditorTools
             SetReferences(sfx, ("_library",
                 AssetDatabase.LoadAssetAtPath<SfxLibrary>($"{DataRoot}/SFX_Default.asset")));
 
+            var combatSo2 = new SerializedObject(combat);
+            combatSo2.FindProperty("_balanceConfig").objectReferenceValue = balance;
+            combatSo2.ApplyModifiedPropertiesWithoutUndo();
+
+            SetReferences(
+                projectileSkill,
+                ("_balanceConfig", balance),
+                ("_prefab", BuildProjectilePrefab().GetComponent<Projectile>()));
+
+            SetReferences(skills, ("_balanceConfig", balance),
+                ("_projectileBehaviour", projectileSkill), ("_areaBehaviour", areaSkill));
+
+            var skillsSo = new SerializedObject(skills);
+            SerializedProperty slots = skillsSo.FindProperty("_skills");
+            slots.arraySize = 3;
+            slots.GetArrayElementAtIndex(0).objectReferenceValue =
+                AssetDatabase.LoadAssetAtPath<SkillData>($"{DataRoot}/SKL_Q_Fireball.asset");
+            slots.GetArrayElementAtIndex(1).objectReferenceValue =
+                AssetDatabase.LoadAssetAtPath<SkillData>($"{DataRoot}/SKL_E_Shockwave.asset");
+            slots.GetArrayElementAtIndex(2).objectReferenceValue =
+                AssetDatabase.LoadAssetAtPath<SkillData>($"{DataRoot}/SKL_R_Cataclysm.asset");
+            skillsSo.ApplyModifiedPropertiesWithoutUndo();
+
             BuildDashTrail(hero, balance, renderer);
             BuildImpactParticles(hero, balance);
             BuildImpulseSource(hero);
@@ -321,6 +361,17 @@ namespace ChibiRift.EditorTools
         /// Afterimage emitter for the dash (MOV-006). A child so the pool's instances live outside
         /// the hero's own transform and are not dragged along by it.
         /// </summary>
+        /// <summary>
+        /// Scene-level parent for anything pooled that lives in world space. Pooled objects must
+        /// not hang off an actor: a projectile or an afterimage parented to the hero is carried
+        /// along by them, which defeats both.
+        /// </summary>
+        private static Transform PooledRoot()
+        {
+            GameObject existing = GameObject.Find(PooledRootName);
+            return existing != null ? existing.transform : new GameObject(PooledRootName).transform;
+        }
+
         private static void BuildDashTrail(GameObject hero, BalanceConfig balance, SpriteRenderer source)
         {
             GameObject ghostPrefab = BuildGhostPrefab();
@@ -367,6 +418,33 @@ namespace ChibiRift.EditorTools
 
             var burst = burstObject.AddComponent<ImpactParticles>();
             SetReferences(burst, ("_balanceConfig", balance));
+        }
+
+        /// <summary>
+        /// The pooled projectile (COM-007). A trigger collider is enough: the projectile finds its
+        /// own target with an overlap check, and a solid body would shove enemies around.
+        /// </summary>
+        private static GameObject BuildProjectilePrefab()
+        {
+            var projectile = new GameObject("Projectile")
+            {
+                layer = LayerMask.NameToLayer(GameLayers.ProjectilePlayer)
+            };
+
+            AddPlaceholderSprite(projectile, new Vector2(0.4f, 0.4f), new Color(1f, 0.85f, 0.35f));
+
+            var circle = projectile.AddComponent<CircleCollider2D>();
+            circle.radius = 0.2f;
+            circle.isTrigger = true;
+
+            projectile.AddComponent<Projectile>();
+
+            string path = $"{PrefabRoot}/Projectile.prefab";
+            AssetDatabase.DeleteAsset(path);
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(projectile, path);
+            Object.DestroyImmediate(projectile);
+
+            return prefab;
         }
 
         private static GameObject BuildGhostPrefab()
@@ -585,6 +663,162 @@ namespace ChibiRift.EditorTools
             }
 
             so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>
+        /// The pooled spawner plus the development tools that drive it (AI-006, NFR-001).
+        /// </summary>
+        private static void BuildSpawnerAndTools(Transform hero)
+        {
+            EnemyData data = AssetDatabase.LoadAssetAtPath<EnemyData>($"{DataRoot}/ENM_MeleeGrunt.asset");
+            BalanceConfig balance = AssetDatabase.LoadAssetAtPath<BalanceConfig>($"{DataRoot}/BalanceConfig.asset");
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{PrefabRoot}/ENM_MeleeGrunt.prefab");
+
+            var spawnerObject = new GameObject("EnemySpawner");
+            var spawner = spawnerObject.AddComponent<EnemySpawner>();
+            SetReferences(
+                spawner,
+                ("_balanceConfig", balance),
+                ("_enemyData", data),
+                ("_prefab", prefab != null ? prefab.GetComponent<EnemyController>() : null));
+
+            var toolsObject = new GameObject("DevTools");
+
+            var debugSpawner = toolsObject.AddComponent<DebugSpawner>();
+            SetReferences(
+                debugSpawner,
+                ("_balanceConfig", balance), ("_spawner", spawner), ("_origin", hero));
+
+            var harness = toolsObject.AddComponent<FrameTimeHarness>();
+            SetReferences(
+                harness,
+                ("_balanceConfig", balance), ("_spawner", spawner), ("_origin", hero));
+        }
+
+        /// <summary>
+        /// The temporary HUD (SRS 19.2): hero health, three skill cooldowns and the dash cooldown.
+        /// Geometric, no art — it exists to make slice 4B acceptable by eye, not to be the P3 HUD.
+        /// </summary>
+        private static void BuildHud()
+        {
+            var root = new GameObject("HUD", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+
+            var canvas = root.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+
+            // Behind the damage numbers, so a burst of them is never hidden by a bar.
+            canvas.sortingOrder = -1;
+
+            var scaler = root.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
+
+            Slider health = BuildHealthBar(root.transform);
+
+            var fills = new Image[3];
+            string[] labels = { "Q", "E", "R" };
+            for (int i = 0; i < labels.Length; i++)
+            {
+                fills[i] = BuildCooldownPip(root.transform, labels[i], new Vector2(8f + i * 26f, 8f));
+            }
+
+            Image dash = BuildCooldownPip(root.transform, "Shift", new Vector2(8f + 3 * 26f + 8f, 8f));
+
+            var hud = root.AddComponent<HudController>();
+            var hudSo = new SerializedObject(hud);
+            hudSo.FindProperty("_healthBar").objectReferenceValue = health;
+            hudSo.FindProperty("_dashCooldownFill").objectReferenceValue = dash;
+
+            SerializedProperty skillFills = hudSo.FindProperty("_skillCooldownFills");
+            skillFills.arraySize = fills.Length;
+            for (int i = 0; i < fills.Length; i++)
+            {
+                skillFills.GetArrayElementAtIndex(i).objectReferenceValue = fills[i];
+            }
+
+            hudSo.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static Slider BuildHealthBar(Transform parent)
+        {
+            var barObject = new GameObject("HealthBar", typeof(RectTransform), typeof(Slider));
+            barObject.transform.SetParent(parent, false);
+
+            var rect = barObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = new Vector2(8f, -8f);
+            rect.sizeDelta = new Vector2(120f, 12f);
+
+            var background = new GameObject("Background", typeof(Image));
+            background.transform.SetParent(barObject.transform, false);
+            StretchToParent(background.GetComponent<RectTransform>());
+            background.GetComponent<Image>().color = new Color(0.08f, 0.08f, 0.1f, 0.85f);
+
+            var fillArea = new GameObject("Fill", typeof(Image));
+            fillArea.transform.SetParent(barObject.transform, false);
+            StretchToParent(fillArea.GetComponent<RectTransform>());
+
+            var fill = fillArea.GetComponent<Image>();
+            fill.color = new Color(0.35f, 0.78f, 0.42f);
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Horizontal;
+
+            var slider = barObject.GetComponent<Slider>();
+            slider.transition = Selectable.Transition.None;
+            slider.interactable = false;
+            slider.fillRect = fillArea.GetComponent<RectTransform>();
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+            slider.value = 1f;
+
+            return slider;
+        }
+
+        /// <summary>
+        /// One cooldown square with its key letter. The fill shows time remaining, so a ready
+        /// ability is an empty square and a fresh cast is a full one.
+        /// </summary>
+        private static Image BuildCooldownPip(Transform parent, string label, Vector2 offset)
+        {
+            var pip = new GameObject($"Pip_{label}", typeof(RectTransform));
+            pip.transform.SetParent(parent, false);
+
+            var rect = pip.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.zero;
+            rect.pivot = Vector2.zero;
+            rect.anchoredPosition = offset;
+            rect.sizeDelta = new Vector2(22f, 22f);
+
+            var background = new GameObject("Background", typeof(Image));
+            background.transform.SetParent(pip.transform, false);
+            StretchToParent(background.GetComponent<RectTransform>());
+            background.GetComponent<Image>().color = new Color(0.12f, 0.12f, 0.16f, 0.9f);
+
+            var text = new GameObject("Label", typeof(Text));
+            text.transform.SetParent(pip.transform, false);
+            StretchToParent(text.GetComponent<RectTransform>());
+
+            var caption = text.GetComponent<Text>();
+            caption.font = AssetDatabase.GetBuiltinExtraResource<Font>("LegacyRuntime.ttf");
+            caption.alignment = TextAnchor.MiddleCenter;
+            caption.fontSize = 10;
+            caption.text = label;
+
+            var coolObject = new GameObject("Cooldown", typeof(Image));
+            coolObject.transform.SetParent(pip.transform, false);
+            StretchToParent(coolObject.GetComponent<RectTransform>());
+
+            var cooldown = coolObject.GetComponent<Image>();
+            cooldown.color = new Color(0f, 0f, 0f, 0.65f);
+            cooldown.type = Image.Type.Filled;
+            cooldown.fillMethod = Image.FillMethod.Radial360;
+            cooldown.fillAmount = 0f;
+            cooldown.raycastTarget = false;
+
+            return cooldown;
         }
 
         /// <summary>Screen-space canvas hosting the floating damage numbers (HPS-008).</summary>

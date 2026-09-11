@@ -190,6 +190,7 @@ that wants to affect it sends a request to the owner rather than writing directl
 | `SpriteRenderer.flipX` | `PlayerCombat` | `SetAimTarget` |
 | `Rigidbody2D.linearVelocity` | `PlayerMotor` / `EnemyMotor` | `SetMoveIntent`, `ApplyKnockback`, `BeginDash` |
 | `Transform.position` (hero) | `PlayerMotor` | `Teleport` |
+| `GameObject.activeSelf` (pooled enemy) | `EnemySpawner` | `Spawn` / `Despawn`; `HealthComponent` only announces `CorpseExpired` |
 
 **Why this is a rule and not a preference.** The project has hit the same failure three times, and
 each time it was two writers rather than a logic error:
@@ -202,6 +203,10 @@ each time it was two writers rather than a logic error:
 - Slice 4A, same review: the white hit flash and the i-frame pulse both wanted
   `SpriteRenderer.color`, and they fire together by definition, because being hit is what opens the
   window.
+
+- Slice 4B: `HealthComponent` deactivated a corpse on its own timer while the pool also owned the
+  instance. Releasing something already inactive is how a pool hands the same object to two
+  callers; `Test_Pool_DoubleDespawnIsSafe` covers it.
 
 Update the table in the same commit that changes an owner.
 
@@ -276,7 +281,7 @@ Headless:
   -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **156 EditMode + 56 PlayMode, all passing.**
+Current status: **183 EditMode + 68 PlayMode, all passing.**
 
 | Suite | Count | What it covers |
 |---|---|---|
@@ -284,7 +289,7 @@ Current status: **156 EditMode + 56 PlayMode, all passing.**
 | `ExperienceCurveTests` | 12 | The XP curve and its inverse |
 | `UpgradeRollerTests` | 15 | Three-card rolls, the no-duplicate rule, Fallback Pool top-up, an exhausted pool, the max-stack filter, seed reproducibility |
 | `InputActionsAssetTests` | 6 | The `.inputactions` asset itself: the map, all nine actions, the A/D composite and Space binding, and that W/S/F stay unbound (SRS 43 Q2) |
-| `DataDefaultsConsistencyTests` | 94 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
+| `DataDefaultsConsistencyTests` | 121 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
 | `DamagePipelineSourceTests` | 2 | Health is only ever reduced through `CombatSystem` (HPS-003). A text scan, not a compiler guarantee — see OI-19 |
 | `PrefabWiringTests` | 3 | Every serialized field on the hero and enemy prefabs is wired, or declared empty with a reason. Covers the third value path — prefab fields — which neither of the data suites can see (OI-26) |
 | `SceneActorVisualTests` | 4 | Every actor in Run_01 draws something, its sprite is a real asset, and nothing is scaled through its Transform. Covers what the logic suites structurally cannot see — see OI-23 |
@@ -292,7 +297,7 @@ Current status: **156 EditMode + 56 PlayMode, all passing.**
 | `AssetReferenceIntegrityTests` | 5 | No wave, stage or hero points at a missing asset, and no two assets share an id. Renaming an asset is the classic way to leave a reference that Unity only complains about at runtime |
 | `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
 | `PlayerCombatTests` (PlayMode) | 10 | TC-COM: the active window, one hit per target per swing, the three hit chain, both combo resets, mouse aim and sprite flip, damage to a corpse, death firing once, and step 3 out-damaging step 1 |
-| `Run01SceneTests` (PlayMode) | 22 | **The only fixture that plays the real game.** Loads the real Boot scene so the real `InputReader` and `CombatSystem` are built, drives simulated mouse and keyboard, then plays Run_01 with the prefabs that ship in it: every wired action reaches its property, a real click damages a dummy, Space jumps, hero and enemies land, the nearest enemy actually closes distance, a landed hit produces a visible health bar and damage number, and from slice 4A the dash, crits, hit stop and shake are all exercised here too |
+| `Run01SceneTests` (PlayMode) | 33 | **The only fixture that plays the real game.** Loads the real Boot scene so the real `InputReader` and `CombatSystem` are built, drives simulated mouse and keyboard, then plays Run_01 with the prefabs that ship in it: every wired action reaches its property, a real click damages a dummy, Space jumps, hero and enemies land, the nearest enemy actually closes distance, a landed hit produces a visible health bar and damage number, and from slice 4A the dash, crits, hit stop and shake are all exercised here too |
 | `EnemyAiTests` (PlayMode) | 16 | TC-AI: idle, chase, aggro hysteresis, walking home, attack window and cooldown, damage through the pipeline, hero i-frames, combo reset on being hit, knockback out and back, hurt stun, terminal death, and stats following the asset |
 
 ### Writing a PlayMode test
@@ -458,7 +463,37 @@ Attack cues fire as the swing starts, not as it connects, so a whiff still makes
 The asset is regenerated by **ChibiRift → Setup**, which clears the clip assignments — assign them
 after running Setup, or the next Setup run will empty them again.
 
-## 14. Related documents
+## 14. Measuring frame time
+
+`FrameTimeHarness` spawns the NFR-001 crowd, samples every frame for ten seconds and writes
+`Logs/frametime-report.json`.
+
+**Running it.** Open `Run_01`, press Play from `Boot`, then call `Run()` on the `FrameTimeHarness`
+component on `DevTools` — or press **F3** a few times to fill the arena and watch the profiler
+window directly. The console prints a one-line summary; the JSON has the full distribution.
+
+**Reading it against the requirements:**
+
+| Field | Requirement | Passing looks like |
+|---|---|---|
+| `MeanFps` | NFR-001, average FPS | ≥ 60 |
+| `OnePercentLowFps` | NFR-001, 1% low | ≥ 50 |
+| `P99Ms` | NFR-002, frame time ceiling | ≤ 33 |
+| `FramesOver33Ms` | NFR-002 | as close to 0 as the run allows |
+| `AllocatedKilobytesDelta` | NFR-002 | near flat — steady growth means something allocates per frame, and a GC spike is the usual cause of a bad p99 |
+
+**What the measurement does not cover.** The harness casts no skill. The ultimate's cooldown is 15s
+and the sample is 10s, so including it would make each run depend on whether a cast happened to
+land inside the window. **The p99 therefore excludes the cost of an area skill sweeping its 3.5u
+radius.** That sentence is written into the report file as well, so the numbers cannot be read
+without it.
+
+**A batch-mode run measures nothing about performance.** There is no renderer, so the frame times
+are not a player's frame times. `Test_Profiler_HarnessProducesCompleteReport` asserts that the
+harness produced every field and never asserts a threshold. Only an editor run on real hardware
+answers NFR-001 and NFR-002.
+
+## 15. Related documents
 
 - `TRACEABILITY.md` — every SRS requirement ID mapped to the file that serves it.
 - `OPEN_ISSUES.md` — ambiguities found in the SRS and the decision taken for each.

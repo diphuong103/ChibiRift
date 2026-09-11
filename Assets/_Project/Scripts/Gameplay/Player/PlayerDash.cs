@@ -84,7 +84,14 @@ namespace ChibiRift.Gameplay
         {
             float dt = Time.fixedDeltaTime;
 
-            if (CooldownRemaining > 0f) CooldownRemaining = Mathf.Max(CooldownRemaining - dt, 0f);
+            if (CooldownRemaining > 0f)
+            {
+                CooldownRemaining = Mathf.Max(CooldownRemaining - dt, 0f);
+
+                // MOV-006 and SRS 19.2 both ask for a visible dash cooldown. Published here rather
+                // than polled by the HUD, which cannot see this assembly.
+                _eventBus?.Publish(new DashCooldownChangedEvent(CooldownRemaining, Config.Cooldown));
+            }
             _buffer.Tick(dt);
 
             // The dash ending is where the cooldown starts, so it is measured from the end of the
@@ -108,6 +115,7 @@ namespace ChibiRift.Gameplay
 
             _motor.BeginDash(Direction(), config.Speed, config.Duration);
             _wasDashing = true;
+            _eventBus?.Publish(new DashCooldownChangedEvent(config.Cooldown, config.Cooldown));
 
             // HPS-005: the same window a hit opens, so there is only one notion of invulnerability.
             _health.BeginInvulnerability(config.IFrameDuration);

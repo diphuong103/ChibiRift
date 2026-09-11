@@ -29,6 +29,9 @@ namespace ChibiRift.Gameplay
         [Tooltip("Afterimage prefab: a SpriteRenderer and nothing else.")]
         [SerializeField] private SpriteRenderer _ghostPrefab;
 
+        [Tooltip("Scene-level parent for the afterimages. Must NOT be the hero: a ghost parented to the hero is dragged along by them and marks nothing.")]
+        [SerializeField] private Transform _container;
+
         [Tooltip("Sprite copied into each afterimage. Defaults to this object's own.")]
         [SerializeField] private SpriteRenderer _source;
 
@@ -61,7 +64,12 @@ namespace ChibiRift.Gameplay
                 return;
             }
 
-            _pool = new ObjectPool<SpriteRenderer>(_ghostPrefab, transform, _prewarmCount);
+            // Not this transform: this component is a child of the hero, so ghosts parented here
+            // would travel with the hero instead of staying where they were left — which is the
+            // one thing an afterimage exists to do.
+            if (_container == null) _container = new GameObject("DashGhosts").transform;
+
+            _pool = new ObjectPool<SpriteRenderer>(_ghostPrefab, _container, _prewarmCount);
         }
 
         private void Update()

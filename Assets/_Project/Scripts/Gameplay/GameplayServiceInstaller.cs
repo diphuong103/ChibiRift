@@ -38,6 +38,11 @@ namespace ChibiRift.Gameplay
 
             var random = new DeterministicRandom(_combatSeed != 0 ? _combatSeed : NewSeed());
             locator.Register(new CombatSystem(eventBus, _balanceConfig, random));
+
+            // The audio service is built in Core and cannot read BalanceConfig, so its performance
+            // budget is handed over here, where both are visible (NFR-001).
+            if (locator.TryGet(out IAudioService audio) && audio is AudioManager manager)
+                manager.ConfigureVoices(_balanceConfig.SfxVoiceCount);
         }
 
         private static int NewSeed() => unchecked((int)System.DateTime.UtcNow.Ticks);

@@ -298,8 +298,9 @@ namespace ChibiRift.Gameplay
                 // The launch happens partway through the step, not at its start. Charging the
                 // full step of gravity undershoots the arc and charging none overshoots it; half
                 // a step is the semi-implicit Euler correction and lands the peak on the
-                // analytic JumpVelocity^2 / (2 * GravityUp).
-                return jumpVelocity - config.GravityUp * dt / 2f;
+                // analytic JumpVelocity^2 / (2 * GravityUp). The fraction lives in the asset only
+                // so no tuning number sits in this assembly; it is not something to tune.
+                return jumpVelocity - config.GravityUp * dt * config.LaunchGravityFraction;
             }
 
             float gravity = config.GravityUp;

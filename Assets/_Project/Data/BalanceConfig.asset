@@ -53,6 +53,16 @@ MonoBehaviour:
   _heroKnockbackForce: 4
   _heroKnockbackDuration: 0.12
   _enemyHealthBarHideDelay: 3
+  _enemyPoolPrewarm: 16
+  _enemyPoolMax: 48
+  _projectilePoolPrewarm: 24
+  _projectilePoolMax: 64
+  _sfxVoiceCount: 16
+  _maxTargetsPerSweep: 16
+  _stressEnemyCount: 30
+  _stressDurationSeconds: 10
+  _skillBufferSeconds: 0.12
+  _debugSpawnRadius: 8
   _hitStop:
     Light: 0.04
     Heavy: 0.08

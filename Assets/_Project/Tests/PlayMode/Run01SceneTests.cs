@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.IO;
 using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
@@ -742,7 +744,465 @@ namespace ChibiRift.Tests.Play
             yield return WaitForRealSeconds(HitStopSettle);
         }
 
+        // ----- COM-007, COM-008: skills ----------------------------------------------------
+
+        [UnityTest]
+        public IEnumerator Test_SkillQ_FiresProjectileTowardCursor()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var skills = motor.GetComponent<SkillSystem>();
+            var projectiles = motor.GetComponent<ProjectileSkill>();
+
+            yield return AimAtScreenSide(0.9f);
+            float heroX = motor.transform.position.x;
+
+            skills.RequestCast(SkillSlot.Skill1);
+            yield return Steps(4);
+
+            Projectile fired = projectiles.LastFired;
+            Assert.That(fired, Is.Not.Null, "Q fired no projectile (COM-007).");
+            Assert.That(fired.Direction.x, Is.GreaterThan(0f),
+                "Cursor is to the right, so the projectile must travel right. Aim comes from " +
+                "PlayerCombat, with no auto-target (COM-009).");
+
+            yield return Steps(StepsFor(0.2f));
+            Assert.That(fired.transform.position.x, Is.GreaterThan(heroX),
+                "The projectile did not move away from the hero.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_SkillQ_ProjectileDealsDamageThroughCombatSystem()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var skills = motor.GetComponent<SkillSystem>();
+            var bus = ServiceLocator.Current.Get<EventBus>();
+
+            // A pooled target in the empty left half, rather than one of the scene dummies. Two
+            // reasons: FindObjectsByType returns them in no particular order, and the three scene
+            // enemies walk toward the hero, so either of those can put something unintended in the
+            // line of fire and turn a pass into luck.
+            yield return FireIntoEmptySpace(motor);
+
+            var combat = motor.GetComponent<PlayerCombat>();
+
+            // Parked well away first, then moved into the line of fire immediately before the cast.
+            // Aim cannot be predicted ahead of time here: it is derived from the cursor through the
+            // camera, and the camera is still settling against the confiner, so the world direction
+            // under a fixed screen point keeps changing for the first few frames.
+            EnemySpawner spawner = FindSpawner();
+            EnemyController enemy = spawner.Spawn(new Vector2(-30f, 1f));
+            Assert.That(enemy, Is.Not.Null, "The pool handed out no target.");
+
+            yield return Steps(8);
+            HealthComponent target = enemy.Health;
+
+            var sources = new List<DamageSource>();
+            void OnDamage(DamageAppliedEvent evt) => sources.Add(evt.Result.Source);
+
+            bus.Subscribe<DamageAppliedEvent>(OnDamage);
+            try
+            {
+                float before = target.CurrentHealth;
+
+                // Two units along the aim the hero has right now: close enough that the projectile
+                // arrives in about nine physics steps, before anything can drift.
+                enemy.transform.position =
+                    (Vector2)motor.transform.position + combat.AimDirection * 2f;
+
+                yield return null;
+
+                skills.RequestCast(SkillSlot.Skill1);
+                yield return WaitForRealSeconds(0.6f);
+
+                Assert.That(target.CurrentHealth, Is.LessThan(before),
+                    $"The projectile never connected. Hero at {motor.transform.position.x:F1}, " +
+                    $"target at {target.transform.position.x:F1}.");
+
+                // Health dropping with no event would mean a second damage path had been added
+                // around the pipeline (HPS-003).
+                Assert.That(sources, Does.Contain(DamageSource.Skill),
+                    "Damage landed but no DamageAppliedEvent carried DamageSource.Skill, so it " +
+                    "bypassed CombatSystem (HPS-003).");
+            }
+            finally
+            {
+                bus.Unsubscribe<DamageAppliedEvent>(OnDamage);
+                spawner.DespawnAll();
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator Test_SkillE_HitsAllEnemiesInRadius()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var skills = motor.GetComponent<SkillSystem>();
+            var area = motor.GetComponent<AoeSkill>();
+
+            SkillData data = skills.GetSkill(SkillSlot.Skill2);
+            Assert.That(data, Is.Not.Null, "E has no skill asset.");
+
+            // Three dummies stand at x = 3, 8 and 12. Put the hero on the first one so exactly one
+            // is inside the 2.5u radius and the others are far outside it.
+            HealthComponent near = FindDummy();
+            motor.Teleport(new Vector2(near.transform.position.x, motor.transform.position.y));
+            yield return Steps(4);
+
+            float before = near.CurrentHealth;
+
+            skills.RequestCast(SkillSlot.Skill2);
+            yield return WaitForRealSeconds(0.3f);
+
+            Assert.That(area.LastRadius, Is.EqualTo(data.Radius).Within(0.001f),
+                "The blast used a different radius from the asset (NFR-007).");
+            Assert.That(area.LastHitCount, Is.GreaterThan(0), "The blast hit nothing at all.");
+            Assert.That(near.CurrentHealth, Is.LessThan(before), "The dummy inside the radius was not hit.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Skill_RespectsCooldown()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var skills = motor.GetComponent<SkillSystem>();
+            SkillData data = skills.GetSkill(SkillSlot.Skill1);
+
+            yield return AimAtScreenSide(0.9f);
+
+            skills.RequestCast(SkillSlot.Skill1);
+            yield return Steps(4);
+
+            Assert.That(skills.GetCooldownRemaining(SkillSlot.Skill1), Is.GreaterThan(0f),
+                "Casting must start the cooldown (COM-008).");
+            Assert.That(skills.CanCast(SkillSlot.Skill1), Is.False,
+                "A live cooldown must refuse the next cast. There is no resource cost in MVP, so " +
+                "the cooldown is the only gate (COM-008).");
+
+            yield return Steps(StepsFor(data.Cooldown + 0.2f));
+
+            Assert.That(skills.CanCast(SkillSlot.Skill1), Is.True,
+                $"After {data.Cooldown}s the skill should be available again.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Skill_CannotFireWhileDashing()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var skills = motor.GetComponent<SkillSystem>();
+            var dash = motor.GetComponent<PlayerDash>();
+
+            yield return AimAtScreenSide(0.9f);
+
+            dash.RequestDash();
+            yield return Steps(3);
+            Assert.That(motor.IsDashing, Is.True, "Setup failed: the dash never started.");
+
+            Assert.That(skills.CanCast(SkillSlot.Skill1), Is.False,
+                "A dash is a commitment. Letting a skill interrupt it would remove the cost that " +
+                "makes dashing a decision.");
+
+            skills.RequestCast(SkillSlot.Skill1);
+            yield return Steps(2);
+
+            Assert.That(skills.GetCooldownRemaining(SkillSlot.Skill1), Is.EqualTo(0f).Within(0.001f),
+                "A cast went through mid-dash.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Skill_BufferedDuringHitStop()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var skills = motor.GetComponent<SkillSystem>();
+            var pause = ServiceLocator.Current.Get<IPauseService>();
+
+            yield return AimAtScreenSide(0.9f);
+
+            pause.RequestHitStop(0.06f);
+            yield return null;
+            Assert.That(Time.timeScale, Is.EqualTo(0f).Within(0.001f), "Setup failed: time is not frozen.");
+
+            // Without buffering this press reaches a frozen game and is simply gone, which the
+            // player experiences as the button not working (P1-07).
+            skills.RequestCast(SkillSlot.Skill1);
+
+            yield return WaitForRealSeconds(0.3f);
+            yield return Steps(4);
+
+            Assert.That(skills.GetCooldownRemaining(SkillSlot.Skill1), Is.GreaterThan(0f),
+                "The buffered press never became a cast once time resumed (P1-07).");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_SkillCooldownEvent_FiresWithCorrectSlotIndex()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var skills = motor.GetComponent<SkillSystem>();
+            var bus = ServiceLocator.Current.Get<EventBus>();
+
+            var seen = new List<SkillCooldownChangedEvent>();
+            void OnCooldown(SkillCooldownChangedEvent evt) => seen.Add(evt);
+
+            bus.Subscribe<SkillCooldownChangedEvent>(OnCooldown);
+            try
+            {
+                yield return AimAtScreenSide(0.9f);
+
+                // E, not Q: a wrong-slot bug that always reported slot 0 would pass unnoticed.
+                skills.RequestCast(SkillSlot.Skill2);
+                yield return Steps(4);
+
+                SkillData data = skills.GetSkill(SkillSlot.Skill2);
+
+                Assert.That(seen, Is.Not.Empty,
+                    "No SkillCooldownChangedEvent was published, so the HUD has nothing to show. " +
+                    "This event has been in the contract since the foundation slice.");
+
+                bool matched = seen.Exists(e =>
+                    e.Slot == SkillSlot.Skill2 && Mathf.Approximately(e.TotalSeconds, data.Cooldown));
+
+                Assert.That(matched, Is.True,
+                    "Casting E published no event for slot Skill2 with its own cooldown total. " +
+                    $"Slots seen: {string.Join(", ", seen.ConvertAll(e => e.Slot.ToString()))}");
+            }
+            finally
+            {
+                bus.Unsubscribe<SkillCooldownChangedEvent>(OnCooldown);
+            }
+        }
+
+        // ----- AI-006, SRS 29: pooling -------------------------------------------------------
+
+        [UnityTest]
+        public IEnumerator Test_Pool_NoInstantiateAfterPrewarm()
+        {
+            yield return BootIntoRun01();
+
+            EnemySpawner spawner = FindSpawner();
+
+            int prewarm = spawner.PrewarmCount;
+            int createdAfterPrewarm = spawner.TotalCreated;
+
+            Assert.That(createdAfterPrewarm, Is.EqualTo(prewarm),
+                $"The pool made {createdAfterPrewarm} instances at load but was asked for {prewarm}.");
+
+            // Spawn and retire in batches that stay inside the prewarmed set. SRS 29's whole point
+            // is that a wave costs no Instantiate at all.
+            for (int batch = 0; batch < 3; batch++)
+            {
+                for (int i = 0; i < prewarm; i++) spawner.Spawn(new Vector2(i, 2f));
+
+                yield return Steps(2);
+                spawner.DespawnAll();
+                yield return Steps(2);
+            }
+
+            Assert.That(spawner.TotalCreated, Is.EqualTo(createdAfterPrewarm),
+                $"The pool created {spawner.TotalCreated - createdAfterPrewarm} more instances " +
+                "during play. Prewarm exists so a wave never instantiates (SRS 29).");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Pool_EnemyFullyResetOnReuse()
+        {
+            yield return BootIntoRun01();
+
+            EnemySpawner spawner = FindSpawner();
+            var combat = ServiceLocator.Current.Get<CombatSystem>();
+
+            EnemyController first = spawner.Spawn(new Vector2(30f, 2f));
+            Assert.That(first, Is.Not.Null, "The pool handed out nothing.");
+
+            yield return Steps(4);
+
+            // Leave it in the worst state a reused instance could inherit: dead, invulnerable,
+            // moving, mid-swing, collider off.
+            HealthComponent health = first.Health;
+            first.GetComponent<EnemyMotor>().ApplyKnockback(Vector2.right, 8f, 1f);
+
+            // Kill first, dirty the invulnerability flag second. The other order cannot work:
+            // CombatSystem refuses a hit on an invulnerable target, which is the rule under test
+            // elsewhere (HPS-005).
+            combat.DealDamage(health, 9999f, 1f, 0f, DamageSource.BasicAttack,
+                first.transform.position, Vector2.zero);
+
+            yield return WaitForRealSeconds(0.3f);
+            Assert.That(health.IsDead, Is.True, "Setup failed: the enemy survived.");
+
+            health.BeginInvulnerability(5f);
+
+            spawner.Despawn(first);
+            yield return Steps(2);
+
+            EnemyController reused = spawner.Spawn(new Vector2(32f, 2f));
+            yield return Steps(2);
+
+            Assert.That(reused, Is.SameAs(first), "The pool did not reuse the released instance.");
+
+            // Each of these is a separate way a recycled enemy can come back wrong, and each only
+            // shows up once the pool starts reusing — which is when the scene is busiest.
+            Assert.That(reused.Health.IsDead, Is.False, "Reused enemy is still dead.");
+            Assert.That(reused.Health.CurrentHealth, Is.EqualTo(reused.Health.MaxHealth).Within(0.001f),
+                "Reused enemy did not come back at full health.");
+            Assert.That(reused.Health.IsInvulnerable, Is.False, "Reused enemy is still invulnerable.");
+            // Horizontal only. The instance is spawned clear of the arena floor, so its vertical
+            // velocity is fresh gravity rather than anything left over; knockback is horizontal and
+            // is the momentum that would actually survive a bad reset.
+            Assert.That(Mathf.Abs(reused.GetComponent<EnemyMotor>().Velocity.x), Is.LessThan(0.5f),
+                "Reused enemy is still carrying the knockback from its previous life.");
+            Assert.That(reused.GetComponent<EnemyAI>().State, Is.EqualTo(EnemyLifecycleState.Idle),
+                "Reused enemy came back in its old state rather than Idle.");
+            Assert.That(reused.GetComponent<EnemyAttack>().IsAttacking, Is.False,
+                "Reused enemy came back mid-swing.");
+            Assert.That(reused.GetComponent<Collider2D>().enabled, Is.True,
+                "Reused enemy came back with the collider its corpse had switched off.");
+
+            spawner.DespawnAll();
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Pool_DoubleDespawnIsSafe()
+        {
+            yield return BootIntoRun01();
+
+            EnemySpawner spawner = FindSpawner();
+
+            EnemyController enemy = spawner.Spawn(new Vector2(30f, 2f));
+            yield return Steps(2);
+
+            Assert.That(spawner.Despawn(enemy), Is.True, "The first release should succeed.");
+            Assert.That(spawner.Despawn(enemy), Is.False,
+                "A second release of the same instance must be refused. Both the corpse timer and " +
+                "an explicit clear can reach Despawn, and releasing twice hands the same object to " +
+                "two callers.");
+
+            // The real damage a double release does: the same instance handed out twice at once.
+            EnemyController a = spawner.Spawn(new Vector2(30f, 2f));
+            EnemyController b = spawner.Spawn(new Vector2(32f, 2f));
+
+            Assert.That(a, Is.Not.SameAs(b),
+                "The pool handed the same instance to two callers, which is what a double release " +
+                "causes.");
+
+            spawner.DespawnAll();
+            yield return Steps(2);
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Pool_ProjectileFullyResetOnReuse()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var skills = motor.GetComponent<SkillSystem>();
+            var projectiles = motor.GetComponent<ProjectileSkill>();
+            SkillData data = skills.GetSkill(SkillSlot.Skill1);
+
+            // Away from the three scene enemies and aimed at empty arena, so the shot expires on
+            // its lifetime instead of retiring the instant it spawns inside whatever walked up to
+            // the hero while the test was setting up.
+            yield return FireIntoEmptySpace(motor);
+
+            skills.RequestCast(SkillSlot.Skill1);
+            yield return Steps(2);
+
+            Projectile first = projectiles.LastFired;
+            Assert.That(first, Is.Not.Null, "Nothing was fired.");
+
+            yield return WaitForRealSeconds(data.ProjectileLifetime + 0.3f);
+            Assert.That(first.IsAlive, Is.False, "The projectile never expired.");
+
+            yield return Steps(StepsFor(data.Cooldown + 0.2f));
+            yield return FireIntoEmptySpace(motor);
+
+            skills.RequestCast(SkillSlot.Skill1);
+            yield return Steps(2);
+
+            Projectile reused = projectiles.LastFired;
+            Assert.That(reused, Is.SameAs(first), "The pool did not reuse the expired projectile.");
+
+            Assert.That(reused.IsAlive, Is.True, "The reused projectile was not relaunched.");
+            Assert.That(reused.DistanceTravelled, Is.LessThan(data.ProjectileRange * 0.5f),
+                "The reused projectile kept the distance it had already travelled.");
+            Assert.That(reused.LifetimeRemaining, Is.GreaterThan(0f),
+                "The reused projectile came back with its previous lifetime already spent.");
+            Assert.That(reused.Speed, Is.EqualTo(data.ProjectileSpeed).Within(0.001f),
+                "The reused projectile did not take its speed from the asset again.");
+        }
+
+        // ----- NFR-001, NFR-002: profiler harness --------------------------------------------
+
+        [UnityTest]
+        public IEnumerator Test_Profiler_HarnessProducesCompleteReport()
+        {
+            yield return BootIntoRun01();
+
+            var harness = Object.FindFirstObjectByType<FrameTimeHarness>();
+            Assert.That(harness, Is.Not.Null, $"{RunScene} has no FrameTimeHarness.");
+
+            yield return harness.Run();
+
+            FrameTimeReport report = harness.LastReport;
+            Assert.That(report, Is.Not.Null, "The harness produced no report.");
+
+            // Deliberately no threshold assertion. This is a headless run with no renderer, so its
+            // frame times are not a player's frame times; asserting an FPS figure here would be a
+            // number that means nothing. What is checked is that the harness measured something and
+            // filled in every field a reader needs.
+            Assert.That(report.FrameCount, Is.GreaterThan(0), "No frames were sampled.");
+            Assert.That(report.EnemyCount, Is.GreaterThan(0), "No enemies were spawned to measure against.");
+            Assert.That(report.DurationSeconds, Is.GreaterThan(0f), "The sample had no duration.");
+            Assert.That(report.MeanMs, Is.GreaterThan(0f), "Mean frame time is zero.");
+            Assert.That(report.MedianMs, Is.GreaterThan(0f), "Median is missing.");
+            Assert.That(report.P95Ms, Is.GreaterThanOrEqualTo(report.MedianMs), "p95 is below the median.");
+            Assert.That(report.P99Ms, Is.GreaterThanOrEqualTo(report.P95Ms), "p99 is below p95.");
+            Assert.That(report.MaxMs, Is.GreaterThanOrEqualTo(report.P99Ms), "The maximum is below p99.");
+            Assert.That(report.MeanFps, Is.GreaterThan(0f), "Mean FPS was not derived.");
+            Assert.That(report.OnePercentLowFps, Is.GreaterThan(0f), "The 1% low was not derived.");
+
+            Assert.That(report.Caveats, Is.Not.Null.And.Not.Empty,
+                "The report must carry its own caveats, so nobody reads the numbers without " +
+                "seeing what they exclude.");
+            Assert.That(report.Caveats, Does.Contain("skill"),
+                "The caveat must say that no skill is cast, since the ultimate's cooldown is " +
+                "longer than the sample and its area sweep is therefore unmeasured.");
+
+            Assert.That(File.Exists(harness.LastReportPath), Is.True,
+                $"No report file at {harness.LastReportPath}.");
+        }
+
         // ----- helpers ---------------------------------------------------------------------
+
+        /// <summary>
+        /// Puts the hero in the empty left half of the arena, aimed further left. Scene enemies
+        /// spawn at x = 5, 10 and 15 and walk toward the hero, so a shot fired from where they are
+        /// standing retires on its first step and tells you nothing about its flight.
+        /// </summary>
+        private IEnumerator FireIntoEmptySpace(PlayerMotor motor)
+        {
+            // x = -15 is solid floor: the gap in the ground is 3u wide at x = -8.
+            motor.Teleport(new Vector2(-15f, motor.transform.position.y));
+            yield return AimAtScreenSide(0.1f);
+            yield return Steps(2);
+        }
+
+        private static EnemySpawner FindSpawner()
+        {
+            var spawner = Object.FindFirstObjectByType<EnemySpawner>();
+            Assert.That(spawner, Is.Not.Null, $"{RunScene} has no EnemySpawner.");
+            return spawner;
+        }
 
         /// <summary>Half-width of the arena, matching the boundary walls RunSceneBuilder places.</summary>
         private const float ArenaHalfWidth = 20f;

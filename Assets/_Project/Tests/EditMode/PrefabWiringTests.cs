@@ -90,6 +90,17 @@ namespace ChibiRift.Tests.Edit
                 "reference a scene object. RunSceneBuilder.BuildHero assigns it on the instance."),
 
             new Exemption(
+                "Hero.prefab", "ProjectileSkill", "_container", Why.AssignedPerScene,
+                "Pooled projectiles hang off a scene root, not off the hero: one parented to a " +
+                "moving actor is carried along by it mid-flight. A prefab cannot hold a scene " +
+                "reference, so RunSceneBuilder.BuildHero assigns it on the instance."),
+
+            new Exemption(
+                "Hero.prefab", "DashTrail", "_container", Why.AssignedPerScene,
+                "Same reason: an afterimage parented to the hero travels with them and marks " +
+                "nothing, which is the one thing it exists to do."),
+
+            new Exemption(
                 "Hero.prefab", "HealthComponent", "_sourceData", Why.NotApplicable,
                 "That field seeds health from an EnemyData asset. The hero is seeded by " +
                 "PlayerStats.ApplyStats from HeroData instead, so it must stay empty."),
@@ -164,7 +175,7 @@ namespace ChibiRift.Tests.Edit
                         continue;
                     }
 
-                    Component component = actor.GetComponent(exemption.Component);
+                    Component component = FindComponent(actor, exemption.Component);
                     if (component == null)
                     {
                         offenders.Add($"{actorName}: has no {exemption.Component}");
@@ -205,7 +216,7 @@ namespace ChibiRift.Tests.Edit
             foreach (Exemption exemption in Exemptions)
             {
                 GameObject prefab = LoadPrefab(exemption.Prefab);
-                Component component = prefab.GetComponent(exemption.Component);
+                Component component = FindComponent(prefab, exemption.Component);
 
                 if (component == null)
                 {
@@ -227,6 +238,21 @@ namespace ChibiRift.Tests.Edit
         }
 
         // ----- helpers ---------------------------------------------------------------------
+
+        /// <summary>
+        /// The named component anywhere under <paramref name="root"/>. Children count: a prefab
+        /// puts its pooling and trail components on child objects, and a check that only looked at
+        /// the root would silently pass them by.
+        /// </summary>
+        private static Component FindComponent(GameObject root, string typeName)
+        {
+            foreach (Component component in root.GetComponentsInChildren<Component>(true))
+            {
+                if (component != null && component.GetType().Name == typeName) return component;
+            }
+
+            return null;
+        }
 
         private static GameObject LoadPrefab(string prefabName)
         {

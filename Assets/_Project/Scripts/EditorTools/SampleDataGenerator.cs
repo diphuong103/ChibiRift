@@ -55,15 +55,50 @@ namespace ChibiRift.EditorTools
                 "CameraConfig", "camera.default", "Default Camera",
                 "Cinemachine damping and lookahead for the gameplay camera (CAM-001).");
 
+            // COM-007: three skills, two behaviours. Q is a projectile; E and R are the same area
+            // behaviour with different radius, damage and cooldown. All three scale off the hero's
+            // Attack through DamageMultiplier, so BaseDamage stays 0 (see SkillData).
             SkillData skill = Create<SkillData>(
-                "SKL_Fireball", "skill.fireball", "Fireball",
+                "SKL_Q_Fireball", "skill.fireball", "Fireball",
                 "Launches a fireball toward the cursor. Cooldown only, no resource cost (COM-008).",
                 so =>
                 {
                     so.FindProperty("_slot").enumValueIndex = (int)Core.SkillSlot.Skill1;
                     so.FindProperty("_type").enumValueIndex = (int)SkillType.Projectile;
-                    so.FindProperty("_baseDamage").floatValue = 15f;
-                    so.FindProperty("_cooldown").floatValue = 5f;
+                    so.FindProperty("_baseDamage").floatValue = 0f;
+                    so.FindProperty("_damageMultiplier").floatValue = 1.5f;
+                    so.FindProperty("_cooldown").floatValue = 3f;
+                    so.FindProperty("_projectileSpeed").floatValue = 12f;
+                    so.FindProperty("_projectileLifetime").floatValue = 2f;
+                    so.FindProperty("_projectileRadius").floatValue = 0.25f;
+                });
+
+            SkillData skillE = Create<SkillData>(
+                "SKL_E_Shockwave", "skill.shockwave", "Shockwave",
+                "Damages everything close to the hero. Cooldown only, no resource cost (COM-008).",
+                so =>
+                {
+                    so.FindProperty("_slot").enumValueIndex = (int)Core.SkillSlot.Skill2;
+                    so.FindProperty("_type").enumValueIndex = (int)SkillType.AreaOfEffect;
+                    so.FindProperty("_baseDamage").floatValue = 0f;
+                    so.FindProperty("_damageMultiplier").floatValue = 2f;
+                    so.FindProperty("_cooldown").floatValue = 6f;
+                    so.FindProperty("_radius").floatValue = 2.5f;
+                    so.FindProperty("_windup").floatValue = 0.2f;
+                });
+
+            SkillData skillR = Create<SkillData>(
+                "SKL_R_Cataclysm", "skill.cataclysm", "Cataclysm",
+                "The ultimate: a wide blast. One cast kills a full-health melee grunt (COM-007).",
+                so =>
+                {
+                    so.FindProperty("_slot").enumValueIndex = (int)Core.SkillSlot.Ultimate;
+                    so.FindProperty("_type").enumValueIndex = (int)SkillType.AreaOfEffect;
+                    so.FindProperty("_baseDamage").floatValue = 0f;
+                    so.FindProperty("_damageMultiplier").floatValue = 4f;
+                    so.FindProperty("_cooldown").floatValue = 15f;
+                    so.FindProperty("_radius").floatValue = 3.5f;
+                    so.FindProperty("_windup").floatValue = 0.35f;
                 });
 
             UpgradeData upgrade = Create<UpgradeData>(
@@ -177,8 +212,10 @@ namespace ChibiRift.EditorTools
                 {
                     // Stats and dash already default to the SRS 35 baseline; only the loadout is wired.
                     SerializedProperty skills = so.FindProperty("_skills");
-                    skills.arraySize = 1;
+                    skills.arraySize = 3;
                     skills.GetArrayElementAtIndex(0).objectReferenceValue = skill;
+                    skills.GetArrayElementAtIndex(1).objectReferenceValue = skillE;
+                    skills.GetArrayElementAtIndex(2).objectReferenceValue = skillR;
 
                     so.FindProperty("_basicAttack").objectReferenceValue = basicAttack;
                 });

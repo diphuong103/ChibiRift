@@ -44,6 +44,7 @@ MonoBehaviour:
     DoubleJumpVelocity: 13
     CoyoteTime: 0.1
     JumpBuffer: 0.12
+    LaunchGravityFraction: 0.5
     GroundCheckWidth: 0.7
     GroundCheckHeight: 0.1
     GroundCheckOffsetY: -0.9
@@ -53,7 +54,9 @@ MonoBehaviour:
   _basicAttack: {fileID: 11400000, guid: 792ca30c948361e3b90e5b41e0d774c8, type: 2}
   _hurtIFrameDuration: 0.8
   _skills:
-  - {fileID: 11400000, guid: e56b88de6b9133a7899872493063b136, type: 2}
+  - {fileID: 11400000, guid: 165324ee9b56a3ea1bd915e63b002beb, type: 2}
+  - {fileID: 11400000, guid: 44b8e066b1c1653a981a152d37108580, type: 2}
+  - {fileID: 11400000, guid: 6eb0c7b68e7b75544861e3f9d773ea84, type: 2}
   _passive: {fileID: 0}
   _animatorController: {fileID: 0}
   _portrait: {fileID: 0}

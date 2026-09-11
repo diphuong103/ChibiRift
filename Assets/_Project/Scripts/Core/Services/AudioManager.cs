@@ -11,15 +11,21 @@ namespace ChibiRift.Core
         private const string LogCategory = "Audio";
 
         /// <summary>
-        /// Voices available at once. Above the concurrent-enemy figure of NFR-001 so a busy wave
-        /// never silences a cue, and fixed so playing a sound allocates nothing.
+        /// Voices available at once, pushed in by <c>GameplayServiceInstaller</c>.
         /// </summary>
-        private const int VoiceCount = 16;
+        /// <remarks>
+        /// The figure is a performance budget and belongs in <c>BalanceConfig</c> with the others,
+        /// but this class lives in ChibiRift.Core and Core cannot reference ChibiRift.Data. So it
+        /// is handed over at install time rather than read. Zero means nobody has configured it,
+        /// which is reported once and then stays silent rather than guessing a number here.
+        /// </remarks>
+        private int _voiceCount;
 
         private AudioSource[] _voices;
         private GameObject _voiceHolder;
         private int _nextVoice;
         private bool _warnedAboutNullClip;
+        private bool _warnedAboutMissingBudget;
 
         private float _masterVolume = 1f;
         private float _musicVolume = 1f;
@@ -80,6 +86,18 @@ namespace ChibiRift.Core
             voice.PlayOneShot(clip, Mathf.Clamp01(volume) * _sfxVolume * _masterVolume);
         }
 
+        /// <summary>
+        /// Sets how many voices may sound at once (NFR-001). Called by the gameplay installer,
+        /// which is the nearest thing to this class that can see <c>BalanceConfig</c>.
+        /// </summary>
+        public void ConfigureVoices(int voiceCount)
+        {
+            _voiceCount = Mathf.Max(voiceCount, 0);
+
+            // Rebuilt on the next cue rather than now: a Run may be mid-teardown when this lands.
+            Dispose();
+        }
+
         /// <summary>Releases the pooled voices. Called when the composition root tears down.</summary>
         public void Dispose()
         {
@@ -96,6 +114,17 @@ namespace ChibiRift.Core
         /// </summary>
         private AudioSource NextVoice()
         {
+            if (_voiceCount <= 0)
+            {
+                if (_warnedAboutMissingBudget) return null;
+
+                _warnedAboutMissingBudget = true;
+                GameLog.Warn(LogCategory,
+                    "No SFX voice budget configured, so every cue is silent. " +
+                    "GameplayServiceInstaller supplies it from BalanceConfig.SfxVoiceCount.");
+                return null;
+            }
+
             if (_voices == null) CreateVoices();
             if (_voices == null) return null;
 
@@ -109,8 +138,8 @@ namespace ChibiRift.Core
             _voiceHolder = new GameObject("SfxVoices") { hideFlags = HideFlags.HideAndDontSave };
             Object.DontDestroyOnLoad(_voiceHolder);
 
-            _voices = new AudioSource[VoiceCount];
-            for (int i = 0; i < VoiceCount; i++)
+            _voices = new AudioSource[_voiceCount];
+            for (int i = 0; i < _voiceCount; i++)
             {
                 var voice = _voiceHolder.AddComponent<AudioSource>();
                 voice.playOnAwake = false;

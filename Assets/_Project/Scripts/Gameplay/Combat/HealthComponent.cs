@@ -49,6 +49,17 @@ namespace ChibiRift.Gameplay
         public event Action<HealthComponent> Died;
 
         /// <summary>
+        /// Raised once the corpse timer expires (HPS-007).
+        /// </summary>
+        /// <remarks>
+        /// This component announces that the body is done; it does <b>not</b> deactivate the object.
+        /// Doing both would give the GameObject two owners — this and the pool — and releasing an
+        /// instance that is already inactive is how a pool ends up handing the same object to two
+        /// callers. <see cref="EnemySpawner"/> owns the lifetime; see the ownership table in README.
+        /// </remarks>
+        public event Action<HealthComponent> CorpseExpired;
+
+        /// <summary>
         /// Raised on every hit that actually landed, before the death check. The enemy state
         /// machine uses it to enter Hurt; the hero's combat component uses it to drop the combo.
         /// </summary>
@@ -125,10 +136,10 @@ namespace ChibiRift.Gameplay
             _corpseRemaining -= dt;
             if (_corpseRemaining > 0f) return;
 
-            // HPS-007: the corpse leaves on its own. A pool that owns this instance will have
-            // reclaimed it from the Died handler already, which also deactivates it.
+            // HPS-007: announce, do not deactivate. Whoever owns this instance decides what
+            // happens to it — the pool for an enemy, nothing at all for a scene-placed dummy.
             _corpseRemaining = -1f;
-            gameObject.SetActive(false);
+            CorpseExpired?.Invoke(this);
         }
 
         /// <summary>

@@ -41,18 +41,67 @@ namespace ChibiRift.UI
         private void OnEnable()
         {
             if (ServiceLocator.Current == null) return;
-            _eventBus = ServiceLocator.Current.Get<EventBus>();
+            if (!ServiceLocator.Current.TryGet(out _eventBus)) return;
 
-            // TODO(SRS-19.2): subscribe to HealthChangedEvent, ExperienceChangedEvent,
-            //   LevelUpEvent, SkillCooldownChangedEvent, DashCooldownChangedEvent,
-            //   CurrencyChangedEvent, BossActivatedEvent, BossPhaseChangedEvent,
-            //   EliteActivatedEvent and DamageAppliedEvent.
+            // P1 wires the four readouts needed to accept slice 4B by eye. The rest of SRS 19.2 —
+            // XP, level, currency, boss and elite bars — lands with the systems that feed them, and
+            // their fields are left on this class rather than split into a second HUD that would
+            // have to be merged back in P3.
+            _eventBus.Subscribe<HealthChangedEvent>(OnHealthChanged);
+            _eventBus.Subscribe<SkillCooldownChangedEvent>(OnSkillCooldownChanged);
+            _eventBus.Subscribe<DashCooldownChangedEvent>(OnDashCooldownChanged);
+
+            // TODO(SRS-19.2): ExperienceChangedEvent, LevelUpEvent, CurrencyChangedEvent,
+            //   BossActivatedEvent, BossPhaseChangedEvent and EliteActivatedEvent.
         }
 
         private void OnDisable()
         {
-            // TODO(SRS-19.2): unsubscribe from every event above so a scene change leaves no
-            // dangling handler on the persistent EventBus.
+            // The bus outlives the scene, so a handler left behind would fire into a destroyed
+            // component on the next Run.
+            if (_eventBus == null) return;
+
+            _eventBus.Unsubscribe<HealthChangedEvent>(OnHealthChanged);
+            _eventBus.Unsubscribe<SkillCooldownChangedEvent>(OnSkillCooldownChanged);
+            _eventBus.Unsubscribe<DashCooldownChangedEvent>(OnDashCooldownChanged);
+            _eventBus = null;
+        }
+
+        /// <summary>Hero health bar (SRS 19.2). Enemy bars are their own component.</summary>
+        private void OnHealthChanged(HealthChangedEvent evt)
+        {
+            // Filtered on IsPlayer: every enemy publishes on this same channel, and without the
+            // check the hero's bar would show whichever enemy was hit most recently.
+            if (!evt.IsPlayer || _healthBar == null) return;
+
+            _healthBar.value = evt.MaxHealth > 0f
+                ? Mathf.Clamp01(evt.CurrentHealth / evt.MaxHealth)
+                : 0f;
+        }
+
+        /// <summary>Q / E / R cooldowns (SRS 19.2, COM-008).</summary>
+        private void OnSkillCooldownChanged(SkillCooldownChangedEvent evt)
+        {
+            int index = (int)evt.Slot;
+            if (_skillCooldownFills == null || index < 0 || index >= _skillCooldownFills.Length) return;
+
+            Image fill = _skillCooldownFills[index];
+            if (fill == null) return;
+
+            // Fill shows what is left to wait, so a ready skill is empty and a fresh cast is full.
+            fill.fillAmount = evt.TotalSeconds > 0f
+                ? Mathf.Clamp01(evt.RemainingSeconds / evt.TotalSeconds)
+                : 0f;
+        }
+
+        /// <summary>Dash cooldown, required by MOV-006 and SRS 19.2.</summary>
+        private void OnDashCooldownChanged(DashCooldownChangedEvent evt)
+        {
+            if (_dashCooldownFill == null) return;
+
+            _dashCooldownFill.fillAmount = evt.TotalSeconds > 0f
+                ? Mathf.Clamp01(evt.RemainingSeconds / evt.TotalSeconds)
+                : 0f;
         }
 
         /// <summary>Floating damage number over the target (HPS-008).</summary>

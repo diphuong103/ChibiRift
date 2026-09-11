@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-29 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-31 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -579,3 +579,42 @@ fully qualified access in `PlayerController`. Both are caught now.
 
 **Limit worth knowing.** The scan is textual, like `DamagePipelineSourceTests` (OI-19). Reflection,
 an alias, or a wrapper class would route around it.
+
+---
+
+## OI-30 — Pooled objects must not be parented to an actor
+
+Found by `PrefabWiringTests` complaining that `ProjectileSkill._container` was unset. The default
+would have been the component's own transform — which sits on the hero.
+
+A projectile advances by reading its own world position each step and adding a step of travel. Made
+a child of the hero, it inherits the hero's movement as well, so a shot fired while running drifts
+with the shooter. `DashTrail` had the same arrangement from slice 4A: afterimages parented to the
+hero travel with the hero, which defeats the one thing an afterimage is for.
+
+**Decision.** Anything pooled that lives in world space is parented to a scene-level
+`PooledObjects` root. Both components now fail loudly rather than defaulting to their own transform,
+and the scene assigns the root on the instance, the way `PlayerMotor._sceneContext` already worked.
+
+**Worth noting:** neither the trail nor the projectile was *visibly* broken in a way that would have
+been reported as a bug. The trail simply looked wrong, and a projectile fired standing still behaved
+correctly. The guard found it, not a playtest.
+
+---
+
+## OI-31 — Where P1 draws the line on the NFR measurements
+
+`FrameTimeHarness` exists and produces the full distribution, but **P1 does not claim NFR-001 or
+NFR-002 are met.**
+
+- A batch-mode run has no renderer, so its frame times are not a player's frame times. The test
+  asserts the report is complete and deliberately asserts no threshold; a pass here says the
+  instrument works, not that the game is fast.
+- The harness casts no skill. The ultimate's cooldown is 15s and the sample window is 10s, so
+  including one would make each run depend on whether a cast landed inside the window. The p99
+  therefore **excludes the cost of an area skill sweeping its 3.5u radius**, and that sentence is
+  written into the report JSON so the numbers cannot be read without it.
+
+**What closing these requires:** an editor run on the target machine, compared against the table in
+README section 14. Until then both stay open, superseding the "nothing to profile yet" state
+recorded in OI-15.

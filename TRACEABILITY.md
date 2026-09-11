@@ -38,8 +38,8 @@ Paths are relative to `Assets/_Project/`.
 | COM-004 | Clear hitbox / hurtbox, active frames only | `PlayerCombat.SweepHitbox` (`Physics2D.OverlapBox` inside `[ActiveStartTime, ActiveEndTime]`), per-swing `HashSet` for one hit per target, collision matrix. Frame data is in seconds, not Animation Events — see OI-18 | **Done** — `Test_Attack_HitboxOnlyActiveInWindow` |
 | COM-005 | Damage, knockback, hit feedback | `DamageAppliedEvent` carries the attacker position and the force; the target applies it through `IKnockbackReceiver` (`PlayerMotor`, `EnemyMotor`) using the shared `Combat/KnockbackState.cs`. `CombatSystem` never pushes anyone: hit-stop and shake will subscribe to the same event. Horizontal only in P1 | **Done** — `Test_Knockback_MovesTargetAwayFromAttacker`, `Test_Knockback_ReturnsControlAfterDuration` |
 | COM-006 | Critical hit | `DamageCalculator` step 2 + `RollCritical`, rolled inside `CombatSystem.DealDamage` with the seeded RNG (RNG-004). `PlayerCombat` passes `PlayerStats.CritChance` (0.05); multiplier 2.0 from `BalanceConfig`. `DamageAppliedEvent.Result.WasCritical` drives the colour, the longer hit stop and the harder shake | **Done** — `Test_Crit_AppliesMultiplier`, `Test_Crit_MarksDamageEventAsCrit`, `DamageCalculatorTests.Step2_AppliesCriticalMultiplierOnlyOnCrit` |
-| COM-007 | Q/E/R special skills | `InputReader.WasSkillPressed`, `Scripts/Gameplay/Skills/SkillSystem.cs`, `Data/SkillData.cs` | Skeleton — bindings + Schema Done |
-| COM-008 | Cooldown only, no mana pool | `SkillSystem.cs`, `SkillData.Cooldown`; no resource field exists anywhere | Skeleton — by construction Done |
+| COM-007 | Q/E/R special skills | `InputReader.WasSkillPressed` -> `PlayerController` -> `Skills/SkillSystem.cs` (a component on the hero, not a service). Two behaviours serve three skills: `ProjectileSkill` for Q, `AoeSkill` for E and R with different assets. Aim from `PlayerCombat`, damage through `CombatSystem`, feedback from `DamageAppliedEvent`. Press buffered like jump, dash and attack | **Done** — `Test_SkillQ_FiresProjectileTowardCursor`, `Test_SkillQ_ProjectileDealsDamageThroughCombatSystem`, `Test_SkillE_HitsAllEnemiesInRadius`, `Test_Skill_CannotFireWhileDashing`, `Test_Skill_BufferedDuringHitStop`, `Test_SkillCooldownEvent_FiresWithCorrectSlotIndex` |
+| COM-008 | Cooldown only, no mana pool | `SkillSystem.CanCast` gates on the cooldown alone; `SkillData.Cooldown` supplies it. No energy or mana field exists anywhere in the project, by construction rather than omission | **Done** — `Test_Skill_RespectsCooldown` |
 | COM-009 | Mouse aim, no auto-target | `InputReader.AimWorldPosition` -> `PlayerCombat.SetAimTarget`: sets `AimDirection`, places and rotates the hitbox at `HitboxOffsetDistance`, and is the single writer of `SpriteRenderer.flipX` (OI-20) | **Done** — `Test_MouseAim_HitboxFollowsCursorDirection`, `Test_MouseAim_SpriteFlipsCorrectly` |
 
 ## 9 Health, Damage and Death
@@ -108,7 +108,7 @@ Paths are relative to `Assets/_Project/`.
 | AI-003 | No attack while dead | `EnemyAI.FixedUpdate` returns on `Death` before anything else; `EnemyMotor` also refuses the killing blow's own knockback so the corpse cannot slide (OI-21) | **Done** — `Test_Enemy_DeathStopsAllAI` |
 | AI-004 | Attack cooldown / window | `Gameplay/Enemy/EnemyAttack.cs`, three phases from `EnemyAttackConfig` (windup 0.35 / active 0.10 / recovery 0.45, cooldown 1.2 counted from the end of recovery). Hitbox open only inside the active window; the swing is committed at windup and plays out even if the hero leaves | **Done** — `Test_Enemy_AttacksWhenInRange`, `Test_Enemy_AttackRespectsCooldown`, `Test_Enemy_HitboxOnlyActiveInWindow` |
 | AI-005 | No infinite pathfinding loop | Two mechanisms: `EnemyAI.UpdateStuckDetection` sidesteps when a chase covers less than `StuckMinDisplacement` in `StuckCheckWindow`, and `EnemyMotor.SeparationPush` keeps a crowd from collapsing into one silhouette | **Done** |
-| AI-006 | Spawn/despawn owned by Wave System | `Gameplay/Enemy/EnemySpawner.cs`, `Core/Pooling/ObjectPool.cs` | Skeleton — pool **Done** |
+| AI-006 | Spawn/despawn owned by Wave System | `Gameplay/Enemy/EnemySpawner.cs` over `ObjectPool<T>`, prewarmed at scene load. The single owner of a pooled enemy's lifetime: `HealthComponent` announces `CorpseExpired` and `EnemyController` returns the instance. A second release is refused rather than handing one object to two callers | Spawner **Done** — `Test_Pool_NoInstantiateAfterPrewarm`, `Test_Pool_EnemyFullyResetOnReuse`, `Test_Pool_DoubleDespawnIsSafe`; the wave system that will drive it is P2 |
 | ELT-001 | Elite = base + modifier + ×3 HP / ×1.5 dmg | `Data/EliteModifierData.cs`, `BalanceConfig.EliteHealthMultiplier` / `EliteDamageMultiplier` | Schema **Done** (SRS 35 values), behaviour Skeleton |
 | ELT-002 | ≥ 3 modifiers: Shielded, Enraged, Explosive | `EliteModifierType` enum + `EliteModifierData` fields for all three; `ELT_Enraged.asset` sample | Schema Done; 2 remaining assets chưa triển khai (content) |
 | ELT-003 | Distinct visuals + HP bar | `EliteModifierData.AuraTint` / `ScaleMultiplier`, `EliteActivatedEvent`, `HudController` | Schema Done, visuals Skeleton |
@@ -231,8 +231,8 @@ Paths are relative to `Assets/_Project/`.
 | InputManager (SRS 26) | `Core/Services/InputReader.cs` + `Settings/ChibiRiftControls.inputactions` | **Done** — Move and Jump wired; the other seven actions are bound and exposed but not yet consumed |
 | PlayerController / PlayerCombat / PlayerStats | `Gameplay/Player/` | `PlayerController`, `PlayerMotor`, `PlayerCombat` **Done**; `PlayerStats` **Done** (stats only, health moved to `HealthComponent`) |
 | CombatSystem / DamageSystem / StatusEffectSystem | `Gameplay/Combat/` | `DamageCalculator`, `CombatSystem`, `HealthComponent` **Done**; `StatusEffectSystem` Skeleton |
-| SkillSystem / UpgradeSystem | `Gameplay/Skills/`, `Gameplay/Progression/` | `UpgradeRoller` **Done**, rest Skeleton |
-| EnemyController / EnemyAI / EnemySpawner | `Gameplay/Enemy/` | `EnemyAI`, `EnemyMotor`, `EnemyAttack`, `EnemyController` **Done** (melee only); `EnemySpawner` Skeleton |
+| SkillSystem / UpgradeSystem | `Gameplay/Skills/`, `Gameplay/Progression/` | `SkillSystem` **Done** (COM-007, COM-008); `UpgradeRoller` **Done**; `UpgradeSystem` Skeleton (P2) |
+| EnemyController / EnemyAI / EnemySpawner | `Gameplay/Enemy/` | `EnemyAI`, `EnemyMotor`, `EnemyAttack`, `EnemyController`, `EnemySpawner` **Done** (melee only) |
 | WaveManager / StageManager / BossManager | `Gameplay/Wave|Stage|Boss/` | Skeleton |
 | RunManager / RewardManager | `Gameplay/Run/` | Skeleton |
 | MetaProgressionManager / CurrencyManager | `Meta/` | `CurrencyManager` **Done** |
@@ -247,14 +247,14 @@ Paths are relative to `Assets/_Project/`.
 
 | ID | Requirement | Where | Status |
 |---|---|---|---|
-| NFR-001 | ≥ 60 FPS avg, ≥ 50 FPS 1% low @1080p | `ObjectPool<T>`, `EnemyAI.ThinkInterval`, `WaveData.SpawnBudget` | **Chưa đo được** — no content to profile. See OI-15 |
-| NFR-002 | p99 frame time ≤ 33 ms, no frame > 100 ms | Batched telemetry, pool prewarm, bounded `HitStopDuration` | **Chưa đo được** |
+| NFR-001 | ≥ 60 FPS avg, ≥ 50 FPS 1% low @1080p | `Gameplay/Profiling/FrameTimeHarness.cs` spawns 30 enemies and reports mean FPS and the 1% low; protected by `ObjectPool<T>`, `EnemyAI.ThinkInterval`, the sweep and voice budgets in `BalanceConfig` | Harness **Done** — `Test_Profiler_HarnessProducesCompleteReport`; **the measurement itself needs an editor run on real hardware**, see README section 14 and OI-15 |
+| NFR-002 | p99 frame time ≤ 33 ms, no frame > 100 ms | The same harness reports p95, p99, max, the count of frames over 33 ms and heap growth; protected by batched telemetry, pool prewarm and bounded hit stop | Harness **Done**; measurement pending an editor run. The p99 **excludes** area-skill cost, because a 15s ultimate cooldown does not fit a 10s sample — stated in the report file itself |
 | NFR-003 | No crash in a happy-path Run | — | **Chưa đo được** — no Run yet |
 | NFR-004 | Scene load ≤ 5 s, launch ≤ 8 s | `SceneFlowManager` async load + `LoadProgressChanged` | Infrastructure **Done**, chưa đo được |
 | NFR-005 | New player understands the controls | `Scripts/UI/HowToPlayPanel.cs` | Skeleton |
 | NFR-006 | Volume controls and readable UI | `IAudioService`, `SettingsSave` | Backend **Done** |
 | NFR-007 | New content added via data/prefab | 9 ScriptableObject types; no content enumerated in code | **Done** |
-| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 155 EditMode + 56 PlayMode tests | **Done** |
+| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 183 EditMode + 68 PlayMode tests | **Done** |
 | NFR-009 | Basic save validation | `MetaSave.IsValid()`, checked before every write and after every read | **Done** |
 
 ## 30 Error Handling
