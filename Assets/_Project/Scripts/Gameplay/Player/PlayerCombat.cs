@@ -281,13 +281,13 @@ namespace ChibiRift.Gameplay
         {
             if (_combat == null) return;
 
-            // TODO(COM-006): pass _stats.CritChance once P1-13 wires crits in slice 4. Until then
-            // every hit resolves as a normal hit, which is what the crit-free slice expects.
+            // COM-006: the hero's own crit chance. Rolled inside CombatSystem with the seeded RNG,
+            // so a hit is reproducible for a given seed (RNG-004).
             _combat.DealDamage(
                 target,
                 _stats.Attack,
                 damageMultiplier,
-                0f,
+                _stats.CritChance,
                 DamageSource.BasicAttack,
                 target.transform.position,
                 transform.position);
@@ -321,7 +321,7 @@ namespace ChibiRift.Gameplay
             if (Attack == null) return;
 
             Vector2 center = (Vector2)transform.position + AimDirection * Attack.HitboxOffsetDistance;
-            Gizmos.color = IsHitboxActive ? Color.red : new Color(1f, 1f, 1f, 0.25f);
+            Gizmos.color = IsHitboxActive ? Color.red : Color.grey;
 
             Matrix4x4 previous = Gizmos.matrix;
             float angle = Mathf.Atan2(AimDirection.y, AimDirection.x) * Mathf.Rad2Deg;

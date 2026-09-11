@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5728016481561120864
+--- !u!1 &3678221457830008206
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,10 +8,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5134777341495005953}
-  - component: {fileID: 5750118795670754461}
-  - component: {fileID: 2049372508176915748}
-  - component: {fileID: 109712415430368781}
+  - component: {fileID: 1464621841394094356}
+  - component: {fileID: 7214852816082105926}
+  - component: {fileID: 440996180711231510}
+  - component: {fileID: 8947973142102253871}
   m_Layer: 0
   m_Name: DamageNumber
   m_TagString: Untagged
@@ -19,13 +19,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &5134777341495005953
+--- !u!224 &1464621841394094356
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5728016481561120864}
+  m_GameObject: {fileID: 3678221457830008206}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -38,21 +38,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &5750118795670754461
+--- !u!222 &7214852816082105926
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5728016481561120864}
+  m_GameObject: {fileID: 3678221457830008206}
   m_CullTransparentMesh: 1
---- !u!114 &2049372508176915748
+--- !u!114 &440996180711231510
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5728016481561120864}
+  m_GameObject: {fileID: 3678221457830008206}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
@@ -80,19 +80,19 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: 0
---- !u!114 &109712415430368781
+--- !u!114 &8947973142102253871
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5728016481561120864}
+  m_GameObject: {fileID: 3678221457830008206}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57567337a14d62c3a9e142b4eeecd63c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.UI::ChibiRift.UI.DamageNumber
-  _label: {fileID: 2049372508176915748}
+  _label: {fileID: 440996180711231510}
   _lifetime: 0.7
   _riseDistance: 48
   _normalColor: {r: 1, g: 1, b: 1, a: 1}

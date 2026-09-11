@@ -77,8 +77,7 @@ namespace ChibiRift.Gameplay
             }
 
             // COM-006: rolled here, outside the formula, so Calculate stays deterministic (RNG-004).
-            // TODO(COM-006): slice 4 (P1-13) passes the hero's real crit chance; until then callers
-            // pass 0 and every hit resolves as a normal hit.
+            // A caller passing 0 opts out; the hero passes its real crit chance from slice 4A on.
             bool isCritical = DamageCalculator.RollCritical(critChance, _random);
 
             var request = new DamageRequest(
@@ -96,6 +95,10 @@ namespace ChibiRift.Gameplay
 
             target.ApplyDamage(result);
 
+            // Read immediately after applying: the death transition runs inside ApplyDamage, so
+            // this is the only moment that can tell a killing blow from an ordinary one.
+            bool killed = target.IsDead;
+
             // HPS-008 and COM-005: the one announcement of a landed hit. EntityDiedEvent is
             // published by HealthComponent, which is the only place that knows the hit was lethal.
             bool targetIsPlayer = TargetIsPlayer(target);
@@ -107,7 +110,8 @@ namespace ChibiRift.Gameplay
                 targetIsPlayer,
                 attackerPosition,
                 targetIsPlayer ? _balance.HeroKnockbackForce : _balance.EnemyKnockbackForce,
-                targetIsPlayer ? _balance.HeroKnockbackDuration : _balance.EnemyKnockbackDuration));
+                targetIsPlayer ? _balance.HeroKnockbackDuration : _balance.EnemyKnockbackDuration,
+                killed));
 
             return result;
         }

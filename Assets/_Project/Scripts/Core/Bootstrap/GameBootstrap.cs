@@ -81,7 +81,7 @@ namespace ChibiRift.Core
             _locator.Register(_input);
 
             _locator.Register<ISceneFlowService>(new SceneFlowManager(this, _eventBus));
-            _locator.Register<IPauseService>(new PauseManager(_eventBus, _input));
+            _locator.Register<IPauseService>(new PauseManager(_eventBus, _input, this));
             _locator.Register<IAudioService>(new AudioManager());
             _locator.Register(new VfxManager(_eventBus));
         }

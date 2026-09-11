@@ -33,6 +33,9 @@ namespace ChibiRift.Gameplay
         /// <summary>Raised whenever the hero touches or leaves the ground.</summary>
         public event Action<bool> GroundedChanged;
 
+        /// <summary>Raised the moment a jump actually fires, for the jump cue (SRS 22).</summary>
+        public event Action Jumped;
+
         /// <summary>Raised after a respawn, so the camera can snap instead of pan (MOV-004).</summary>
         public event Action Respawned;
 
@@ -62,6 +65,8 @@ namespace ChibiRift.Gameplay
         private float _speedMultiplier = 1f;
         private bool _jumpHeld;
         private KnockbackState _knockback;
+        private DashState _dash;
+        private float _wallStopFraction;
         private int _groundMask;
 
         private MovementConfig Config => _heroData.Movement;
@@ -125,6 +130,9 @@ namespace ChibiRift.Gameplay
         /// <summary>Horizontal intent for this step, -1..1. Called by <see cref="PlayerController"/>.</summary>
         public void SetMoveIntent(float axis) => _moveIntent = Mathf.Clamp(axis, -1f, 1f);
 
+        /// <summary>Horizontal intent as last set, -1..1. Read by the dash to pick its direction.</summary>
+        public float MoveIntent => _moveIntent;
+
         /// <summary>
         /// Scales top speed for this step, 0..1 (COM-001). An attack commits the hero by slowing
         /// them rather than freezing them, so a swing never feels like a stutter.
@@ -133,6 +141,28 @@ namespace ChibiRift.Gameplay
 
         /// <inheritdoc />
         public bool IsKnockedBack => _knockback.IsActive;
+
+        /// <summary>True while a dash owns both axes (MOV-006).</summary>
+        public bool IsDashing => _dash.IsActive;
+
+        /// <summary>
+        /// Starts a dash along <paramref name="direction"/> (MOV-006). The motor stops driving
+        /// itself and stops applying gravity until the window ends or a wall stops it (MOV-007).
+        /// </summary>
+        public void BeginDash(Vector2 direction, float speed, float durationSeconds)
+        {
+            _wallStopFraction = _heroData != null ? _heroData.Dash.WallStopFraction : 0f;
+            _dash.Begin(direction, speed, durationSeconds);
+            if (!_dash.IsActive) return;
+
+            // A dash replaces momentum outright rather than adding to it: otherwise dashing
+            // mid-fall would carry the fall speed through and undershoot the distance.
+            _body.linearVelocity = _dash.Velocity;
+            _knockback.Clear();
+        }
+
+        /// <summary>Ends a dash early. Used on death and on respawn.</summary>
+        public void CancelDash() => _dash.Clear();
 
         /// <inheritdoc />
         /// <remarks>
@@ -169,12 +199,29 @@ namespace ChibiRift.Gameplay
 
             Vector2 velocity = _body.linearVelocity;
 
-            // COM-005: while a knockback runs the hero has no horizontal say. Without this the
-            // line below would overwrite the pushed velocity on the very next step and the
-            // knockback would never be visible.
-            if (!_knockback.Tick(dt)) velocity.x = ApplyHorizontal(velocity.x, dt);
+            // MOV-006: a dash owns both axes. Checked first because it also outranks knockback —
+            // being shoved mid-dash must not bend the dash off its line.
+            if (_dash.Tick(dt))
+            {
+                velocity = _dash.Velocity;
 
-            velocity.y = ApplyJumpAndGravity(velocity.y, dt);
+                // MOV-007: a wall ends the dash rather than being passed through. The collider has
+                // already stopped the body, so near-zero travel is the signal that it hit something.
+                if (Mathf.Abs(_body.linearVelocity.x) < Mathf.Abs(_dash.Velocity.x) * _wallStopFraction)
+                {
+                    _dash.Clear();
+                    velocity = _body.linearVelocity;
+                }
+            }
+            else
+            {
+                // COM-005: while a knockback runs the hero has no horizontal say. Without this the
+                // line below would overwrite the pushed velocity on the very next step and the
+                // knockback would never be visible.
+                if (!_knockback.Tick(dt)) velocity.x = ApplyHorizontal(velocity.x, dt);
+
+                velocity.y = ApplyJumpAndGravity(velocity.y, dt);
+            }
 
             _body.linearVelocity = velocity;
 
@@ -246,6 +293,7 @@ namespace ChibiRift.Gameplay
             {
                 JumpBufferTimer = 0f;
                 CoyoteTimer = 0f;
+                Jumped?.Invoke();
 
                 // The launch happens partway through the step, not at its start. Charging the
                 // full step of gravity undershoots the arc and charging none overshoots it; half
@@ -332,6 +380,7 @@ namespace ChibiRift.Gameplay
             CoyoteTimer = 0f;
             JumpBufferTimer = 0f;
             _knockback.Clear();
+            _dash.Clear();
         }
 
         /// <summary>

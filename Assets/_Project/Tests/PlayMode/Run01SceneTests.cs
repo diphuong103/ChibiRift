@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using ChibiRift.Core;
+using ChibiRift.Data;
 using ChibiRift.Gameplay;
 using ChibiRift.UI;
 
@@ -52,6 +53,10 @@ namespace ChibiRift.Tests.Play
             // not exercise. Their complaints are not what is under test.
             LogAssert.ignoreFailingMessages = true;
 
+            // A hit stop left running by an earlier test would still hold the scale at zero, and
+            // FixedUpdate does not run at zero — every WaitForFixedUpdate below would wait forever.
+            Time.timeScale = 1f;
+
             // GameBootstrap survives scene loads and refuses to build a second root, so one left
             // over from an earlier test would keep its old InputReader registered, bound to devices
             // this test no longer has.
@@ -76,6 +81,10 @@ namespace ChibiRift.Tests.Play
         {
             // Destroyed before the fixture disposes the input devices, so nothing is left polling a
             // device with no state.
+            // Before the bootstrap goes: it hosts the hit-stop coroutine, so destroying it mid
+            // freeze would strand timeScale at zero with nothing alive left to restore it.
+            Time.timeScale = 1f;
+
             DestroyExistingBootstrap();
             yield return null;
 
@@ -329,7 +338,485 @@ namespace ChibiRift.Tests.Play
                 "something on the Enemy layer, or its move intent never reaches the motor (AI-005).");
         }
 
+        // ----- MOV-006, MOV-007: dash ------------------------------------------------------
+
+        [UnityTest]
+        public IEnumerator Test_Dash_MovesExactDistance()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            PlayerDash dash = motor.GetComponent<PlayerDash>();
+            DashConfig config = HeroDataOf(motor).Dash;
+
+            // Aimed right: away from the hole at x = -8 and well short of the wall at x = 20.
+            yield return AimAtScreenSide(0.9f);
+
+            float startX = motor.transform.position.x;
+
+            dash.RequestDash();
+            yield return Steps(2);
+            yield return WaitForDashToEnd(motor);
+
+            float travelled = motor.transform.position.x - startX;
+
+            // Constant velocity over a whole number of fixed steps, so the distance is exact to
+            // within one step of travel. A dash that undershoots is a dash whose reach cannot be
+            // learned, which is the entire point of a fixed distance.
+            float tolerance = config.Speed * Time.fixedDeltaTime * 2f;
+            Assert.That(travelled, Is.EqualTo(config.Distance).Within(tolerance),
+                $"Dash covered {travelled:F3}u, expected {config.Distance}u.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Dash_GrantsInvulnerability()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var health = motor.GetComponent<HealthComponent>();
+            PlayerDash dash = motor.GetComponent<PlayerDash>();
+
+            Assert.That(health.IsInvulnerable, Is.False, "Setup failed: hero started invulnerable.");
+
+            dash.RequestDash();
+            yield return Steps(2);
+
+            Assert.That(health.IsInvulnerable, Is.True,
+                "A dash must open the i-frame window (MOV-006, HPS-005).");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Dash_DoesNotCutExistingHurtIFrame()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            var health = motor.GetComponent<HealthComponent>();
+            PlayerDash dash = motor.GetComponent<PlayerDash>();
+
+            float hurtWindow = HeroDataOf(motor).HurtIFrameDuration;
+            float dashWindow = HeroDataOf(motor).Dash.IFrameDuration;
+
+            Assert.That(hurtWindow, Is.GreaterThan(dashWindow),
+                "This test only means something while the hurt window is the longer of the two.");
+
+            health.BeginInvulnerability(hurtWindow);
+            dash.RequestDash();
+            yield return Steps(2);
+
+            // Wait past the dash window but well short of the hurt window.
+            yield return Steps(StepsFor(dashWindow + 0.05f));
+
+            Assert.That(health.IsInvulnerable, Is.True,
+                $"The {dashWindow}s dash window replaced the longer {hurtWindow}s hurt window " +
+                "instead of being absorbed by it (HPS-005).");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Dash_StopsAtWall()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            PlayerDash dash = motor.GetComponent<PlayerDash>();
+            DashConfig config = HeroDataOf(motor).Dash;
+
+            // Right up against the wall at x = +20, with less room than the dash distance.
+            motor.Teleport(new Vector2(ArenaHalfWidth - 2f, motor.transform.position.y));
+            yield return AimAtScreenSide(0.9f);
+            yield return Steps(4);
+
+            dash.RequestDash();
+            yield return Steps(StepsFor(config.Duration) + 4);
+
+            // MOV-007: the wall stops it. Passing through would put the hero outside the arena.
+            float endX = motor.transform.position.x;
+
+            Assert.That(endX, Is.GreaterThan(ArenaHalfWidth - 2f),
+                "The hero dashed away from the wall, so nothing about MOV-007 was tested.");
+            Assert.That(endX, Is.LessThan(ArenaHalfWidth),
+                $"Hero dashed to x={endX:F2}, through the wall at {ArenaHalfWidth}.");
+            Assert.That(motor.IsDashing, Is.False, "The dash should have ended at the wall.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Dash_RespectsCooldown()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            PlayerDash dash = motor.GetComponent<PlayerDash>();
+            DashConfig config = HeroDataOf(motor).Dash;
+
+            yield return AimAtScreenSide(0.9f);
+
+            dash.RequestDash();
+            yield return Steps(2);
+            yield return WaitForDashToEnd(motor);
+            yield return Steps(2);
+
+            Assert.That(dash.CooldownRemaining, Is.GreaterThan(0f),
+                "The cooldown should start when the dash window closes (MOV-006).");
+
+            // Let the post-dash glide finish before taking the reference position, or the glide
+            // would be mistaken for a second dash.
+            yield return Steps(StepsFor(0.4f));
+            float afterFirst = motor.transform.position.x;
+
+            // Half way through the cooldown: a press must do nothing at all.
+            dash.RequestDash();
+            yield return Steps(StepsFor(config.Cooldown * 0.5f));
+
+            Assert.That(motor.transform.position.x, Is.EqualTo(afterFirst).Within(1f),
+                "A second dash ran while the cooldown was still going (MOV-006).");
+
+            yield return Steps(StepsFor(config.Cooldown * 0.5f + 0.1f));
+
+            Assert.That(dash.CanDash, Is.True,
+                $"After {config.Cooldown}s the dash should be available again.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Dash_BufferedDuringHitStop()
+        {
+            yield return BootIntoRun01();
+
+            PlayerMotor motor = FindHeroMotor();
+            PlayerDash dash = motor.GetComponent<PlayerDash>();
+            var pause = ServiceLocator.Current.Get<IPauseService>();
+
+            yield return AimAtScreenSide(0.9f);
+
+            // Freeze time, then press. Without buffering the press lands on a frozen game and is
+            // simply gone, which the player reads as the button not working.
+            pause.RequestHitStop(HeroDataOf(motor).Dash.BufferSeconds * 0.5f);
+            yield return null;
+
+            Assert.That(Time.timeScale, Is.EqualTo(0f).Within(0.001f), "Setup failed: time is not frozen.");
+
+            dash.RequestDash();
+            Assert.That(dash.BufferRemaining, Is.GreaterThan(0f), "The press was not buffered (P1-07).");
+
+            yield return WaitForRealSeconds(0.2f);
+            yield return Steps(StepsFor(HeroDataOf(motor).Dash.Duration) + 4);
+
+            Assert.That(dash.CooldownRemaining, Is.GreaterThan(0f),
+                "The buffered press never became a dash once time resumed (P1-07).");
+        }
+
+        // ----- COM-006: crit ---------------------------------------------------------------
+
+        [UnityTest]
+        public IEnumerator Test_Crit_AppliesMultiplier()
+        {
+            yield return BootIntoRun01();
+
+            var combat = ServiceLocator.Current.Get<CombatSystem>();
+            var balance = BalanceOf(FindHeroMotor());
+            HealthComponent target = FindDummy();
+
+            // Chance 1 rather than hunting for a seed that crits: the multiplier is what is under
+            // test, not the roll.
+            DamageResult normal = combat.DealDamage(
+                target, 10f, 1f, 0f, DamageSource.BasicAttack, target.transform.position, Vector2.zero);
+
+            // Real time, not fixed steps: that hit froze the game, and FixedUpdate does not run
+            // while it is frozen, so a WaitForFixedUpdate here would never return.
+            yield return WaitForRealSeconds(HitStopSettle);
+
+            DamageResult crit = combat.DealDamage(
+                target, 10f, 1f, 1f, DamageSource.BasicAttack, target.transform.position, Vector2.zero);
+
+            Assert.That(normal.WasCritical, Is.False, "A 0 chance hit should never crit.");
+            Assert.That(crit.WasCritical, Is.True, "A chance of 1 must always crit (COM-006).");
+            Assert.That(crit.FinalDamage,
+                Is.EqualTo(normal.FinalDamage * balance.DefaultCritMultiplier).Within(0.001f),
+                $"Crit should deal {balance.DefaultCritMultiplier}x the normal hit.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Crit_MarksDamageEventAsCrit()
+        {
+            yield return BootIntoRun01();
+
+            var bus = ServiceLocator.Current.Get<EventBus>();
+            var combat = ServiceLocator.Current.Get<CombatSystem>();
+            HealthComponent target = FindDummy();
+
+            bool sawCrit = false;
+            void OnDamage(DamageAppliedEvent evt)
+            {
+                if (evt.Result.WasCritical) sawCrit = true;
+            }
+
+            bus.Subscribe<DamageAppliedEvent>(OnDamage);
+            try
+            {
+                combat.DealDamage(
+                    target, 10f, 1f, 1f, DamageSource.BasicAttack, target.transform.position, Vector2.zero);
+                yield return WaitForRealSeconds(HitStopSettle);
+
+                // The damage number colours itself off this flag, so it is the flag the UI needs
+                // rather than the result the caller happens to hold.
+                Assert.That(sawCrit, Is.True,
+                    "DamageAppliedEvent did not report the crit, so the UI cannot colour it (HPS-008).");
+            }
+            finally
+            {
+                bus.Unsubscribe<DamageAppliedEvent>(OnDamage);
+            }
+        }
+
+        // ----- SRS 21: hit stop ------------------------------------------------------------
+
+        [UnityTest]
+        public IEnumerator Test_HitStop_RestoresTimeScale()
+        {
+            yield return BootIntoRun01();
+
+            var pause = ServiceLocator.Current.Get<IPauseService>();
+
+            pause.RequestHitStop(0.05f);
+            yield return null;
+
+            Assert.That(Time.timeScale, Is.EqualTo(0f).Within(0.001f), "Hit stop did not freeze time.");
+
+            yield return WaitForRealSeconds(0.2f);
+
+            Assert.That(Time.timeScale, Is.EqualTo(1f).Within(0.001f),
+                "Time never resumed. A stuck timeScale is a hung game, not a slow one.");
+            Assert.That(pause.IsHitStopped, Is.False, "The hit stop should have finished.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_HitStop_TakesLongerDurationNotSum()
+        {
+            yield return BootIntoRun01();
+
+            var pause = ServiceLocator.Current.Get<IPauseService>();
+
+            // Two hits on one frame, as a crowd produces. Summing them would stall the game for
+            // long enough to read as a hitch.
+            pause.RequestHitStop(0.05f);
+            pause.RequestHitStop(0.08f);
+            yield return null;
+
+            // Past the longer of the two, but well short of their sum.
+            yield return WaitForRealSeconds(0.11f);
+
+            Assert.That(Time.timeScale, Is.EqualTo(1f).Within(0.001f),
+                "Overlapping hit stops added up instead of taking the longer one.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_HitStop_DoesNotCancelPause()
+        {
+            yield return BootIntoRun01();
+
+            var pause = ServiceLocator.Current.Get<IPauseService>();
+
+            pause.Pause(PauseReason.PauseMenu);
+            Assert.That(Time.timeScale, Is.EqualTo(0f).Within(0.001f), "Setup failed: pause did not freeze time.");
+
+            // A hit resolving during a pause. With two writers of timeScale this is the moment the
+            // freeze expires and hands the scale back to 1, un-pausing the game underneath the
+            // player.
+            pause.RequestHitStop(0.05f);
+            yield return WaitForRealSeconds(0.2f);
+
+            Assert.That(Time.timeScale, Is.EqualTo(0f).Within(0.001f),
+                "A hit stop finished during a pause and resumed the game (PAU-001).");
+            Assert.That(pause.IsPaused, Is.True, "The pause itself was lost.");
+
+            pause.Resume(PauseReason.PauseMenu);
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Pause_DuringHitStop_RestoresToOneOnResume()
+        {
+            yield return BootIntoRun01();
+
+            var pause = ServiceLocator.Current.Get<IPauseService>();
+
+            pause.RequestHitStop(0.2f);
+            yield return null;
+            Assert.That(pause.IsHitStopped, Is.True, "Setup failed: no hit stop is running.");
+
+            // Pause lands in the middle of the freeze and takes over.
+            pause.Pause(PauseReason.PauseMenu);
+            yield return WaitForRealSeconds(0.3f);
+
+            pause.Resume(PauseReason.PauseMenu);
+            yield return null;
+
+            // The danger is the opposite of the previous test: the abandoned hit stop leaving the
+            // scale at 0 with nothing left to restore it.
+            Assert.That(Time.timeScale, Is.EqualTo(1f).Within(0.001f),
+                "Time stayed frozen after resuming: the cancelled hit stop never released the scale.");
+        }
+
+        // ----- SRS 21: flash, and CAM-003 ---------------------------------------------------
+
+        [UnityTest]
+        public IEnumerator Test_Flash_DoesNotLeakMaterials()
+        {
+            yield return BootIntoRun01();
+
+            var combat = ServiceLocator.Current.Get<CombatSystem>();
+            HealthComponent target = FindDummy();
+
+            yield return WaitForRealSeconds(HitStopSettle);
+            int before = Resources.FindObjectsOfTypeAll<Material>().Length;
+
+            // Twenty hits. Writing Renderer.material clones the shared material on every access,
+            // so a leaking implementation grows the count once per flash.
+            for (int i = 0; i < 20; i++)
+            {
+                combat.DealDamage(
+                    target, 1f, 1f, 0f, DamageSource.BasicAttack, target.transform.position, Vector2.zero);
+                yield return WaitForRealSeconds(HitStopSettle);
+            }
+
+            int after = Resources.FindObjectsOfTypeAll<Material>().Length;
+
+            Assert.That(after - before, Is.LessThanOrEqualTo(2),
+                $"Material count grew from {before} to {after} over 20 flashes. Use a " +
+                "MaterialPropertyBlock rather than assigning to Renderer.material.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Shake_DoesNotEscapeConfiner()
+        {
+            yield return BootIntoRun01();
+
+            var bus = ServiceLocator.Current.Get<EventBus>();
+            Camera camera = Camera.main;
+            Assert.That(camera, Is.Not.Null, $"{RunScene} has no main camera.");
+
+            // Half the visible width: the confiner keeps the camera edge inside the polygon, so the
+            // centre may come no closer than this to the arena edge.
+            float halfWidth = camera.orthographicSize * camera.aspect;
+
+            // Far harder than anything the game asks for, so a confiner that is being bypassed
+            // shows up rather than hiding inside the tolerance.
+            for (int i = 0; i < 10; i++)
+            {
+                bus.Publish(new ScreenShakeRequestedEvent(5f, 0.2f));
+                yield return WaitForRealSeconds(0.05f);
+
+                float limit = ArenaHalfWidth - halfWidth;
+                Assert.That(Mathf.Abs(camera.transform.position.x), Is.LessThanOrEqualTo(limit + 1f),
+                    $"Camera reached x={camera.transform.position.x:F2}, outside the confiner. " +
+                    "The impulse listener must run before CinemachineConfiner2D (CAM-002, CAM-003).");
+            }
+        }
+
+        // ----- SRS 22: audio ----------------------------------------------------------------
+
+        [UnityTest]
+        public IEnumerator Test_Sfx_NullClipDoesNotThrow()
+        {
+            yield return BootIntoRun01();
+
+            var audio = ServiceLocator.Current.Get<IAudioService>();
+
+            // Every clip is empty in P1 and that is the shipping state. Playing one must be silent
+            // and uneventful, not an exception in the middle of combat.
+            Assert.DoesNotThrow(() => audio.PlayOneShot(null));
+            Assert.DoesNotThrow(() => audio.PlayOneShot(null, 0.5f));
+
+            // And the real path: land a hit with an empty library behind it.
+            var combat = ServiceLocator.Current.Get<CombatSystem>();
+            HealthComponent target = FindDummy();
+
+            combat.DealDamage(
+                target, 1f, 1f, 0f, DamageSource.BasicAttack, target.transform.position, Vector2.zero);
+
+            yield return WaitForRealSeconds(HitStopSettle);
+        }
+
         // ----- helpers ---------------------------------------------------------------------
+
+        /// <summary>Half-width of the arena, matching the boundary walls RunSceneBuilder places.</summary>
+        private const float ArenaHalfWidth = 20f;
+
+        /// <summary>
+        /// Real seconds to wait after landing a hit. Longer than the longest freeze (0.14s on a
+        /// kill), so time has certainly resumed before the next assertion or fixed-step wait.
+        /// </summary>
+        private const float HitStopSettle = 0.25f;
+
+        private static HeroData HeroDataOf(PlayerMotor motor)
+        {
+            var stats = motor.GetComponent<PlayerStats>();
+            Assert.That(stats, Is.Not.Null, "Hero has no PlayerStats.");
+            Assert.That(stats.Hero, Is.Not.Null, "PlayerStats has no HeroData.");
+            return stats.Hero;
+        }
+
+        private static BalanceConfig BalanceOf(PlayerMotor motor)
+        {
+            var stats = motor.GetComponent<PlayerStats>();
+            Assert.That(stats.Balance, Is.Not.Null, "PlayerStats has no BalanceConfig.");
+            return stats.Balance;
+        }
+
+        /// <summary>
+        /// Points the cursor at one side of the screen and lets it take effect.
+        /// </summary>
+        /// <remarks>
+        /// It has to be the real mouse. Facing follows the cursor from slice 2 on and the dash
+        /// falls back to facing, but <c>PlayerController.Update</c> re-applies the pointer position
+        /// every frame — so setting the aim directly is overwritten before the next fixed step, and
+        /// the dash goes wherever the untouched cursor happens to point. In this scene that is
+        /// leftward, into the hole at x = -8.
+        /// </remarks>
+        private IEnumerator AimAtScreenSide(float normalisedX)
+        {
+            Set(_mouse.position, new Vector2(Screen.width * normalisedX, Screen.height * 0.5f));
+            yield return null;
+            yield return null;
+        }
+
+        /// <summary>
+        /// Runs until the dash window closes, then returns. Distance has to be measured here:
+        /// after the dash the motor decelerates from 20 u/s at 80 u/s^2 and keeps travelling, so a
+        /// fixed number of extra steps would fold that glide into the measurement.
+        /// </summary>
+        private static IEnumerator WaitForDashToEnd(PlayerMotor motor)
+        {
+            int budget = StepsFor(2f);
+            for (int i = 0; i < budget && motor.IsDashing; i++) yield return new WaitForFixedUpdate();
+
+            Assert.That(motor.IsDashing, Is.False, "The dash never ended.");
+        }
+
+        /// <summary>A dummy to hit: it has plenty of health and never fights back.</summary>
+        private static HealthComponent FindDummy()
+        {
+            HealthComponent[] all = Object.FindObjectsByType<HealthComponent>(FindObjectsSortMode.None);
+
+            foreach (HealthComponent health in all)
+            {
+                if (health.IsPlayer || health.IsDead) continue;
+                if (!health.name.StartsWith("Dummy")) continue;
+                return health;
+            }
+
+            Assert.Fail($"{RunScene} contains no training dummy.");
+            return null;
+        }
+
+        /// <summary>
+        /// Waits in real time. Scaled waits never finish while a hit stop holds the scale at zero,
+        /// which is exactly the state these tests need to wait out.
+        /// </summary>
+        private static IEnumerator WaitForRealSeconds(float seconds)
+        {
+            float until = Time.realtimeSinceStartup + seconds;
+            while (Time.realtimeSinceStartup < until) yield return null;
+        }
 
         private static PlayerMotor FindHeroMotor()
         {
@@ -358,9 +845,25 @@ namespace ChibiRift.Tests.Play
             return best;
         }
 
+        /// <summary>
+        /// Waits <paramref name="count"/> physics steps, surviving a hit stop.
+        /// </summary>
+        /// <remarks>
+        /// <c>FixedUpdate</c> does not run while <c>Time.timeScale</c> is zero, so a plain
+        /// <c>WaitForFixedUpdate</c> deadlocks for as long as a freeze lasts — and from slice 4A
+        /// any landed hit freezes time, including one an enemy lands on the hero in the middle of
+        /// an unrelated test. Waiting the freeze out on frames first keeps the step semantics and
+        /// removes the deadlock. The guard is generous: it only has to outlast a 0.14s freeze.
+        /// </remarks>
         private static IEnumerator Steps(int count)
         {
-            for (int i = 0; i < count; i++) yield return new WaitForFixedUpdate();
+            for (int i = 0; i < count; i++)
+            {
+                float guardUntil = Time.realtimeSinceStartup + 1f;
+                while (Time.timeScale <= 0f && Time.realtimeSinceStartup < guardUntil) yield return null;
+
+                yield return new WaitForFixedUpdate();
+            }
         }
 
         private static int StepsFor(float seconds) => Mathf.CeilToInt(seconds / Time.fixedDeltaTime) + 1;

@@ -25,8 +25,8 @@ Paths are relative to `Assets/_Project/`.
 | MOV-003 | Double jump | `PlayerMotor.JumpCount` (reset on landing), `HeroData.MaxJumpCount` (2), `MovementConfig.DoubleJumpVelocity` (13, separate from the ground jump) | **Done** — `Test_DoubleJump_OnlyOnce` |
 | MOV-004 | Bounded by collision / world boundary | `PlayerMotor.UpdateGrounded` (`Physics2D.OverlapBox`, not `OnCollisionStay`), `PlayerMotor.ApplyBoundary` + `CheckFallLimit`, `Gameplay/SceneContext.cs` (`WorldHalfWidth` 20, `FallLimitY` -10, `SpawnPoint`), `Core/Utilities/GameLayers.cs` (`SolidWorldMask`), `ProjectSettings/Physics2DSettings.asset` | **Done** — `Test_WallCollision_NoPassThrough`, `Test_FallThroughHole_Respawn` |
 | MOV-005 | Input survives FPS variation | `InputReader.cs` (Input System, no legacy polling); `PlayerController.Update` samples input every frame so a tap between physics steps is not dropped, while `PlayerMotor.FixedUpdate` integrates on a fixed `dt` | **Done** |
-| MOV-006 | Dash on Left Shift with i-frames and cooldown | `PlayerController.Update` `TODO(MOV-006)` (binding live via `InputReader.DashPressed`), `Data/DashConfig.cs`, `BalanceConfig.DashCooldown` / `DashIFrameDuration` | Skeleton — binding + Schema + SRS 35 values Done |
-| MOV-007 | Dash cannot clip colliders or leave the arena | `TODO(MOV-006)` in `PlayerController.Update`; will reuse `PlayerMotor.ApplyBoundary` and `GameLayers.SolidWorldMask` | Skeleton |
+| MOV-006 | Dash on Left Shift with i-frames and cooldown | `Gameplay/Player/PlayerDash.cs` + `Combat/DashState.cs`; direction from move input or, standing still, from the cursor facing; i-frames through the shared `HealthComponent.BeginInvulnerability`; press buffered by `Combat/InputBuffer.cs` so a press during hit stop survives. `DashConfig` supplies 5u / 0.25s / 0.25s i-frame / 1.5s cooldown | **Done** — `Test_Dash_MovesExactDistance`, `Test_Dash_GrantsInvulnerability`, `Test_Dash_DoesNotCutExistingHurtIFrame`, `Test_Dash_RespectsCooldown`, `Test_Dash_BufferedDuringHitStop` |
+| MOV-007 | Dash cannot clip colliders or leave the arena | `PlayerMotor.FixedUpdate` ends the dash when the body stops moving against a collider (`DashConfig.WallStopFraction`); `ApplyBoundary` still clamps the arena edge | **Done** — `Test_Dash_StopsAtWall` |
 
 ## 8.2 Combat & Attack
 
@@ -37,7 +37,7 @@ Paths are relative to `Assets/_Project/`.
 | COM-003 | Combo resets on timeout | `PlayerCombat.Update` + `ResetCombo`, `HeroData.ComboWindow` (0.5); also resets on leaving the ground and on taking a hit. Publishes `ComboChangedEvent` | **Done** — `Test_Combo_ResetsAfterWindowExpires`, `Test_Combo_ResetsWhenLeavingGround`, `Test_Hero_HitResetsCombo` |
 | COM-004 | Clear hitbox / hurtbox, active frames only | `PlayerCombat.SweepHitbox` (`Physics2D.OverlapBox` inside `[ActiveStartTime, ActiveEndTime]`), per-swing `HashSet` for one hit per target, collision matrix. Frame data is in seconds, not Animation Events — see OI-18 | **Done** — `Test_Attack_HitboxOnlyActiveInWindow` |
 | COM-005 | Damage, knockback, hit feedback | `DamageAppliedEvent` carries the attacker position and the force; the target applies it through `IKnockbackReceiver` (`PlayerMotor`, `EnemyMotor`) using the shared `Combat/KnockbackState.cs`. `CombatSystem` never pushes anyone: hit-stop and shake will subscribe to the same event. Horizontal only in P1 | **Done** — `Test_Knockback_MovesTargetAwayFromAttacker`, `Test_Knockback_ReturnsControlAfterDuration` |
-| COM-006 | Critical hit | `Combat/DamageCalculator.cs` step 2 + `RollCritical` | **Done** — `DamageCalculatorTests.Step2_AppliesCriticalMultiplierOnlyOnCrit` |
+| COM-006 | Critical hit | `DamageCalculator` step 2 + `RollCritical`, rolled inside `CombatSystem.DealDamage` with the seeded RNG (RNG-004). `PlayerCombat` passes `PlayerStats.CritChance` (0.05); multiplier 2.0 from `BalanceConfig`. `DamageAppliedEvent.Result.WasCritical` drives the colour, the longer hit stop and the harder shake | **Done** — `Test_Crit_AppliesMultiplier`, `Test_Crit_MarksDamageEventAsCrit`, `DamageCalculatorTests.Step2_AppliesCriticalMultiplierOnlyOnCrit` |
 | COM-007 | Q/E/R special skills | `InputReader.WasSkillPressed`, `Scripts/Gameplay/Skills/SkillSystem.cs`, `Data/SkillData.cs` | Skeleton — bindings + Schema Done |
 | COM-008 | Cooldown only, no mana pool | `SkillSystem.cs`, `SkillData.Cooldown`; no resource field exists anywhere | Skeleton — by construction Done |
 | COM-009 | Mouse aim, no auto-target | `InputReader.AimWorldPosition` -> `PlayerCombat.SetAimTarget`: sets `AimDirection`, places and rotates the hitbox at `HitboxOffsetDistance`, and is the single writer of `SpriteRenderer.flipX` (OI-20) | **Done** — `Test_MouseAim_HitboxFollowsCursorDirection`, `Test_MouseAim_SpriteFlipsCorrectly` |
@@ -50,7 +50,7 @@ Paths are relative to `Assets/_Project/`.
 | HPS-002 | Enemy HP/Max HP | The same `HealthComponent`, seeded by `HealthComponent.SeedFrom(EnemyData)` or by `EnemyController.Distribute`. Shown by `UI/EnemyHealthBar.cs`, which identifies its owner by its parent's instance id and so needs no reference into gameplay | **Done** |
 | HPS-003 | One unified damage pipeline | `CombatSystem.DealDamage` is the only entry; it calls `DamageCalculator.Calculate` and is the only caller of `IDamageable.ApplyDamage` | **Done** — `DamagePipelineSourceTests` (text scan, OI-19) |
 | HPS-004 | No damage to a dead target | Guarded twice: `CombatSystem.DealDamage` refuses the hit (so no damage number appears) and `HealthComponent.ApplyDamage` refuses it again | **Done** — `Test_Damage_DeadTargetTakesNoMoreDamage` |
-| HPS-005 | I-frames after a hit and during dash | `HealthComponent.IsInvulnerable` / `BeginInvulnerability`; a surviving hit opens the window automatically for `HealthComponent.HurtIFrameDuration` (hero 0.8, enemies 0). `Gameplay/Player/HurtFlash.cs` shows it. A longer window never shortens a running one, so a dash cannot cut post-hit i-frames short | Post-hit **Done** — `Test_Hero_IFrameBlocksSecondHit`, `Test_Hero_IFrameExpiresAfterDuration`; dash lands in slice 4 |
+| HPS-005 | I-frames after a hit and during dash | `HealthComponent.IsInvulnerable` / `BeginInvulnerability`; a surviving hit opens the window automatically for `HealthComponent.HurtIFrameDuration` (hero 0.8, enemies 0). `Gameplay/Feel/SpriteFeedback.cs` shows it. A longer window never shortens a running one, which is what lets the dash open its own 0.25s without truncating the 0.8s a hit just granted | **Done** — `Test_Hero_IFrameBlocksSecondHit`, `Test_Hero_IFrameExpiresAfterDuration`, `Test_Dash_GrantsInvulnerability`, `Test_Dash_DoesNotCutExistingHurtIFrame` |
 | HPS-006 | Hero HP ≤ 0 enters Death | `HealthComponent.EnterDeathState`, guarded so `Died` and `EntityDiedEvent` fire once | **Done** — `Test_Death_FiresOnEntityDiedOnce` |
 | HPS-007 | Enemy death triggers reward/XP | The same guarded `HealthComponent.EnterDeathState`; `EnemyController.OnHealthDied` is where XP and gold hang. Corpse disables its collider and retires after `EnemyData.CorpseLingerSeconds` | Death **Done** — `Test_Death_FiresOnEntityDiedOnce`; reward grant Skeleton |
 | HPS-008 | Damage number on target | `UI/DamageNumberSpawner.cs` + `UI/DamageNumber.cs`, pooled with `ObjectPool<T>`, driven only by `DamageAppliedEvent`. Crit colour is set up although crits arrive in slice 4 | **Done** |
@@ -175,7 +175,7 @@ Paths are relative to `Assets/_Project/`.
 | SRS 19.3 | Level Up overlay, 3 cards, hover, mouse select | `Scripts/UI/LevelUpPanel.cs`, `UpgradeCardView.cs` | Skeleton |
 | SRS 19.4 | Settings: volumes, fullscreen, resolution, telemetry | `Scripts/UI/SettingsPanel.cs`, `Save/SettingsManager.cs`, `SettingsSave` | Backend **Done**, panel Skeleton |
 | SRS 19.4 | Key Rebind (Should), Language (Could) | — | **Chưa triển khai** — out of MVP (SRS 43 Q10) |
-| PAU-001 | ESC pauses and stops game time | `Core/Services/PauseManager.cs`, `InputReader.PausePressed` | **Done** |
+| PAU-001 | ESC pauses and stops game time | `Core/Services/PauseManager.cs`, the only writer of `Time.timeScale`, which also applies hit stop so the two can never fight. Pause outranks hit stop in both directions | **Done** — `Test_HitStop_DoesNotCancelPause`, `Test_Pause_DuringHitStop_RestoresToOneOnResume` |
 | PAU-002 | Resume / Settings / How to Play / Abandon / Quit | `Scripts/UI/PauseMenuController.cs` (5 button fields) | Skeleton |
 | PAU-003 | Abandon and Quit need confirmation | `PauseMenuController._confirmationPanel` | Skeleton |
 | PAU-004 | Abandon still passes through Post-Run | `RunManager.AbandonRun` TODO | Skeleton |
@@ -187,10 +187,10 @@ Paths are relative to `Assets/_Project/`.
 |---|---|---|---|
 | CAM-001 | Camera follows the hero stably | `Gameplay/Camera/CameraRig.SetFollowTarget` / `ApplyConfig` (Cinemachine 3: `CinemachineCamera.Target.TrackingTarget` + `CinemachinePositionComposer` damping and lookahead), `Data/CameraConfig.cs` (`DampingX` 0.3, `DampingY` 0.5, `Lookahead` 0.2), `CM_Follow` in `Scenes/Run_01.unity` | **Done** — smoothness accepted by playtest, not by a test |
 | CAM-002 | Camera stays inside level bounds | `CameraRig` (`CinemachineConfiner2D` + `InvalidateConfinerCache`), `CameraConfiner` `PolygonCollider2D` (-20,0)-(20,12) in `Scenes/Run_01.unity` | **Done** |
-| CAM-003 | Configurable screen shake | `ScreenShakeRequestedEvent`, `Core/Services/VfxManager.RequestScreenShake`, `BalanceConfig.ScreenShakeAmplitude` / `Duration` | Event + config **Done**, shake Skeleton |
+| CAM-003 | Configurable screen shake | `Feel/ScreenShakeService.cs` picks the weight from `BalanceConfig.Shake` and publishes `ScreenShakeRequestedEvent`; `CameraRig` subscribes and fires a `CinemachineImpulseSource` on the hero. The `CinemachineImpulseListener` is ordered **before** `CinemachineConfiner2D`, or a heavy hit shakes the view past the arena edge | **Done** — `Test_Shake_DoesNotEscapeConfiner` |
 | CAM-004 | Zoom for big events | `CameraRig.SetZoom` | Skeleton |
-| SRS 21 | Hit stop, flash, damage numbers, particles, trails | `VfxManager.cs`, `BalanceConfig.HitStopDuration` | Skeleton — **VFX chưa triển khai** (out of scope) |
-| SRS 22 | BGM and SFX buses | `Core/Services/AudioManager.cs`, `IAudioService` | Skeleton — **audio assets chưa triển khai** (out of scope) |
+| SRS 21 | Hit stop, flash, damage numbers, particles, trails | `Feel/HitStopService.cs` (light / heavy / crit / kill, applied by `PauseManager` which is the one owner of `Time.timeScale`), `Feel/SpriteFeedback.cs` (white flash via `MaterialPropertyBlock`, no material clones), `Feel/ImpactParticles.cs`, `Feel/DashTrail.cs`, `UI/DamageNumber.cs` | **Done** — `Test_HitStop_RestoresTimeScale`, `Test_HitStop_TakesLongerDurationNotSum`, `Test_HitStop_DoesNotCancelPause`, `Test_Pause_DuringHitStop_RestoresToOneOnResume`, `Test_Flash_DoesNotLeakMaterials` |
+| SRS 22 | BGM and SFX buses | `AudioManager.PlayOneShot` with a 16-voice pool, `Data/SfxLibrary.cs` (nine cues), `Feel/SfxPlayer.cs` joining the two because Core cannot reference Data. A missing clip is silent and warns once | Wiring **Done** — `Test_Sfx_NullClipDoesNotThrow`; **no audio files exist yet**, see README section 13 |
 
 ## 23 Data & Save
 
@@ -254,7 +254,7 @@ Paths are relative to `Assets/_Project/`.
 | NFR-005 | New player understands the controls | `Scripts/UI/HowToPlayPanel.cs` | Skeleton |
 | NFR-006 | Volume controls and readable UI | `IAudioService`, `SettingsSave` | Backend **Done** |
 | NFR-007 | New content added via data/prefab | 9 ScriptableObject types; no content enumerated in code | **Done** |
-| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 128 EditMode + 34 PlayMode tests | **Done** |
+| NFR-008 | Damage/XP/RNG independently testable | All three are `static` and pure; 155 EditMode + 56 PlayMode tests | **Done** |
 | NFR-009 | Basic save validation | `MetaSave.IsValid()`, checked before every write and after every read | **Done** |
 
 ## 30 Error Handling

@@ -18,11 +18,13 @@ namespace ChibiRift.Gameplay
         private IInputService _input;
         private PlayerMotor _motor;
         private PlayerCombat _combat;
+        private PlayerDash _dash;
 
         private void Awake()
         {
             _motor = GetComponent<PlayerMotor>();
             _combat = GetComponent<PlayerCombat>();
+            _dash = GetComponent<PlayerDash>();
         }
 
         private void Start()
@@ -56,7 +58,9 @@ namespace ChibiRift.Gameplay
                 _motor.SetSpeedMultiplier(_combat.MoveSpeedMultiplier);
             }
 
-            // TODO(MOV-006): dash on _input.DashPressed once the dash system exists.
+            // MOV-006: the dash buffers the press and decides direction and cooldown itself.
+            if (_dash != null && _input.DashPressed) _dash.RequestDash();
+
             // TODO(COM-007): Q/E/R via _input.WasSkillPressed.
         }
     }

@@ -27,13 +27,26 @@ namespace ChibiRift.Data
         [Min(0f)]
         public float Cooldown;
 
+        [Tooltip("Seconds a dash press is remembered (P1-07). Its own field so retuning dash feel cannot change jump feel.")]
+        [Min(0f)]
+        public float BufferSeconds;
+
+        [Tooltip("Fraction of dash speed below which the hero counts as blocked by a wall (MOV-007). Not zero: a body resting against a collider still reports a little residual motion.")]
+        [Range(0f, 1f)]
+        public float WallStopFraction;
+
+        /// <summary>Constant speed of the dash: the whole distance covered over the whole duration.</summary>
+        public float Speed => Duration > 0f ? Distance / Duration : 0f;
+
         /// <summary>Baseline dash: SRS 35 values where given, owner-confirmed values elsewhere (OI-03).</summary>
         public static DashConfig Baseline => new DashConfig
         {
             Distance = 5f,
             Duration = 0.25f,
             IFrameDuration = 0.25f,
-            Cooldown = 1.5f
+            Cooldown = 1.5f,
+            BufferSeconds = 0.12f,
+            WallStopFraction = 0.1f
         };
     }
 }

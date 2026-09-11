@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-26 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-28 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -476,3 +476,59 @@ prefab (a prefab cannot reference a scene object), `HealthComponent._sourceData`
 is the enemy seeding path), and `_isPlayer` and `_hurtIFrameDuration` on the enemy (an enemy is not
 the player, and enemies take hurt stun rather than invulnerability — i-frames would make them
 immune for the rest of a combo and break COM-002).
+
+---
+
+## OI-27 — Two writers of a runtime property, three times running
+
+The slice 4A brief specified a `TimeController` that would set `Time.timeScale` for hit stop.
+`PauseManager` already documents itself as *"the only writer of `Time.timeScale` in the project"*,
+and `VfxManager.RequestHitStop` already carried a TODO naming this exact hazard.
+
+**The failure it would have caused:** the hero is hit, hit stop freezes time for 0.08s, the player
+presses ESC inside that window. The freeze expires, sets the scale back to 1, and the game is
+running again behind a pause menu that is still on screen.
+
+That is the **third** time this project has hit the same shape of bug:
+
+| Slice | Property | Two writers | Symptom |
+|---|---|---|---|
+| 2 | `SpriteRenderer.flipX` | `PlayerMotor` and `PlayerCombat` | Sprite flickered when cursor and movement disagreed (OI-20) |
+| 4A | `Time.timeScale` | `PauseManager` and the specified `TimeController` | Pause silently lifted by an expiring freeze |
+| 4A | `SpriteRenderer.color` | `HurtFlash` and the new hit flash | Whichever ran last won; they fire together by definition |
+
+**Decision.** `PauseManager` stays the sole writer and gained `RequestHitStop`. Pause outranks hit
+stop in both directions: a request made while paused is dropped, and a pause taken during a freeze
+cancels it rather than queueing behind it. The freeze *length* is still chosen in
+`Gameplay/Feel/HitStopService.cs`, because the durations live in `BalanceConfig` and Core cannot
+reference Data. `HurtFlash` was merged into `Gameplay/Feel/SpriteFeedback.cs`, now the sole writer
+of sprite colour.
+
+**Rule adopted, written into README section 6:** one runtime property, one owner; everything else
+sends a request. The README carries the current ownership table, updated in the same commit that
+changes an owner. Three occurrences is a pattern, not an accident.
+
+---
+
+## OI-28 — Hit stop deadlocks any test that waits on a physics step
+
+`FixedUpdate` does not run while `Time.timeScale` is zero, so `yield return new WaitForFixedUpdate()`
+never returns during a freeze. Every PlayMode fixture waits that way, and from slice 4A **any**
+landed hit freezes time — including one an enemy lands on the hero in the middle of a test about
+something else entirely.
+
+Found the hard way: the first run of the slice 4A suite hung indefinitely inside
+`Test_Crit_AppliesMultiplier`, which deals damage and then waits two steps.
+
+**Fixes, both kept:**
+
+- The shared `Steps` helper waits out a freeze on frames before each fixed step, so it cannot
+  deadlock. Frames advance at a zero time scale; physics steps do not.
+- Tests that deliberately freeze time wait in real seconds instead, and the fixture forces
+  `Time.timeScale = 1` both before a test boots and before it tears the composition root down —
+  destroying the bootstrap mid-freeze would otherwise strand the scale at zero with nothing alive
+  left to restore it.
+
+**Worth remembering for later slices:** anything that can stop time turns every scaled wait in the
+test suite into a potential hang, and a hang looks nothing like a failure — the run simply never
+finishes.

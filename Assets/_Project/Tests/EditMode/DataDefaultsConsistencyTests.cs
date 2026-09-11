@@ -211,6 +211,39 @@ namespace ChibiRift.Tests.Edit
 
             yield return Row("hurtFlashesPerSecond", 8f, g => g.Balance.HurtFlashesPerSecond);
             yield return Row("hurtFlashMinAlpha", 0.25f, g => g.Balance.HurtFlashMinAlpha);
+
+            // Hit stop (P1 slice 4A). The four must stay clearly apart or combo steps that differ
+            // only by a damage number stay indistinguishable to the hands.
+            yield return Row("hitStopLight", 0.04f, g => g.Balance.HitStop.Light);
+            yield return Row("hitStopHeavy", 0.08f, g => g.Balance.HitStop.Heavy);
+            yield return Row("hitStopCrit", 0.10f, g => g.Balance.HitStop.Critical);
+            yield return Row("hitStopKill", 0.14f, g => g.Balance.HitStop.Kill);
+
+            // Screen shake (CAM-003).
+            yield return Row("shakeLight.amplitude", 0.12f, g => g.Balance.Shake.Light.Amplitude);
+            yield return Row("shakeLight.duration", 0.10f, g => g.Balance.Shake.Light.Duration);
+            yield return Row("shakeHeavy.amplitude", 0.25f, g => g.Balance.Shake.Heavy.Amplitude);
+            yield return Row("shakeHeavy.duration", 0.16f, g => g.Balance.Shake.Heavy.Duration);
+            yield return Row("shakeCrit.amplitude", 0.35f, g => g.Balance.Shake.Critical.Amplitude);
+            yield return Row("shakeCrit.duration", 0.20f, g => g.Balance.Shake.Critical.Duration);
+            yield return Row("shakeHeroHurt.amplitude", 0.30f, g => g.Balance.Shake.HeroHurt.Amplitude);
+            yield return Row("shakeHeroHurt.duration", 0.18f, g => g.Balance.Shake.HeroHurt.Duration);
+
+            // Flash and dash trail (SRS 21, MOV-006).
+            yield return Row("flashDuration", 0.08f, g => g.Balance.Impact.FlashDuration);
+            yield return Row("dashGhostInterval", 0.04f, g => g.Balance.Impact.DashGhostInterval);
+            yield return Row("dashGhostLifetime", 0.15f, g => g.Balance.Impact.DashGhostLifetime);
+            yield return Row("dashGhostAlpha", 0.4f, g => g.Balance.Impact.DashGhostAlpha);
+
+            // Not in the brief's list: a particle count was needed and prose said "a few".
+            yield return Row("impactParticleCount", 6f, g => g.Balance.Impact.ParticleCount);
+
+            // Input buffering (P1-07). Separate fields from the jump buffer on purpose.
+            yield return Row("attackBufferSeconds", 0.12f, g => g.Attack.AttackBufferSeconds);
+            yield return Row("dashBufferSeconds", 0.12f, g => g.Hero.Dash.BufferSeconds);
+
+            // Not in the brief's list: MOV-007 needs a threshold for "the wall stopped me".
+            yield return Row("dashWallStopFraction", 0.1f, g => g.Hero.Dash.WallStopFraction);
         }
 
         [TestCaseSource(nameof(ConfirmedValues))]

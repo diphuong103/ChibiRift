@@ -32,4 +32,5 @@ MonoBehaviour:
   _hitboxWidth: 1.2
   _hitboxHeight: 1
   _hitboxOffsetDistance: 0.8
+  _attackBufferSeconds: 0.12
   _moveSpeedMultiplierWhileAttacking: 0.3

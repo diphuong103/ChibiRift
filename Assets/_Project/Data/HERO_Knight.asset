@@ -29,6 +29,8 @@ MonoBehaviour:
     Duration: 0.25
     IFrameDuration: 0.25
     Cooldown: 1.5
+    BufferSeconds: 0.12
+    WallStopFraction: 0.1
   _movement:
     GroundAccel: 60
     GroundDecel: 80

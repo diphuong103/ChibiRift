@@ -65,6 +65,11 @@ namespace ChibiRift.Data
         [Min(0f)]
         [SerializeField] private float _hitboxOffsetDistance = 0.8f;
 
+        [Header("Input buffering (P1-07)")]
+        [Tooltip("Seconds an attack press is remembered. Its own field rather than the jump buffer, so retuning attack rhythm cannot silently change how jumps feel.")]
+        [Min(0f)]
+        [SerializeField] private float _attackBufferSeconds = 0.12f;
+
         [Header("Movement while attacking (COM-001)")]
         [Tooltip("Horizontal speed scale during a swing. Below 1 commits the attack without freezing the hero. Not in SRS 35; set by the project owner.")]
         [Range(0f, 1f)]
@@ -90,6 +95,12 @@ namespace ChibiRift.Data
 
         /// <summary>Horizontal speed scale while a swing is running (COM-001).</summary>
         public float MoveSpeedMultiplierWhileAttacking => _moveSpeedMultiplierWhileAttacking;
+
+        /// <summary>
+        /// Seconds an attack press is remembered (P1-07). Needed because hit stop stops time: a
+        /// press during the freeze would otherwise be dropped, which reads as the game ignoring it.
+        /// </summary>
+        public float AttackBufferSeconds => _attackBufferSeconds;
 
         /// <summary>The step at <paramref name="index"/>, or a harmless empty step when out of range.</summary>
         public AttackStep GetStep(int index)

@@ -178,6 +178,33 @@ makes the illegal directions **impossible to compile** rather than merely discou
 
 ## 6. Naming conventions
 
+### One runtime property, one owner
+
+Each mutable property of a component has exactly **one** class allowed to write it. Anything else
+that wants to affect it sends a request to the owner rather than writing directly.
+
+| Property | Owner | How everyone else asks |
+|---|---|---|
+| `Time.timeScale` | `PauseManager` | `IPauseService.Pause` / `RequestHitStop` |
+| `SpriteRenderer.color` and alpha | `SpriteFeedback` | raise `HealthComponent.Damaged`, or open an i-frame window |
+| `SpriteRenderer.flipX` | `PlayerCombat` | `SetAimTarget` |
+| `Rigidbody2D.linearVelocity` | `PlayerMotor` / `EnemyMotor` | `SetMoveIntent`, `ApplyKnockback`, `BeginDash` |
+| `Transform.position` (hero) | `PlayerMotor` | `Teleport` |
+
+**Why this is a rule and not a preference.** The project has hit the same failure three times, and
+each time it was two writers rather than a logic error:
+
+- Slice 2: `PlayerMotor` and `PlayerCombat` both wrote `flipX`, and the sprite flickered whenever
+  the cursor and the movement direction disagreed (OI-20).
+- Slice 4A, caught in planning: hit stop was specified as a second writer of `Time.timeScale`. A
+  freeze expiring during a pause would have set the scale back to 1 and un-paused the game
+  underneath the player.
+- Slice 4A, same review: the white hit flash and the i-frame pulse both wanted
+  `SpriteRenderer.color`, and they fire together by definition, because being hit is what opens the
+  window.
+
+Update the table in the same commit that changes an owner.
+
 ### Two names that are easy to confuse
 
 | Name | Meaning |
@@ -249,7 +276,7 @@ Headless:
   -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **135 EditMode + 41 PlayMode, all passing.**
+Current status: **155 EditMode + 56 PlayMode, all passing.**
 
 | Suite | Count | What it covers |
 |---|---|---|
@@ -257,14 +284,14 @@ Current status: **135 EditMode + 41 PlayMode, all passing.**
 | `ExperienceCurveTests` | 12 | The XP curve and its inverse |
 | `UpgradeRollerTests` | 15 | Three-card rolls, the no-duplicate rule, Fallback Pool top-up, an exhausted pool, the max-stack filter, seed reproducibility |
 | `InputActionsAssetTests` | 6 | The `.inputactions` asset itself: the map, all nine actions, the A/D composite and Space binding, and that W/S/F stay unbound (SRS 43 Q2) |
-| `DataDefaultsConsistencyTests` | 74 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
+| `DataDefaultsConsistencyTests` | 94 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
 | `DamagePipelineSourceTests` | 2 | Health is only ever reduced through `CombatSystem` (HPS-003). A text scan, not a compiler guarantee — see OI-19 |
 | `PrefabWiringTests` | 3 | Every serialized field on the hero and enemy prefabs is wired, or declared empty with a reason. Covers the third value path — prefab fields — which neither of the data suites can see (OI-26) |
 | `SceneActorVisualTests` | 4 | Every actor in Run_01 draws something, its sprite is a real asset, and nothing is scaled through its Transform. Covers what the logic suites structurally cannot see — see OI-23 |
 | `AssetReferenceIntegrityTests` | 5 | No wave, stage or hero points at a missing asset, and no two assets share an id. Renaming an asset is the classic way to leave a reference that Unity only complains about at runtime |
 | `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
 | `PlayerCombatTests` (PlayMode) | 10 | TC-COM: the active window, one hit per target per swing, the three hit chain, both combo resets, mouse aim and sprite flip, damage to a corpse, death firing once, and step 3 out-damaging step 1 |
-| `Run01SceneTests` (PlayMode) | 7 | **The only fixture that plays the real game.** Loads the real Boot scene so the real `InputReader` and `CombatSystem` are built, drives simulated mouse and keyboard, then plays Run_01 with the prefabs that ship in it: every wired action reaches its property, a real click damages a dummy, Space jumps, hero and enemies land, the nearest enemy actually closes distance, and a landed hit produces a visible health bar and damage number |
+| `Run01SceneTests` (PlayMode) | 22 | **The only fixture that plays the real game.** Loads the real Boot scene so the real `InputReader` and `CombatSystem` are built, drives simulated mouse and keyboard, then plays Run_01 with the prefabs that ship in it: every wired action reaches its property, a real click damages a dummy, Space jumps, hero and enemies land, the nearest enemy actually closes distance, a landed hit produces a visible health bar and damage number, and from slice 4A the dash, crits, hit stop and shake are all exercised here too |
 | `EnemyAiTests` (PlayMode) | 16 | TC-AI: idle, chase, aggro hysteresis, walking home, attack window and cooldown, damage through the pipeline, hero i-frames, combo reset on being hit, knockback out and back, hurt stun, terminal death, and stats following the asset |
 
 ### The three paths a value takes, and what watches each
@@ -378,7 +405,32 @@ Nothing is ever sent over the network.
 
 The repository is committed and pushed to `https://github.com/diphuong103/ChibiRift.git`.
 
-## 13. Related documents
+## 13. Sound effects
+
+No audio ships yet. The wiring is complete and silent: every cue is connected, and a missing clip
+is dropped without an error and reported once per session rather than once per hit.
+
+**To add sound**, drop `.wav` files anywhere under `Assets/_Project/Audio/` and assign them on
+`Assets/_Project/Data/SFX_Default.asset`:
+
+| Field on `SfxLibrary` | Fires when |
+|---|---|
+| `Attack 1` | First combo step starts |
+| `Attack 2` | Second combo step starts |
+| `Attack 3` | Third combo step starts |
+| `Hit` | Any non-critical hit lands |
+| `Crit` | A critical hit lands (COM-006) |
+| `Jump` | Jump or double jump leaves the ground |
+| `Dash` | Dash starts (MOV-006) |
+| `Hurt Hero` | The hero takes damage |
+| `Enemy Death` | An enemy dies |
+
+Attack cues fire as the swing starts, not as it connects, so a whiff still makes a sound.
+
+The asset is regenerated by **ChibiRift → Setup**, which clears the clip assignments — assign them
+after running Setup, or the next Setup run will empty them again.
+
+## 14. Related documents
 
 - `TRACEABILITY.md` — every SRS requirement ID mapped to the file that serves it.
 - `OPEN_ISSUES.md` — ambiguities found in the SRS and the decision taken for each.

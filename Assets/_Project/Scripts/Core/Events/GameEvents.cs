@@ -53,6 +53,13 @@ namespace ChibiRift.Core
         /// <summary>Seconds the target's own movement yields to the knockback.</summary>
         public readonly float KnockbackDuration;
 
+        /// <summary>
+        /// True when this hit emptied the target's health. Carried here rather than read back off
+        /// the target, because by the time a subscriber runs the target may already be leaving the
+        /// scene. Hit stop uses it to give a kill the longest freeze (SRS 21).
+        /// </summary>
+        public readonly bool KilledTarget;
+
         public DamageAppliedEvent(
             int targetEntityId,
             in DamageResult result,
@@ -60,8 +67,10 @@ namespace ChibiRift.Core
             bool targetIsPlayer,
             Vector2 attackerPosition,
             float knockbackForce,
-            float knockbackDuration)
+            float knockbackDuration,
+            bool killedTarget)
         {
+            KilledTarget = killedTarget;
             TargetEntityId = targetEntityId;
             Result = result;
             WorldPosition = worldPosition;
@@ -368,6 +377,26 @@ namespace ChibiRift.Core
             AliveCount = aliveCount;
             NearestState = nearestState;
             NearestDistance = nearestDistance;
+        }
+    }
+
+    /// <summary>
+    /// A dash started (MOV-006). Drives the afterimage trail and the dash cue; the dash itself is
+    /// already under way by the time this is published.
+    /// </summary>
+    public readonly struct DashStartedEvent
+    {
+        public readonly int EntityId;
+        public readonly Vector2 WorldPosition;
+        public readonly float Duration;
+        public readonly float InvulnerableSeconds;
+
+        public DashStartedEvent(int entityId, Vector2 worldPosition, float duration, float invulnerableSeconds)
+        {
+            EntityId = entityId;
+            WorldPosition = worldPosition;
+            Duration = duration;
+            InvulnerableSeconds = invulnerableSeconds;
         }
     }
 

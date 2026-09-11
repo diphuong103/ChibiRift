@@ -91,10 +91,10 @@ namespace ChibiRift.Core
             _jump.started += OnJumpStarted;
             _jump.canceled += OnJumpReleased;
             _attack.started += OnAttack;
+            _dash.started += OnDash;
 
             // Not wired because nothing consumes them yet; the actions are still bound and
             // pollable, so wiring is a one-line change when the system arrives.
-            // TODO(MOV-006): _dash.started += OnDash;
             // TODO(COM-007): _skill1/_skill2/_skill3.started += OnSkill1/2/3;
             // TODO(PAU-001): _pause.started += OnPause;
 
@@ -159,6 +159,7 @@ namespace ChibiRift.Core
             _jump.started -= OnJumpStarted;
             _jump.canceled -= OnJumpReleased;
             _attack.started -= OnAttack;
+            _dash.started -= OnDash;
 
             _gameplay.Disable();
         }
@@ -174,7 +175,6 @@ namespace ChibiRift.Core
 
         private void OnDash(InputAction.CallbackContext context)
         {
-            // TODO(MOV-006): dash with i-frames and cooldown consumes this.
             DashStarted?.Invoke();
         }
 

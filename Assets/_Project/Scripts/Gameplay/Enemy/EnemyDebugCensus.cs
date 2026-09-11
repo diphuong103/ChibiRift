@@ -1,5 +1,6 @@
 using UnityEngine;
 using ChibiRift.Core;
+using ChibiRift.Data;
 
 namespace ChibiRift.Gameplay
 {
@@ -16,9 +17,15 @@ namespace ChibiRift.Gameplay
     [DisallowMultipleComponent]
     public sealed class EnemyDebugCensus : MonoBehaviour
     {
-        [Tooltip("Seconds between scans. Slow on purpose: this is a diagnostic, not a system.")]
-        [Min(0.05f)]
-        [SerializeField] private float _scanInterval = 0.25f;
+        [Tooltip("Supplies the scan interval. The diagnostic samples at the AI's own decision rate, so what it reports is what the AI last decided.")]
+        [SerializeField] private BalanceConfig _balanceConfig;
+
+        /// <summary>
+        /// Seconds between scans, taken from the AI think interval rather than a constant here.
+        /// Sampling faster than the AI decides would only report the same answer repeatedly; this
+        /// also keeps the project free of tuning literals outside ChibiRift.Data (SRS 35).
+        /// </summary>
+        private float ScanInterval => _balanceConfig != null ? _balanceConfig.EnemyThinkInterval : 0f;
 
         private EventBus _eventBus;
         private Transform _hero;
@@ -38,7 +45,7 @@ namespace ChibiRift.Gameplay
 
             _timer -= Time.deltaTime;
             if (_timer > 0f) return;
-            _timer = _scanInterval;
+            _timer = ScanInterval;
 
             EnemyAI[] enemies = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
 

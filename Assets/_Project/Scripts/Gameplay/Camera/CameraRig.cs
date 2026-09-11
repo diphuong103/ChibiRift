@@ -27,6 +27,12 @@ namespace ChibiRift.Gameplay
         [Tooltip("Keeps the view inside the arena polygon (CAM-002).")]
         [SerializeField] private CinemachineConfiner2D _confiner;
 
+        [Tooltip("Applies shake impulses to the camera (CAM-003). Must sit BEFORE the confiner in the extension list, or a shake can throw the view outside the arena.")]
+        [SerializeField] private CinemachineImpulseListener _impulseListener;
+
+        [Tooltip("Emits the shake impulses. Lives on the hero, where every shake originates.")]
+        [SerializeField] private CinemachineImpulseSource _impulseSource;
+
         [Header("Data")]
         [Tooltip("Damping X/Y and lookahead. Never hard-coded in this script (SRS 35).")]
         [SerializeField] private CameraConfig _cameraConfig;
@@ -68,6 +74,40 @@ namespace ChibiRift.Gameplay
         public void InvalidateConfinerCache()
         {
             if (_confiner != null) _confiner.InvalidateBoundingShapeCache();
+        }
+
+        private EventBus _eventBus;
+
+        private void Start()
+        {
+            if (ServiceLocator.Current == null) return;
+            if (!ServiceLocator.Current.TryGet(out _eventBus)) return;
+
+            _eventBus.Subscribe<ScreenShakeRequestedEvent>(OnShakeRequested);
+        }
+
+        private void OnDisable() => _eventBus?.Unsubscribe<ScreenShakeRequestedEvent>(OnShakeRequested);
+
+        private void OnShakeRequested(ScreenShakeRequestedEvent evt) => Shake(evt.Amplitude, evt.Duration);
+
+        /// <summary>
+        /// Shakes the camera (CAM-003). Amplitude and duration come from the caller, which reads
+        /// them from <c>BalanceConfig</c> — this class holds no tuning values of its own.
+        /// </summary>
+        /// <remarks>
+        /// The impulse listener is ordered before <see cref="CinemachineConfiner2D"/> on purpose.
+        /// Cinemachine runs extensions in list order, so a listener placed after the confiner adds
+        /// its offset to an already-clamped position and pushes the view outside the arena
+        /// polygon, showing the void beyond the level on every heavy hit.
+        /// </remarks>
+        public void Shake(float amplitude, float duration)
+        {
+            if (_impulseSource == null || amplitude <= 0f || duration <= 0f) return;
+
+            CinemachineImpulseDefinition definition = _impulseSource.ImpulseDefinition;
+            definition.ImpulseDuration = duration;
+
+            _impulseSource.GenerateImpulseWithForce(amplitude);
         }
 
         /// <summary>Zoom for a large event such as the boss entrance (CAM-004).</summary>

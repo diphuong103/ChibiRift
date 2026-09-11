@@ -142,6 +142,16 @@ namespace ChibiRift.Data
         [Min(0f)]
         [SerializeField] private float _enemyHealthBarHideDelay = 3f;
 
+        [Header("Game feel (SRS 21, CAM-003)")]
+        [Tooltip("How long the game freezes per weight of hit. The main thing separating combo step 1 from step 3.")]
+        [SerializeField] private HitStopConfig _hitStop = HitStopConfig.Baseline;
+
+        [Tooltip("Screen shake per weight of hit (CAM-003).")]
+        [SerializeField] private ShakeConfig _shake = ShakeConfig.Baseline;
+
+        [Tooltip("Flash, impact particles and the dash trail (SRS 21, MOV-006).")]
+        [SerializeField] private ImpactConfig _impact = ImpactConfig.Baseline;
+
         [Header("Hit feedback (HPS-005)")]
         [Tooltip("Sprite flashes per second while the hero is invulnerable, so the state is visible without reading a number.")]
         [Min(0.1f)]
@@ -238,6 +248,15 @@ namespace ChibiRift.Data
 
         /// <summary>Seconds an enemy health bar lingers after the last hit.</summary>
         public float EnemyHealthBarHideDelay => _enemyHealthBarHideDelay;
+
+        /// <summary>Freeze durations per weight of hit (SRS 21).</summary>
+        public HitStopConfig HitStop => _hitStop;
+
+        /// <summary>Screen shake per weight of hit (CAM-003).</summary>
+        public ShakeConfig Shake => _shake;
+
+        /// <summary>Flash, impact particles and dash trail (SRS 21, MOV-006).</summary>
+        public ImpactConfig Impact => _impact;
 
         /// <summary>Invulnerability flashes per second (HPS-005).</summary>
         public float HurtFlashesPerSecond => _hurtFlashesPerSecond;

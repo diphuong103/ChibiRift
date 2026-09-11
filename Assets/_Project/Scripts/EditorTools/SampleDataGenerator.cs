@@ -258,6 +258,12 @@ namespace ChibiRift.EditorTools
                     stats.FindPropertyRelative("Attack").floatValue = 12f;
                 });
 
+            // P1-31: the cue list. Every clip field is empty on purpose — no audio ships yet and
+            // the wiring is complete and silent until files are dropped in (see README).
+            Create<SfxLibrary>(
+                "SFX_Default", "sfx.default", "Default SFX",
+                "Nine cue slots for P1. Empty until the audio files exist; a missing clip is silent, not an error.");
+
             Create<StageData>(
                 "STG_Stage1", "stage.01", "Stage 1",
                 "The MVP stage: waves then a two phase boss (SRS 14, STG-003).",

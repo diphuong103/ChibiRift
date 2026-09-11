@@ -101,6 +101,24 @@ namespace ChibiRift.Core
 
         /// <summary>Releases the pause held by <paramref name="reason"/>. Time resumes when no reason is left.</summary>
         void Resume(PauseReason reason);
+
+        /// <summary>True while a hit stop is holding time at zero (SRS 21).</summary>
+        bool IsHitStopped { get; }
+
+        /// <summary>
+        /// Freezes time for <paramref name="unscaledSeconds"/> as impact feedback (SRS 21).
+        /// </summary>
+        /// <remarks>
+        /// Routed through the pause service rather than written directly, because
+        /// <see cref="UnityEngine.Time.timeScale"/> has exactly one owner. A second writer would
+        /// end its freeze by setting the scale back to 1 and silently un-pause a game the player
+        /// had paused. Pause outranks hit stop: a request made while paused is dropped, and a pause
+        /// during a freeze cancels it rather than queueing behind it.
+        ///
+        /// <para>Overlapping requests take the longer duration; they never add up, or a crowd
+        /// landing hits together would freeze the game for a noticeable stretch.</para>
+        /// </remarks>
+        void RequestHitStop(float unscaledSeconds);
     }
 
     /// <summary>Why the game is paused. The level-up panel cannot be dismissed with ESC (PAU-005).</summary>
@@ -154,6 +172,13 @@ namespace ChibiRift.Core
 
         /// <summary>Plays a one-shot sound effect by id.</summary>
         void PlaySfx(string sfxId);
+
+        /// <summary>
+        /// Plays <paramref name="clip"/> once at <paramref name="volume"/>, scaled by the SFX and
+        /// master buses. A null clip is silently ignored: no audio ships yet and a half-filled
+        /// library must stay playable.
+        /// </summary>
+        void PlayOneShot(UnityEngine.AudioClip clip, float volume = 1f);
 
         /// <summary>Switches the background music track (SRS 22).</summary>
         void PlayMusic(string musicId);

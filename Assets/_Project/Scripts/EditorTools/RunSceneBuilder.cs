@@ -189,6 +189,12 @@ namespace ChibiRift.EditorTools
             vcam.Lens.OrthographicSize = OrthographicSize;
 
             var composer = vcamObject.AddComponent<CinemachinePositionComposer>();
+
+            // CAM-003 before CAM-002, and the order is the whole point: Cinemachine runs extensions
+            // in the order they were added, so a listener added after the confiner would offset an
+            // already-clamped position and let a heavy hit shake the view past the arena edge.
+            var impulseListener = vcamObject.AddComponent<CinemachineImpulseListener>();
+
             var confiner = vcamObject.AddComponent<CinemachineConfiner2D>();
 
             // CAM-002: the bounding shape lives on its own object, never on hero or ground.
@@ -209,6 +215,9 @@ namespace ChibiRift.EditorTools
             rigSo.FindProperty("_camera").objectReferenceValue = vcam;
             rigSo.FindProperty("_composer").objectReferenceValue = composer;
             rigSo.FindProperty("_confiner").objectReferenceValue = confiner;
+            rigSo.FindProperty("_impulseListener").objectReferenceValue = impulseListener;
+            rigSo.FindProperty("_impulseSource").objectReferenceValue =
+                target != null ? target.GetComponent<CinemachineImpulseSource>() : null;
             rigSo.FindProperty("_cameraConfig").objectReferenceValue =
                 AssetDatabase.LoadAssetAtPath<CameraConfig>($"{DataRoot}/CameraConfig.asset");
             rigSo.ApplyModifiedPropertiesWithoutUndo();
@@ -255,8 +264,13 @@ namespace ChibiRift.EditorTools
             var stats = hero.AddComponent<PlayerStats>();
             var combat = hero.AddComponent<PlayerCombat>();
 
-            // HPS-005: the visible half of the i-frame window.
-            var flash = hero.AddComponent<HurtFlash>();
+            // MOV-006 and the feel systems. SpriteFeedback replaces HurtFlash: it owns the white
+            // hit flash as well as the i-frame pulse, so only one component writes sprite colour.
+            var dash = hero.AddComponent<PlayerDash>();
+            var feedback = hero.AddComponent<SpriteFeedback>();
+            var hitStop = hero.AddComponent<HitStopService>();
+            var shake = hero.AddComponent<ScreenShakeService>();
+            var sfx = hero.AddComponent<SfxPlayer>();
 
             var motorSo = new SerializedObject(motor);
             motorSo.FindProperty("_heroData").objectReferenceValue = heroData;
@@ -284,7 +298,16 @@ namespace ChibiRift.EditorTools
             combatSo.FindProperty("_spriteRenderer").objectReferenceValue = renderer;
             combatSo.ApplyModifiedPropertiesWithoutUndo();
 
-            SetReferences(flash, ("_balanceConfig", balance), ("_spriteRenderer", renderer));
+            SetReferences(dash, ("_heroData", heroData));
+            SetReferences(feedback, ("_balanceConfig", balance), ("_spriteRenderer", renderer));
+            SetReferences(hitStop, ("_balanceConfig", balance));
+            SetReferences(shake, ("_balanceConfig", balance));
+            SetReferences(sfx, ("_library",
+                AssetDatabase.LoadAssetAtPath<SfxLibrary>($"{DataRoot}/SFX_Default.asset")));
+
+            BuildDashTrail(hero, balance, renderer);
+            BuildImpactParticles(hero, balance);
+            BuildImpulseSource(hero);
 
             string path = $"{PrefabRoot}/Hero.prefab";
             AssetDatabase.DeleteAsset(path);
@@ -292,6 +315,84 @@ namespace ChibiRift.EditorTools
             Object.DestroyImmediate(hero);
 
             return prefab;
+        }
+
+        /// <summary>
+        /// Afterimage emitter for the dash (MOV-006). A child so the pool's instances live outside
+        /// the hero's own transform and are not dragged along by it.
+        /// </summary>
+        private static void BuildDashTrail(GameObject hero, BalanceConfig balance, SpriteRenderer source)
+        {
+            GameObject ghostPrefab = BuildGhostPrefab();
+
+            var trailObject = new GameObject("DashTrail");
+            trailObject.transform.SetParent(hero.transform, false);
+
+            var trail = trailObject.AddComponent<DashTrail>();
+            SetReferences(
+                trail,
+                ("_balanceConfig", balance),
+                ("_ghostPrefab", ghostPrefab != null ? ghostPrefab.GetComponent<SpriteRenderer>() : null),
+                ("_source", source));
+        }
+
+        /// <summary>
+        /// The impact burst (SRS 21). A child of the hero only so it has an owner in the scene; it
+        /// moves itself to each hit position, so it is not attached to the hero visually.
+        /// </summary>
+        private static void BuildImpactParticles(GameObject hero, BalanceConfig balance)
+        {
+            var burstObject = new GameObject("ImpactParticles");
+            burstObject.transform.SetParent(hero.transform, false);
+
+            var particles = burstObject.AddComponent<ParticleSystem>();
+
+            ParticleSystem.MainModule main = particles.main;
+            main.duration = 1f;
+            main.loop = false;
+            main.playOnAwake = false;
+            main.startLifetime = 0.25f;
+            main.startSpeed = 6f;
+            main.startSize = 0.12f;
+            main.gravityModifier = 1f;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            ParticleSystem.EmissionModule emission = particles.emission;
+            emission.enabled = false; // Emit() only: bursts are driven by hits, not by a rate.
+
+            ParticleSystem.ShapeModule shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Cone;
+            shape.angle = 25f;
+            shape.radius = 0.05f;
+
+            var burst = burstObject.AddComponent<ImpactParticles>();
+            SetReferences(burst, ("_balanceConfig", balance));
+        }
+
+        private static GameObject BuildGhostPrefab()
+        {
+            var ghost = new GameObject("DashGhost");
+            AddPlaceholderSprite(ghost, new Vector2(1f, 2f), Color.white);
+
+            string path = $"{PrefabRoot}/DashGhost.prefab";
+            AssetDatabase.DeleteAsset(path);
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(ghost, path);
+            Object.DestroyImmediate(ghost);
+
+            return prefab;
+        }
+
+        /// <summary>
+        /// The shake emitter (CAM-003). On the hero because every shake in P1 originates there:
+        /// a hit the hero lands, or a hit the hero takes.
+        /// </summary>
+        private static void BuildImpulseSource(GameObject hero)
+        {
+            var source = hero.AddComponent<CinemachineImpulseSource>();
+
+            CinemachineImpulseDefinition definition = source.ImpulseDefinition;
+            definition.ImpulseShape = CinemachineImpulseDefinition.ImpulseShapes.Recoil;
+            definition.ImpulseType = CinemachineImpulseDefinition.ImpulseTypes.Uniform;
         }
 
         /// <summary>
