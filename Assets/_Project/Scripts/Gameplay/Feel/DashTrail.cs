@@ -72,24 +72,37 @@ namespace ChibiRift.Gameplay
             _pool = new ObjectPool<SpriteRenderer>(_ghostPrefab, _container, _prewarmCount);
         }
 
+        /// <summary>Label this instance's Update reports under for NFR-002 profiling.</summary>
+        private const string AllocationLabel = "DashTrail.Update";
+
         private void Update()
         {
-            FadeLiveGhosts();
-
-            if (_pool == null || _motor == null || _source == null) return;
-
-            if (!_motor.IsDashing)
+            // NFR-002 profiling (OI-32). try/finally: not dashing is the common case and returns
+            // early.
+            AllocationProfiler.BeginSample(AllocationLabel);
+            try
             {
-                // Reset so the first frame of the next dash leaves a ghost straight away.
-                _nextGhostTimer = 0f;
-                return;
+                FadeLiveGhosts();
+
+                if (_pool == null || _motor == null || _source == null) return;
+
+                if (!_motor.IsDashing)
+                {
+                    // Reset so the first frame of the next dash leaves a ghost straight away.
+                    _nextGhostTimer = 0f;
+                    return;
+                }
+
+                _nextGhostTimer -= Time.deltaTime;
+                if (_nextGhostTimer > 0f) return;
+
+                _nextGhostTimer = Config.DashGhostInterval;
+                SpawnGhost();
             }
-
-            _nextGhostTimer -= Time.deltaTime;
-            if (_nextGhostTimer > 0f) return;
-
-            _nextGhostTimer = Config.DashGhostInterval;
-            SpawnGhost();
+            finally
+            {
+                AllocationProfiler.EndSample(AllocationLabel);
+            }
         }
 
         private void SpawnGhost()

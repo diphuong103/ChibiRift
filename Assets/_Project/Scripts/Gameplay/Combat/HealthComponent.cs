@@ -125,21 +125,34 @@ namespace ChibiRift.Gameplay
             _corpseRemaining = -1f;
         }
 
+        /// <summary>Label every instance's Update reports under for NFR-002 profiling.</summary>
+        private const string AllocationLabel = "HealthComponent.Update";
+
         private void Update()
         {
-            float dt = Time.deltaTime;
+            // NFR-002 profiling (OI-32). try/finally: the guard below returns early for anything
+            // that is not currently a corpse, which is most instances on most frames.
+            AllocationProfiler.BeginSample(AllocationLabel);
+            try
+            {
+                float dt = Time.deltaTime;
 
-            if (_invulnerableRemaining > 0f) _invulnerableRemaining -= dt;
+                if (_invulnerableRemaining > 0f) _invulnerableRemaining -= dt;
 
-            if (_corpseRemaining < 0f) return;
+                if (_corpseRemaining < 0f) return;
 
-            _corpseRemaining -= dt;
-            if (_corpseRemaining > 0f) return;
+                _corpseRemaining -= dt;
+                if (_corpseRemaining > 0f) return;
 
-            // HPS-007: announce, do not deactivate. Whoever owns this instance decides what
-            // happens to it — the pool for an enemy, nothing at all for a scene-placed dummy.
-            _corpseRemaining = -1f;
-            CorpseExpired?.Invoke(this);
+                // HPS-007: announce, do not deactivate. Whoever owns this instance decides what
+                // happens to it — the pool for an enemy, nothing at all for a scene-placed dummy.
+                _corpseRemaining = -1f;
+                CorpseExpired?.Invoke(this);
+            }
+            finally
+            {
+                AllocationProfiler.EndSample(AllocationLabel);
+            }
         }
 
         /// <summary>

@@ -133,35 +133,49 @@ namespace ChibiRift.Gameplay
             SpawnPosition = transform.position;
         }
 
+        /// <summary>Label every instance's FixedUpdate reports under for NFR-002 profiling.</summary>
+        private const string AllocationLabel = "EnemyAI.FixedUpdate";
+
         private void FixedUpdate()
         {
-            if (_enemyData == null) return;
-
-            float dt = Time.fixedDeltaTime;
-
-            // Counting runs every step; see the class remarks on the two clocks.
-            TickTimers(dt);
-
-            // AI-003: Death is terminal. Nothing below may run, and no transition leaves it.
-            if (State == EnemyLifecycleState.Death) return;
-
-            if (State == EnemyLifecycleState.Hurt)
+            // NFR-002 profiling (OI-32). try/finally because this method returns early on most of
+            // its paths (dead, hurt, still waiting to think) and every one of them must still close
+            // the sample, or the next call for this label would measure the idle time in between.
+            AllocationProfiler.BeginSample(AllocationLabel);
+            try
             {
-                TickHurt();
-                return;
+                if (_enemyData == null) return;
+
+                float dt = Time.fixedDeltaTime;
+
+                // Counting runs every step; see the class remarks on the two clocks.
+                TickTimers(dt);
+
+                // AI-003: Death is terminal. Nothing below may run, and no transition leaves it.
+                if (State == EnemyLifecycleState.Death) return;
+
+                if (State == EnemyLifecycleState.Hurt)
+                {
+                    TickHurt();
+                    return;
+                }
+
+                _thinkTimer -= dt;
+                if (_thinkTimer > 0f) return;
+                _thinkTimer = ThinkInterval;
+
+                switch (State)
+                {
+                    case EnemyLifecycleState.Idle: TickIdle(); break;
+                    case EnemyLifecycleState.Chase: TickChase(); break;
+                    case EnemyLifecycleState.Attack: TickAttack(); break;
+                    case EnemyLifecycleState.Recovery: TickRecovery(); break;
+                    case EnemyLifecycleState.ReturnToSpawn: TickReturnToSpawn(); break;
+                }
             }
-
-            _thinkTimer -= dt;
-            if (_thinkTimer > 0f) return;
-            _thinkTimer = ThinkInterval;
-
-            switch (State)
+            finally
             {
-                case EnemyLifecycleState.Idle: TickIdle(); break;
-                case EnemyLifecycleState.Chase: TickChase(); break;
-                case EnemyLifecycleState.Attack: TickAttack(); break;
-                case EnemyLifecycleState.Recovery: TickRecovery(); break;
-                case EnemyLifecycleState.ReturnToSpawn: TickReturnToSpawn(); break;
+                AllocationProfiler.EndSample(AllocationLabel);
             }
         }
 

@@ -281,7 +281,7 @@ Headless:
   -testResults /tmp/play.xml -logFile -
 ```
 
-Current status: **183 EditMode + 68 PlayMode, all passing.**
+Current status: **184 EditMode + 69 PlayMode, all passing.**
 
 | Suite | Count | What it covers |
 |---|---|---|
@@ -289,7 +289,7 @@ Current status: **183 EditMode + 68 PlayMode, all passing.**
 | `ExperienceCurveTests` | 12 | The XP curve and its inverse |
 | `UpgradeRollerTests` | 15 | Three-card rolls, the no-duplicate rule, Fallback Pool top-up, an exhausted pool, the max-stack filter, seed reproducibility |
 | `InputActionsAssetTests` | 6 | The `.inputactions` asset itself: the map, all nine actions, the A/D composite and Space binding, and that W/S/F stay unbound (SRS 43 Q2) |
-| `DataDefaultsConsistencyTests` | 121 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
+| `DataDefaultsConsistencyTests` | 122 | Every confirmed balance value survives a run of `SampleDataGenerator` — see below |
 | `DamagePipelineSourceTests` | 2 | Health is only ever reduced through `CombatSystem` (HPS-003). A text scan, not a compiler guarantee — see OI-19 |
 | `PrefabWiringTests` | 3 | Every serialized field on the hero and enemy prefabs is wired, or declared empty with a reason. Covers the third value path — prefab fields — which neither of the data suites can see (OI-26) |
 | `SceneActorVisualTests` | 4 | Every actor in Run_01 draws something, its sprite is a real asset, and nothing is scaled through its Transform. Covers what the logic suites structurally cannot see — see OI-23 |
@@ -297,7 +297,7 @@ Current status: **183 EditMode + 68 PlayMode, all passing.**
 | `AssetReferenceIntegrityTests` | 5 | No wave, stage or hero points at a missing asset, and no two assets share an id. Renaming an asset is the classic way to leave a reference that Unity only complains about at runtime |
 | `PlayerMovementTests` (PlayMode) | 8 | TC-MOV: top speed, jump peak height, double jump, coyote time, jump buffer, wall collision, world clamp, fall respawn |
 | `PlayerCombatTests` (PlayMode) | 10 | TC-COM: the active window, one hit per target per swing, the three hit chain, both combo resets, mouse aim and sprite flip, damage to a corpse, death firing once, and step 3 out-damaging step 1 |
-| `Run01SceneTests` (PlayMode) | 33 | **The only fixture that plays the real game.** Loads the real Boot scene so the real `InputReader` and `CombatSystem` are built, drives simulated mouse and keyboard, then plays Run_01 with the prefabs that ship in it: every wired action reaches its property, a real click damages a dummy, Space jumps, hero and enemies land, the nearest enemy actually closes distance, a landed hit produces a visible health bar and damage number, and from slice 4A the dash, crits, hit stop and shake are all exercised here too |
+| `Run01SceneTests` (PlayMode) | 34 | **The only fixture that plays the real game.** Loads the real Boot scene so the real `InputReader` and `CombatSystem` are built, drives simulated mouse and keyboard, then plays Run_01 with the prefabs that ship in it: every wired action reaches its property, a real click damages a dummy, Space jumps, hero and enemies land, the nearest enemy actually closes distance, a landed hit produces a visible health bar and damage number, the dash/crit/hit-stop/shake feel systems, and — see section 14 — that one real allocation run stays under budget |
 | `EnemyAiTests` (PlayMode) | 16 | TC-AI: idle, chase, aggro hysteresis, walking home, attack window and cooldown, damage through the pipeline, hero i-frames, combo reset on being hit, knockback out and back, hurt stun, terminal death, and stats following the asset |
 
 ### Writing a PlayMode test
@@ -480,18 +480,39 @@ window directly. The console prints a one-line summary; the JSON has the full di
 | `OnePercentLowFps` | NFR-001, 1% low | ≥ 50 |
 | `P99Ms` | NFR-002, frame time ceiling | ≤ 33 |
 | `FramesOver33Ms` | NFR-002 | as close to 0 as the run allows |
-| `AllocatedKilobytesDelta` | NFR-002 | near flat — steady growth means something allocates per frame, and a GC spike is the usual cause of a bad p99 |
+| `AllocatedKilobytesDelta` | NFR-002 | below `BalanceConfig.StressAllocationBudgetKilobytes` (8192); exact only when `GcCollectionsDuringSample` is 0, otherwise a floor |
+| `GcCollectionsDuringSample` | NFR-002 | 0 for an exact allocation reading; above 0 means a collection ran and the figure undercounts |
+| `StoppedBySafetyCap` | — | must be `false`; `true` means the sample did not reach the configured duration and nothing else here is comparable to a normal run |
+| `TopAllocationSources` | NFR-002 | the five heaviest instrumented call sites, most bytes first — see below for what is and is not covered |
+
+**What `TopAllocationSources` can and cannot see (OI-32).** `AllocationProfiler`
+(`ChibiRift.Core`) brackets the hot paths most likely to matter — every enemy and hero
+`Update`/`FixedUpdate`, and `CombatSystem.DealDamage`, which also captures everything a landed hit
+triggers synchronously (hit stop, shake, damage numbers, SFX, particles, knockback), since
+`EventBus.Publish` runs every subscriber on the same call stack. Across repeated 30-enemy/10s
+runs, every one of these totalled under 60 KB, against a measured `AllocatedKilobytesDelta` of
+2304-3456 KB. The remainder tracks the timing of enemies clustering around the hero rather than
+anything traceable to a specific script, and is the best-supported read on it: Unity's own
+Physics2D bookkeeping for a crowd of colliding, separating bodies — not a ChibiRift bug, and not
+provably that either, since nothing at the script level can bracket the engine's own simulation
+step. Full investigation notes, including two real bugs this harness shipped with and a hypothesis
+that was tested and disproven (the F1 overlay), are in OI-32.
 
 **What the measurement does not cover.** The harness casts no skill. The ultimate's cooldown is 15s
 and the sample is 10s, so including it would make each run depend on whether a cast happened to
 land inside the window. **The p99 therefore excludes the cost of an area skill sweeping its 3.5u
-radius.** That sentence is written into the report file as well, so the numbers cannot be read
-without it.
+radius.** The F1 debug overlay and its enemy census are disabled for the duration of the run
+(restored afterwards), so `AllocatedKilobytesDelta` is not measuring a diagnostic tool by accident.
+All of this is written into the report file as well, so the numbers cannot be read without it.
 
-**A batch-mode run measures nothing about performance.** There is no renderer, so the frame times
-are not a player's frame times. `Test_Profiler_HarnessProducesCompleteReport` asserts that the
-harness produced every field and never asserts a threshold. Only an editor run on real hardware
-answers NFR-001 and NFR-002.
+**A batch-mode run measures nothing about frame-time performance, and cannot see anything tied to
+rendering at all.** There is no renderer, so the frame times are not a player's frame times, and
+`OnGUI`, Canvas rebuilds and sprite batching do not run here — verified for `OnGUI` directly, not
+assumed. `Test_Profiler_HarnessProducesCompleteReport` asserts the harness produced every field and
+never asserts an FPS threshold; `Test_Profiler_AllocationStaysUnderBudget` does assert a threshold,
+because `AllocatedKilobytesDelta` does not depend on rendering to be meaningful. Only an editor run
+on real hardware, with the overlay actually visible, answers NFR-001 and NFR-002 for frame time, or
+can measure whatever this harness cannot see from here.
 
 ## 15. Related documents
 

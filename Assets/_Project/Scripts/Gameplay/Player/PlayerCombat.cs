@@ -169,8 +169,15 @@ namespace ChibiRift.Gameplay
 
         private void OnHeroDamaged(HealthComponent health) => ResetCombo();
 
+        /// <summary>Labels this instance's callbacks report under for NFR-002 profiling.</summary>
+        private const string UpdateAllocationLabel = "PlayerCombat.Update";
+        private const string FixedUpdateAllocationLabel = "PlayerCombat.FixedUpdate";
+
         private void Update()
         {
+            // NFR-002 profiling (OI-32). No early return here, so Begin/End bracket the body directly.
+            AllocationProfiler.BeginSample(UpdateAllocationLabel);
+
             // COM-003: the window only runs between swings. During a swing the next input is
             // accepted the moment the swing ends, so the window must not expire underneath it.
             if (State == CombatState.Idle && ComboWindowRemaining > 0f)
@@ -183,24 +190,36 @@ namespace ChibiRift.Gameplay
             bool grounded = _motor == null || _motor.IsGrounded;
             if (_wasGrounded && !grounded) ResetCombo();
             _wasGrounded = grounded;
+
+            AllocationProfiler.EndSample(UpdateAllocationLabel);
         }
 
         private void FixedUpdate()
         {
-            if (State != CombatState.Attacking) return;
+            // NFR-002 profiling (OI-32). try/finally: idle (not attacking) is the common case and
+            // returns early.
+            AllocationProfiler.BeginSample(FixedUpdateAllocationLabel);
+            try
+            {
+                if (State != CombatState.Attacking) return;
 
-            AttackStep step = Attack.GetStep(ComboStep - 1);
-            _stepElapsed += Time.fixedDeltaTime;
+                AttackStep step = Attack.GetStep(ComboStep - 1);
+                _stepElapsed += Time.fixedDeltaTime;
 
-            // COM-004: the hitbox exists only inside the active window of the current step.
-            bool active = _stepElapsed >= step.ActiveStartTime && _stepElapsed <= step.ActiveEndTime;
-            IsHitboxActive = active;
+                // COM-004: the hitbox exists only inside the active window of the current step.
+                bool active = _stepElapsed >= step.ActiveStartTime && _stepElapsed <= step.ActiveEndTime;
+                IsHitboxActive = active;
 
-            if (active) SweepHitbox(step);
+                if (active) SweepHitbox(step);
 
-            if (_stepElapsed < step.TotalDuration) return;
+                if (_stepElapsed < step.TotalDuration) return;
 
-            EndStep();
+                EndStep();
+            }
+            finally
+            {
+                AllocationProfiler.EndSample(FixedUpdateAllocationLabel);
+            }
         }
 
         private void BeginStep(int step)

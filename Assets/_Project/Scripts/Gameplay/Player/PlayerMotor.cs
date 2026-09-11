@@ -188,47 +188,60 @@ namespace ChibiRift.Gameplay
         /// </summary>
         public void RequestJump() => JumpBufferTimer = Config.JumpBuffer;
 
+        /// <summary>Label this instance's FixedUpdate reports under for NFR-002 profiling.</summary>
+        private const string AllocationLabel = "PlayerMotor.FixedUpdate";
+
         private void FixedUpdate()
         {
-            if (_heroData == null) return;
-
-            float dt = Time.fixedDeltaTime;
-
-            UpdateGrounded();
-            TickTimers(dt);
-
-            Vector2 velocity = _body.linearVelocity;
-
-            // MOV-006: a dash owns both axes. Checked first because it also outranks knockback —
-            // being shoved mid-dash must not bend the dash off its line.
-            if (_dash.Tick(dt))
+            // NFR-002 profiling (OI-32). try/finally: the missing-data guard below returns early.
+            AllocationProfiler.BeginSample(AllocationLabel);
+            try
             {
-                velocity = _dash.Velocity;
+                if (_heroData == null) return;
 
-                // MOV-007: a wall ends the dash rather than being passed through. The collider has
-                // already stopped the body, so near-zero travel is the signal that it hit something.
-                if (Mathf.Abs(_body.linearVelocity.x) < Mathf.Abs(_dash.Velocity.x) * _wallStopFraction)
+                float dt = Time.fixedDeltaTime;
+
+                UpdateGrounded();
+                TickTimers(dt);
+
+                Vector2 velocity = _body.linearVelocity;
+
+                // MOV-006: a dash owns both axes. Checked first because it also outranks knockback —
+                // being shoved mid-dash must not bend the dash off its line.
+                if (_dash.Tick(dt))
                 {
-                    _dash.Clear();
-                    velocity = _body.linearVelocity;
+                    velocity = _dash.Velocity;
+
+                    // MOV-007: a wall ends the dash rather than being passed through. The collider
+                    // has already stopped the body, so near-zero travel is the signal that it hit
+                    // something.
+                    if (Mathf.Abs(_body.linearVelocity.x) < Mathf.Abs(_dash.Velocity.x) * _wallStopFraction)
+                    {
+                        _dash.Clear();
+                        velocity = _body.linearVelocity;
+                    }
                 }
+                else
+                {
+                    // COM-005: while a knockback runs the hero has no horizontal say. Without this
+                    // the line below would overwrite the pushed velocity on the very next step and
+                    // the knockback would never be visible.
+                    if (!_knockback.Tick(dt)) velocity.x = ApplyHorizontal(velocity.x, dt);
+
+                    velocity.y = ApplyJumpAndGravity(velocity.y, dt);
+                }
+
+                _body.linearVelocity = velocity;
+
+                ApplyBoundary();
+                CheckFallLimit();
+                UpdateFacing(velocity.x);
+                PublishState(velocity);
             }
-            else
+            finally
             {
-                // COM-005: while a knockback runs the hero has no horizontal say. Without this the
-                // line below would overwrite the pushed velocity on the very next step and the
-                // knockback would never be visible.
-                if (!_knockback.Tick(dt)) velocity.x = ApplyHorizontal(velocity.x, dt);
-
-                velocity.y = ApplyJumpAndGravity(velocity.y, dt);
+                AllocationProfiler.EndSample(AllocationLabel);
             }
-
-            _body.linearVelocity = velocity;
-
-            ApplyBoundary();
-            CheckFallLimit();
-            UpdateFacing(velocity.x);
-            PublishState(velocity);
         }
 
         /// <summary>MOV-004: an OverlapBox at the feet, never OnCollisionStay.</summary>

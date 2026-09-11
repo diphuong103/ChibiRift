@@ -63,6 +63,9 @@ namespace ChibiRift.Gameplay
         /// <summary>Cap on neighbours considered for separation, so the sweep never allocates.</summary>
         private const int MaxNeighbours = 8;
 
+        /// <summary>Label every instance's FixedUpdate reports under for NFR-002 profiling.</summary>
+        private const string AllocationLabel = "EnemyMotor.FixedUpdate";
+
         private float MoveSpeed => _enemyData != null ? _enemyData.BaseStats.MoveSpeed : 0f;
 
         private EnemyPhysicsConfig Physics2DConfig =>
@@ -152,6 +155,9 @@ namespace ChibiRift.Gameplay
 
         private void FixedUpdate()
         {
+            // NFR-002 profiling (OI-32): aggregates across every live enemy under one label.
+            AllocationProfiler.BeginSample(AllocationLabel);
+
             float dt = Time.fixedDeltaTime;
 
             UpdateGrounded();
@@ -170,6 +176,8 @@ namespace ChibiRift.Gameplay
 
             _body.linearVelocity = velocity;
             UpdateFacing(velocity.x);
+
+            AllocationProfiler.EndSample(AllocationLabel);
         }
 
         private float ApplyGravity(float velocityY, float dt)

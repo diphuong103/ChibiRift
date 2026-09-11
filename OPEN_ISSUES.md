@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-31 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-32 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -618,3 +618,94 @@ NFR-002 are met.**
 **What closing these requires:** an editor run on the target machine, compared against the table in
 README section 14. Until then both stay open, superseding the "nothing to profile yet" state
 recorded in OI-15.
+
+---
+
+## OI-32 — Investigating a real allocation report: two harness bugs, one broken API, and an
+unattributed remainder
+
+The project owner ran the frame-time harness and reported `AllocatedKilobytesDelta = 12848 KB`
+over `DurationSeconds = 6.08s` with 30 enemies — roughly 2 MB/s, and `DurationSeconds` not
+matching the configured 10s. Investigating it found three real, fixed bugs and one honestly
+unresolved finding.
+
+**Bug 1 — the sample silently truncated at ~6s instead of 10s.** The sample buffer was a
+fixed-size array sized from `duration * MaxPlausibleFps` with `MaxPlausibleFps = 2000`, treated as
+a generous bound. A headless batch-mode run with no renderer runs far faster than that — the fixed
+harness measured 34,000-41,000 frames in 10s, 1700-2000+ FPS — so the array filled and the loop
+exited on `frames < samples.Length` failing, long before `elapsed` reached the configured
+duration. **Fixed:** the sample buffer is a `List<float>` with no upper bound (only a defensive
+`SafetyFrameCap` of 1,000,000 frames, purely against a runaway loop); a `StoppedBySafetyCap` field
+on the report makes a future truncation impossible to miss silently, and
+`Test_Profiler_HarnessProducesCompleteReport` asserts it is false.
+
+**Bug 2 — `GC.GetAllocatedBytesForCurrentThread` is not implemented in this project's Unity/Mono
+runtime.** The first fix attempt (before this entry) switched the measurement from
+`GC.GetTotalMemory` to this API, on the textbook-correct reasoning that allocated-bytes cannot be
+hidden by a mid-window collection the way a live-heap-size delta can. **Verified, not assumed:** a
+direct test that allocated and held 10MB of real arrays between two calls measured a delta of
+exactly zero from this API, and zero again for a single boxed `int`. `GC.GetTotalMemory` and
+`UnityEngine.Profiling.Profiler.GetMonoUsedSizeLong` both registered the same 10MB correctly in
+the same test. **Fixed:** reverted to `GC.GetTotalMemory`, paired with `GC.CollectionCount(0)`
+captured before and after — a `GcCollectionsDuringSample` field on the report says whether the
+figure is exact (zero collections) or a floor (one or more; undercounts by whatever they
+reclaimed). `AllocationProfiler`'s many small per-call-site samples use the same pairing and drop
+(rather than add) any individual sample a collection landed inside, since losing one of thousands
+costs nothing and keeping a known-wrong number is worse.
+
+**A hypothesis tested and disproven: the F1 debug overlay was not the cause, at least not the way
+it looked.** `DebugOverlay` is visible by default (`_visibleOnStart = true`) and draws ten
+`GUILayout.Label` calls with string-interpolation format specifiers every `OnGUI` — a plausible-
+looking source, and one with real problems independent of this investigation: it was completely
+unguarded (`EnemyDebugCensus`, its enemy-count feed, was too), meaning both ran in every session
+including a Release build, with nothing enforcing the "development only" their own doc comments
+claimed. Both are now gated behind `#if UNITY_EDITOR || DEVELOPMENT_BUILD`, matching the
+`DebugSpawner` precedent from OI-29, and the frame-time harness additionally disables both for the
+duration of its own run regardless of build symbols (restoring prior state after), since a
+diagnostic overlay is not the game being measured.
+
+That said: **`OnGUI` does not dispatch at all in `-nographics` batch mode** — verified with a
+guaranteed `Debug.Log` placed inside it, which never printed across a full run. And when the exact
+string-interpolation expressions from the overlay's ten label lines were run 10,000 times in
+isolation (outside `OnGUI`, with a genuine data-dependent sink to defeat dead-code elimination),
+they allocated zero bytes — this Unity/Roslyn version does not box interpolated strings with
+alignment and format specifiers the way older versions did. Both halves of the original hypothesis
+are therefore individually disproven for headless testing: the code that runs, doesn't allocate;
+the code that might allocate (`GUILayout`'s own internal bookkeeping, independent of the strings
+passed to it), doesn't run here. Whether that IMGUI-internal cost is real can only be checked in an
+interactive Editor session with an actual Game view, which is almost certainly how the original
+12848 KB figure was produced and is not an environment available to this investigation.
+
+**What the instrumented gameplay code actually costs: negligible.** `AllocationProfiler` (new,
+`ChibiRift.Core`, active only when a caller sets `Recording = true`) was wired into every
+`Update`/`FixedUpdate` with a plausible claim to the total: `EnemyAI`, `EnemyMotor`,
+`EnemyAttack`, `PlayerMotor`, `PlayerCombat`, `DashTrail`, `HealthComponent`, `SkillSystem`,
+`EnemyDebugCensus`, and — cast the widest net available, since `EventBus.Publish` invokes every
+subscriber synchronously on the same call stack — `CombatSystem.DealDamage`, which captures the
+entire reaction cascade of a landed hit (hit stop, screen shake, damage numbers, SFX, particles,
+knockback) in one label. Across three repeated 10-second/30-enemy runs, every one of these summed
+to under 60 KB combined, against totals of 2304-3456 KB. Even bracketing whole frames around an
+active hit-stop coroutine's iterations — as broad a net as a script-level bracket can cast — added
+only ~56 KB.
+
+**The honest conclusion: the remainder is not attributable to any of ChibiRift's own code.**
+Logging the cumulative delta every 2000 frames showed a flat, near-zero rate for the first ~3.5
+seconds, then a sustained ramp of roughly 115-165 bytes/frame for the rest of the run — an
+inflection point that lines up closely with when enemies spawned across an 8-unit radius would
+first walk into melee range and begin clustering around the hero (`(8 - 1.2) / 3 ≈ 2.3s`, plus
+windup). That timing, combined with every reachable script-level cost measuring near zero, points
+at Unity's own Physics2D internal bookkeeping for a cluster of colliding, separating 2D bodies —
+but this is the project's best-supported inference, not a proven attribution the way the two fixed
+bugs are; nothing in `AllocationProfiler`'s method-level bracketing can reach inside the engine's
+own simulation step. Deliberately not "fixed": `EnemyMotor`'s separation force and the Enemy-vs-
+Enemy collision matrix entry are both documented, intentional choices from earlier slices (crowd
+readability, SRS 5), and changing either on a hunch to chase this number would be worse than
+leaving it.
+
+**Regression guard.** `BalanceConfig.StressAllocationBudgetKilobytes` (8192 KB) and
+`Test_Profiler_AllocationStaysUnderBudget` exist so a genuinely new allocator — a P2 wave spawner
+or elite modifier that allocates per tick — is caught immediately rather than discovered as a bad
+p99 later. The budget is deliberately far above the measured 2304-3456 KB range: it is watching
+for a new large allocator, not holding the engine's own crowd-simulation overhead to a number
+nobody chose. Verified by temporarily lowering it below the measured range and confirming the test
+fails with the actual figure named.

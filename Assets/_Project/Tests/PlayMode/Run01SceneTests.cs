@@ -1180,6 +1180,53 @@ namespace ChibiRift.Tests.Play
 
             Assert.That(File.Exists(harness.LastReportPath), Is.True,
                 $"No report file at {harness.LastReportPath}.");
+
+            // OI-32: the duration/sample-count bug this harness shipped with silently ended a 10s
+            // sample at ~6s. A stopped-by-cap run is not comparable to a normal one and must not
+            // pass silently as if nothing were wrong.
+            Assert.That(report.StoppedBySafetyCap, Is.False,
+                "The sample stopped on the defensive safety cap rather than reaching the " +
+                "configured duration; DurationSeconds is not the configured duration and this " +
+                "run is not comparable to a normal one (OI-32).");
+
+            Assert.That(report.DurationSeconds, Is.GreaterThan(9f),
+                "The sample should cover close to the full configured duration.");
+
+            // AllocatedKilobytesDelta is exact only when this is zero (OI-32); above zero it is a
+            // floor, and the report's own caveats say so.
+            Assert.That(report.GcCollectionsDuringSample, Is.GreaterThanOrEqualTo(0));
+
+            Assert.That(report.TopAllocationSources, Is.Not.Null.And.Not.Empty,
+                "No per-source allocation breakdown was produced.");
+        }
+
+        [UnityTest]
+        public IEnumerator Test_Profiler_AllocationStaysUnderBudget()
+        {
+            yield return BootIntoRun01();
+
+            var harness = Object.FindFirstObjectByType<FrameTimeHarness>();
+            Assert.That(harness, Is.Not.Null, $"{RunScene} has no FrameTimeHarness.");
+
+            var combat = ServiceLocator.Current.Get<CombatSystem>();
+            float budget = combat.Balance.StressAllocationBudgetKilobytes;
+
+            yield return harness.Run();
+
+            FrameTimeReport report = harness.LastReport;
+            Assert.That(report, Is.Not.Null, "The harness produced no report.");
+
+            // The regression fence OI-32 asks for. A future P2 system that starts allocating in a
+            // hot loop — a wave spawner doing something per-frame, an elite modifier building a
+            // list every tick — will blow through this long before it shows up as a bad p99 on
+            // someone's machine. The budget itself is generous: measured runs landed at 2304-3456
+            // KB, almost none of it traceable to ChibiRift's own scripts (see BalanceConfig's
+            // tooltip and OI-32), so this is watching for a NEW large allocator, not holding the
+            // engine's own overhead to a number nobody chose.
+            Assert.That(report.AllocatedKilobytesDelta, Is.LessThan(budget),
+                $"Allocated {report.AllocatedKilobytesDelta:F0} KB, over the " +
+                $"{budget:F0} KB budget (BalanceConfig.StressAllocationBudgetKilobytes). " +
+                "Check TopAllocationSources in Logs/frametime-report.json for where it went.");
         }
 
         // ----- helpers ---------------------------------------------------------------------

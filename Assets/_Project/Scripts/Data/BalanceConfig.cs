@@ -177,6 +177,10 @@ namespace ChibiRift.Data
         [Min(1f)]
         [SerializeField] private float _stressDurationSeconds = 10f;
 
+        [Tooltip("Managed heap growth budget for one harness run, in kilobytes. Measured 2304-3456 KB across repeated 30-enemy/10s runs (OI-32) — almost none of it attributable to ChibiRift's own scripts (every instrumented gameplay call site totalled under 60 KB); the remainder is Unity/Physics2D internal bookkeeping for a cluster of colliding bodies, which this budget is deliberately generous about. It exists to catch a NEW P2 system that allocates in a hot loop, not to hold the engine to a number nobody chose.")]
+        [Min(1f)]
+        [SerializeField] private float _stressAllocationBudgetKilobytes = 8192f;
+
         [Tooltip("Seconds a skill press is remembered (P1-07). Its own field, like the jump, dash and attack buffers, so retuning one cannot silently change how the others feel.")]
         [Min(0f)]
         [SerializeField] private float _skillBufferSeconds = 0.12f;
@@ -316,6 +320,9 @@ namespace ChibiRift.Data
 
         /// <summary>Seconds the frame-time harness samples for (NFR-002).</summary>
         public float StressDurationSeconds => _stressDurationSeconds;
+
+        /// <summary>Managed heap growth budget for one harness run, in kilobytes (NFR-002).</summary>
+        public float StressAllocationBudgetKilobytes => _stressAllocationBudgetKilobytes;
 
         /// <summary>Seconds a skill press is remembered (P1-07).</summary>
         public float SkillBufferSeconds => _skillBufferSeconds;

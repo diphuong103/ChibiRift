@@ -106,8 +106,15 @@ namespace ChibiRift.Gameplay
         /// </summary>
         public void RequestCast(SkillSlot slot) => _buffers[IndexOf(slot)].Press(BufferSeconds);
 
+        /// <summary>Label this instance's FixedUpdate reports under for NFR-002 profiling.</summary>
+        private const string AllocationLabel = "SkillSystem.FixedUpdate";
+
         private void FixedUpdate()
         {
+            // NFR-002 profiling (OI-32). No early return: every path falls through to the closing
+            // brace, so Begin/End bracket the body directly.
+            AllocationProfiler.BeginSample(AllocationLabel);
+
             float dt = Time.fixedDeltaTime;
 
             for (int i = 0; i < Slots.Length; i++)
@@ -126,6 +133,8 @@ namespace ChibiRift.Gameplay
 
                 Cast(i);
             }
+
+            AllocationProfiler.EndSample(AllocationLabel);
         }
 
         private void Cast(int index)

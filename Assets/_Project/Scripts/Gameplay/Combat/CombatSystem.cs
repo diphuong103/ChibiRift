@@ -54,6 +54,9 @@ namespace ChibiRift.Gameplay
         /// <param name="worldPosition">Where the floating number appears (HPS-008).</param>
         /// <param name="attackerPosition">Origin of the hit. Sets the knockback direction (COM-005).</param>
         /// <returns>The full result, or <c>default</c> when the hit was refused by a guard.</returns>
+        /// <summary>Label one full hit's cost reports under for NFR-002 profiling.</summary>
+        private const string AllocationLabel = "CombatSystem.DealDamage";
+
         public DamageResult DealDamage(
             IDamageable target,
             float baseDamage,
@@ -63,57 +66,72 @@ namespace ChibiRift.Gameplay
             Vector2 worldPosition,
             Vector2 attackerPosition)
         {
-            if (target == null) return default;
-
-            // HPS-004 and HPS-005. Checked here as well as in HealthComponent so that a refused
-            // hit publishes no DamageAppliedEvent and therefore spawns no damage number.
-            if (target.IsDead) return default;
-            if (target.IsInvulnerable) return default;
-
-            if (_balance == null)
+            // NFR-002 profiling (OI-32). try/finally: several guards below return early, and this
+            // is deliberately the widest possible net — EventBus.Publish invokes every subscriber
+            // synchronously on this same call stack, so this one label also captures the entire
+            // reaction cascade (hit stop, shake, damage numbers, SFX, particles, knockback) that a
+            // landed hit sets off, without having to instrument each subscriber separately.
+            AllocationProfiler.BeginSample(AllocationLabel);
+            try
             {
-                GameLog.Error("Combat", "CombatSystem has no BalanceConfig; MinDamage is unavailable (SRS 30).");
-                return default;
+                if (target == null) return default;
+
+                // HPS-004 and HPS-005. Checked here as well as in HealthComponent so that a refused
+                // hit publishes no DamageAppliedEvent and therefore spawns no damage number.
+                if (target.IsDead) return default;
+                if (target.IsInvulnerable) return default;
+
+                if (_balance == null)
+                {
+                    GameLog.Error("Combat",
+                        "CombatSystem has no BalanceConfig; MinDamage is unavailable (SRS 30).");
+                    return default;
+                }
+
+                // COM-006: rolled here, outside the formula, so Calculate stays deterministic
+                // (RNG-004). A caller passing 0 opts out; the hero passes its real crit chance from
+                // slice 4A on.
+                bool isCritical = DamageCalculator.RollCritical(critChance, _random);
+
+                var request = new DamageRequest(
+                    baseDamage,
+                    attackModifiers,
+                    isCritical,
+                    _balance.DefaultCritMultiplier,
+                    target.Defense,
+                    target.DamageReduction,
+                    _balance.MinDamage,
+                    _balance.MaxDamageReduction,
+                    source);
+
+                DamageResult result = DamageCalculator.Calculate(request);
+
+                target.ApplyDamage(result);
+
+                // Read immediately after applying: the death transition runs inside ApplyDamage, so
+                // this is the only moment that can tell a killing blow from an ordinary one.
+                bool killed = target.IsDead;
+
+                // HPS-008 and COM-005: the one announcement of a landed hit. EntityDiedEvent is
+                // published by HealthComponent, which is the only place that knows the hit was lethal.
+                bool targetIsPlayer = TargetIsPlayer(target);
+
+                _eventBus?.Publish(new DamageAppliedEvent(
+                    EntityIdOf(target),
+                    result,
+                    worldPosition,
+                    targetIsPlayer,
+                    attackerPosition,
+                    targetIsPlayer ? _balance.HeroKnockbackForce : _balance.EnemyKnockbackForce,
+                    targetIsPlayer ? _balance.HeroKnockbackDuration : _balance.EnemyKnockbackDuration,
+                    killed));
+
+                return result;
             }
-
-            // COM-006: rolled here, outside the formula, so Calculate stays deterministic (RNG-004).
-            // A caller passing 0 opts out; the hero passes its real crit chance from slice 4A on.
-            bool isCritical = DamageCalculator.RollCritical(critChance, _random);
-
-            var request = new DamageRequest(
-                baseDamage,
-                attackModifiers,
-                isCritical,
-                _balance.DefaultCritMultiplier,
-                target.Defense,
-                target.DamageReduction,
-                _balance.MinDamage,
-                _balance.MaxDamageReduction,
-                source);
-
-            DamageResult result = DamageCalculator.Calculate(request);
-
-            target.ApplyDamage(result);
-
-            // Read immediately after applying: the death transition runs inside ApplyDamage, so
-            // this is the only moment that can tell a killing blow from an ordinary one.
-            bool killed = target.IsDead;
-
-            // HPS-008 and COM-005: the one announcement of a landed hit. EntityDiedEvent is
-            // published by HealthComponent, which is the only place that knows the hit was lethal.
-            bool targetIsPlayer = TargetIsPlayer(target);
-
-            _eventBus?.Publish(new DamageAppliedEvent(
-                EntityIdOf(target),
-                result,
-                worldPosition,
-                targetIsPlayer,
-                attackerPosition,
-                targetIsPlayer ? _balance.HeroKnockbackForce : _balance.EnemyKnockbackForce,
-                targetIsPlayer ? _balance.HeroKnockbackDuration : _balance.EnemyKnockbackDuration,
-                killed));
-
-            return result;
+            finally
+            {
+                AllocationProfiler.EndSample(AllocationLabel);
+            }
         }
 
         private static int EntityIdOf(IDamageable target)

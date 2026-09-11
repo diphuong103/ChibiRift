@@ -75,47 +75,71 @@ namespace ChibiRift.UI
 
         private void OnCensus(EnemyCensusEvent census) => _census = census;
 
+        /// <summary>Label this component's draw reports under for NFR-002 profiling.</summary>
+        private const string AllocationLabel = "DebugOverlay.OnGUI";
+
         private void OnGUI()
         {
+            // Gated for the same reason DebugSpawner's key reads are (OI-29): a development readout
+            // has no business drawing, or costing anything, in a Release build. Unlike the F1 key
+            // read this was NOT guarded before a profiling pass found it running from frame one —
+            // _visibleOnStart defaults to true, so every session paid for this every frame whether
+            // or not anyone was looking at it (OI-32).
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (!_visible) return;
 
-            _style ??= new GUIStyle(GUI.skin.label) { fontSize = 12, richText = false };
+            // NFR-002 profiling. try/finally: the line above is the path taken almost every frame
+            // once F1 is off, and it still needs to close the sample.
+            AllocationProfiler.BeginSample(AllocationLabel);
+            try
+            {
+                _style ??= new GUIStyle(GUI.skin.label) { fontSize = 12, richText = false };
 
-            var area = new Rect(
-                PanelMargin,
-                Screen.height - PanelHeight - PanelMargin,
-                PanelWidth,
-                PanelHeight);
+                var area = new Rect(
+                    PanelMargin,
+                    Screen.height - PanelHeight - PanelMargin,
+                    PanelWidth,
+                    PanelHeight);
 
-            GUI.Box(area, "Debug (F1)");
-            GUILayout.BeginArea(new Rect(area.x + PanelMargin, area.y + PanelMargin * 2f, PanelWidth, PanelHeight));
+                GUI.Box(area, "Debug (F1)");
+                GUILayout.BeginArea(
+                    new Rect(area.x + PanelMargin, area.y + PanelMargin * 2f, PanelWidth, PanelHeight));
 
-            GUILayout.Label($"velocity.x   {_state.Velocity.x,8:F3}", _style);
-            GUILayout.Label($"velocity.y   {_state.Velocity.y,8:F3}", _style);
-            GUILayout.Label($"isGrounded   {_state.IsGrounded,8}", _style);
-            GUILayout.Label($"jumpCount    {_state.JumpCount,8}", _style);
-            GUILayout.Label($"coyoteTimer  {_state.CoyoteTimer,8:F3}", _style);
-            GUILayout.Label($"jumpBuffer   {_state.JumpBufferTimer,8:F3}", _style);
+                GUILayout.Label($"velocity.x   {_state.Velocity.x,8:F3}", _style);
+                GUILayout.Label($"velocity.y   {_state.Velocity.y,8:F3}", _style);
+                GUILayout.Label($"isGrounded   {_state.IsGrounded,8}", _style);
+                GUILayout.Label($"jumpCount    {_state.JumpCount,8}", _style);
+                GUILayout.Label($"coyoteTimer  {_state.CoyoteTimer,8:F3}", _style);
+                GUILayout.Label($"jumpBuffer   {_state.JumpBufferTimer,8:F3}", _style);
 
-            GUILayout.Space(6f);
+                GUILayout.Space(6f);
 
-            // Attack lands only within roughly 1.4u of a target and has no animation yet, so
-            // without these lines a swing that simply missed is indistinguishable from broken input.
-            string attackState = _combat.IsAttacking
-                ? (_combat.IsHitboxActive ? "ACTIVE" : "swinging")
-                : "idle";
+                // Attack lands only within roughly 1.4u of a target and has no animation yet, so
+                // without these lines a swing that simply missed is indistinguishable from broken
+                // input.
+                string attackState = _combat.IsAttacking
+                    ? (_combat.IsHitboxActive ? "ACTIVE" : "swinging")
+                    : "idle";
 
-            GUILayout.Label($"attackState  {attackState,8}", _style);
-            GUILayout.Label($"comboStep    {_combat.ComboStep,8}  (window {_combat.ComboWindowRemaining:F2})", _style);
-            GUILayout.Label($"aimDir       {_combat.AimDirection.x,5:F2},{_combat.AimDirection.y,5:F2}", _style);
-            GUILayout.Label($"enemyCount   {_census.AliveCount,8}", _style);
-            GUILayout.Label(
-                _census.NearestDistance < 0f
-                    ? "nearestEnemy      none"
-                    : $"nearestEnemy {_census.NearestState,8}  ({_census.NearestDistance:F1}u)",
-                _style);
+                GUILayout.Label($"attackState  {attackState,8}", _style);
+                GUILayout.Label(
+                    $"comboStep    {_combat.ComboStep,8}  (window {_combat.ComboWindowRemaining:F2})", _style);
+                GUILayout.Label(
+                    $"aimDir       {_combat.AimDirection.x,5:F2},{_combat.AimDirection.y,5:F2}", _style);
+                GUILayout.Label($"enemyCount   {_census.AliveCount,8}", _style);
+                GUILayout.Label(
+                    _census.NearestDistance < 0f
+                        ? "nearestEnemy      none"
+                        : $"nearestEnemy {_census.NearestState,8}  ({_census.NearestDistance:F1}u)",
+                    _style);
 
-            GUILayout.EndArea();
+                GUILayout.EndArea();
+            }
+            finally
+            {
+                AllocationProfiler.EndSample(AllocationLabel);
+            }
+#endif
         }
     }
 }

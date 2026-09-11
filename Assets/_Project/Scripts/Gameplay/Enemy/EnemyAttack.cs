@@ -101,29 +101,42 @@ namespace ChibiRift.Gameplay
             _elapsed = 0f;
         }
 
+        /// <summary>Label every instance's FixedUpdate reports under for NFR-002 profiling.</summary>
+        private const string AllocationLabel = "EnemyAttack.FixedUpdate";
+
         private void FixedUpdate()
         {
-            float dt = Time.fixedDeltaTime;
-
-            if (!IsAttacking)
+            // NFR-002 profiling (OI-32). try/finally: the idle (not attacking) path returns early
+            // and must still close the sample.
+            AllocationProfiler.BeginSample(AllocationLabel);
+            try
             {
-                // AI-004: the cooldown runs from the end of recovery, so it is ticked here and not
-                // during the swing.
-                if (CooldownRemaining > 0f) CooldownRemaining = Mathf.Max(CooldownRemaining - dt, 0f);
-                return;
+                float dt = Time.fixedDeltaTime;
+
+                if (!IsAttacking)
+                {
+                    // AI-004: the cooldown runs from the end of recovery, so it is ticked here and
+                    // not during the swing.
+                    if (CooldownRemaining > 0f) CooldownRemaining = Mathf.Max(CooldownRemaining - dt, 0f);
+                    return;
+                }
+
+                EnemyAttackConfig config = Config;
+                _elapsed += dt;
+
+                IsHitboxActive = _elapsed >= config.ActiveStartTime && _elapsed <= config.ActiveEndTime;
+                if (IsHitboxActive) SweepHitbox();
+
+                if (_elapsed < config.TotalDuration) return;
+
+                IsAttacking = false;
+                IsHitboxActive = false;
+                CooldownRemaining = config.Cooldown;
             }
-
-            EnemyAttackConfig config = Config;
-            _elapsed += dt;
-
-            IsHitboxActive = _elapsed >= config.ActiveStartTime && _elapsed <= config.ActiveEndTime;
-            if (IsHitboxActive) SweepHitbox();
-
-            if (_elapsed < config.TotalDuration) return;
-
-            IsAttacking = false;
-            IsHitboxActive = false;
-            CooldownRemaining = config.Cooldown;
+            finally
+            {
+                AllocationProfiler.EndSample(AllocationLabel);
+            }
         }
 
         private void SweepHitbox()

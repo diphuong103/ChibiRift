@@ -61,3 +61,7 @@ crashlytics-build.properties
 # Unity/Mono crash dumps
 mono_crash.*
 *.blob
+
+# Unity Test Runner scratch scene, created and torn down automatically during a batchmode run
+Assets/InitTestScene*.unity
+Assets/InitTestScene*.unity.meta

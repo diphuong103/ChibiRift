@@ -61,6 +61,7 @@ MonoBehaviour:
   _maxTargetsPerSweep: 16
   _stressEnemyCount: 30
   _stressDurationSeconds: 10
+  _stressAllocationBudgetKilobytes: 8192
   _skillBufferSeconds: 0.12
   _debugSpawnRadius: 8
   _hitStop:

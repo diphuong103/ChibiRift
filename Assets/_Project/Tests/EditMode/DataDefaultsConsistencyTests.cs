@@ -312,6 +312,12 @@ namespace ChibiRift.Tests.Edit
             yield return Row("stressEnemyCount", 30f, g => g.Balance.StressEnemyCount);
             yield return Row("stressDurationSeconds", 10f, g => g.Balance.StressDurationSeconds);
 
+            // Not in any brief's list: OI-32's regression guard needed a threshold, chosen from
+            // repeated real measurements (2304-3456 KB observed), not a round number picked in
+            // advance.
+            yield return Row("stressAllocationBudgetKilobytes", 8192f,
+                g => g.Balance.StressAllocationBudgetKilobytes);
+
             // Performance budgets that used to be literals in Core and Gameplay.
             yield return Row("sfxVoiceCount", 16f, g => g.Balance.SfxVoiceCount);
             yield return Row("maxTargetsPerSweep", 16f, g => g.Balance.MaxTargetsPerSweep);
