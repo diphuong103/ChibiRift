@@ -38,6 +38,13 @@ namespace ChibiRift.Gameplay
         /// <summary>Seconds elapsed in the current swing.</summary>
         public float Elapsed => _elapsed;
 
+        /// <summary>
+        /// Scales <see cref="StatBlock.Attack"/> before it reaches <see cref="CombatSystem"/>
+        /// (ELT-001). Set by <see cref="EnemyController.Configure"/>; 1 for a non-elite or a
+        /// scene-placed enemy that was never configured.
+        /// </summary>
+        public float DamageMultiplier { get; set; } = 1f;
+
         /// <summary>Archetype supplying the numbers.</summary>
         public EnemyData Data
         {
@@ -172,7 +179,7 @@ namespace ChibiRift.Gameplay
 
             _combat.DealDamage(
                 target,
-                _enemyData.BaseStats.Attack,
+                _enemyData.BaseStats.Attack * DamageMultiplier,
                 1f,
                 0f,
                 DamageSource.BasicAttack,

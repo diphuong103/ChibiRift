@@ -56,9 +56,9 @@ namespace ChibiRift.Data
         [Min(0f)]
         [SerializeField] private float _spawnInterval = 0.5f;
 
-        [Tooltip("Seconds of breathing room before the next wave starts (WAV-005).")]
+        [Tooltip("Seconds of breathing room before the next wave starts (WAV-005). P2 baseline: 3s.")]
         [Min(0f)]
-        [SerializeField] private float _transitionDelay = 2f;
+        [SerializeField] private float _transitionDelay = 3f;
 
         /// <summary>Enemy groups (WAV-001).</summary>
         public WaveEntry[] Entries => _entries;

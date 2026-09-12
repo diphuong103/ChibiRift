@@ -253,19 +253,53 @@ namespace ChibiRift.EditorTools
                     so.FindProperty("_goldReward").intValue = 0;
                 });
 
-            WaveData wave = Create<WaveData>(
-                "WAV_Stage1_Wave1", "wave.stage1.wave1", "Stage 1 - Wave 1",
-                "Five melee enemies, matching the SRS 14 example for Stage 1.",
+            // Stage 1's five waves (P2 slice 1): 3, 5, 7, 10 melee, then wave 5's single elite
+            // placeholder alongside 4 more melee. All AllEnemiesDefeated — Stage 1 has no
+            // duration- or kill-quota wave. One local helper rather than five near-identical
+            // Create<WaveData> calls: the only thing that varies between waves is composition.
+            WaveData BuildMeleeWave(string fileName, string id, string displayName, int count)
+                => Create<WaveData>(fileName, id, displayName,
+                    $"{count} melee enemies (SRS 14, Stage 1).",
+                    so =>
+                    {
+                        SerializedProperty entries = so.FindProperty("_entries");
+                        entries.arraySize = 1;
+
+                        SerializedProperty entry = entries.GetArrayElementAtIndex(0);
+                        entry.FindPropertyRelative("Enemy").objectReferenceValue = enemyData;
+                        entry.FindPropertyRelative("Count").intValue = count;
+                        entry.FindPropertyRelative("SpawnAsElite").boolValue = false;
+                        entry.FindPropertyRelative("StartDelay").floatValue = 0f;
+
+                        so.FindProperty("_clearCondition").enumValueIndex = (int)WaveClearCondition.AllEnemiesDefeated;
+                    });
+
+            WaveData wave1 = BuildMeleeWave("WAV_Stage1_Wave1", "wave.stage1.wave1", "Stage 1 - Wave 1", 3);
+            WaveData wave2 = BuildMeleeWave("WAV_Stage1_Wave2", "wave.stage1.wave2", "Stage 1 - Wave 2", 5);
+            WaveData wave3 = BuildMeleeWave("WAV_Stage1_Wave3", "wave.stage1.wave3", "Stage 1 - Wave 3", 7);
+            WaveData wave4 = BuildMeleeWave("WAV_Stage1_Wave4", "wave.stage1.wave4", "Stage 1 - Wave 4", 10);
+
+            // Wave 5: one elite placeholder (ELT-001 stat scaling only, no visual tell yet — a real
+            // boss is a later slice) plus 4 more melee.
+            WaveData wave5 = Create<WaveData>(
+                "WAV_Stage1_Wave5", "wave.stage1.wave5", "Stage 1 - Wave 5",
+                "One elite melee plus four regular melee (SRS 14, Stage 1, ELT-001 placeholder).",
                 so =>
                 {
                     SerializedProperty entries = so.FindProperty("_entries");
-                    entries.arraySize = 1;
+                    entries.arraySize = 2;
 
-                    SerializedProperty entry = entries.GetArrayElementAtIndex(0);
-                    entry.FindPropertyRelative("Enemy").objectReferenceValue = enemyData;
-                    entry.FindPropertyRelative("Count").intValue = 5; // SRS 14: "Wave 1: 5 Melee"
-                    entry.FindPropertyRelative("SpawnAsElite").boolValue = false;
-                    entry.FindPropertyRelative("StartDelay").floatValue = 0f;
+                    SerializedProperty elite = entries.GetArrayElementAtIndex(0);
+                    elite.FindPropertyRelative("Enemy").objectReferenceValue = enemyData;
+                    elite.FindPropertyRelative("Count").intValue = 1;
+                    elite.FindPropertyRelative("SpawnAsElite").boolValue = true;
+                    elite.FindPropertyRelative("StartDelay").floatValue = 0f;
+
+                    SerializedProperty regular = entries.GetArrayElementAtIndex(1);
+                    regular.FindPropertyRelative("Enemy").objectReferenceValue = enemyData;
+                    regular.FindPropertyRelative("Count").intValue = 4;
+                    regular.FindPropertyRelative("SpawnAsElite").boolValue = false;
+                    regular.FindPropertyRelative("StartDelay").floatValue = 0f;
 
                     so.FindProperty("_clearCondition").enumValueIndex = (int)WaveClearCondition.AllEnemiesDefeated;
                 });
@@ -303,13 +337,21 @@ namespace ChibiRift.EditorTools
 
             Create<StageData>(
                 "STG_Stage1", "stage.01", "Stage 1",
-                "The MVP stage: waves then a two phase boss (SRS 14, STG-003).",
+                "The MVP stage: five waves then a two phase boss (SRS 14, STG-003).",
                 so =>
                 {
                     SerializedProperty waves = so.FindProperty("_waves");
-                    waves.arraySize = 1;
-                    waves.GetArrayElementAtIndex(0).objectReferenceValue = wave;
+                    waves.arraySize = 5;
+                    waves.GetArrayElementAtIndex(0).objectReferenceValue = wave1;
+                    waves.GetArrayElementAtIndex(1).objectReferenceValue = wave2;
+                    waves.GetArrayElementAtIndex(2).objectReferenceValue = wave3;
+                    waves.GetArrayElementAtIndex(3).objectReferenceValue = wave4;
+                    waves.GetArrayElementAtIndex(4).objectReferenceValue = wave5;
                     so.FindProperty("_boss").objectReferenceValue = boss;
+
+                    // WAV-001: enemies spawn away from the hero's own spawn point and clear of the
+                    // hole at x=-8 (RunSceneBuilder.HoleCentreX) — not hard-coded in WaveManager.
+                    so.FindProperty("_enemySpawnPoint").vector2Value = new Vector2(14f, 1f);
                 });
 
             // Silences the unused-local warnings for assets referenced only by others.

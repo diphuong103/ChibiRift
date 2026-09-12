@@ -39,6 +39,9 @@ namespace ChibiRift.Data
         [Tooltip("Scene holding this stage's arena. MVP uses the fixed Run_01 (SRS 43 Q4).")]
         [SerializeField] private string _sceneName = Core.SceneNames.Run01;
 
+        [Tooltip("Where wave enemies spawn, scattered by BalanceConfig.DebugSpawnRadius. Data, not a position hard-coded in WaveManager/EnemySpawner. Away from Run_01's hole (x=-8) and the hero's own spawn.")]
+        [SerializeField] private Vector2 _enemySpawnPoint = new Vector2(14f, 1f);
+
         /// <summary>Waves in order (STG-001).</summary>
         public WaveData[] Waves => _waves;
 
@@ -59,6 +62,9 @@ namespace ChibiRift.Data
 
         /// <summary>Arena scene name.</summary>
         public string SceneName => _sceneName;
+
+        /// <summary>Where wave enemies spawn (WAV-001).</summary>
+        public Vector2 EnemySpawnPoint => _enemySpawnPoint;
 
         /// <summary>Wave count, used by the HUD progress readout.</summary>
         public int WaveCount => _waves.Length;

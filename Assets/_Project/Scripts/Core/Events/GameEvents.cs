@@ -138,7 +138,11 @@ namespace ChibiRift.Core
         }
     }
 
-    /// <summary>Wave progression changed (WAV-001..WAV-005).</summary>
+    /// <summary>
+    /// Wave progression changed (WAV-001..WAV-005). The only event for wave progress — check here
+    /// before adding a new one; a P2 brief once asked for three separate events without checking
+    /// this file first (OI-33).
+    /// </summary>
     public readonly struct WaveStateChangedEvent
     {
         public readonly string StageId;
@@ -146,11 +150,32 @@ namespace ChibiRift.Core
         public readonly int WaveCount;
         public readonly WaveState State;
 
-        public WaveStateChangedEvent(string stageId, int waveIndex, int waveCount, WaveState state)
+        /// <summary>Enemies still alive from this wave. Drives the HUD's "N left" readout.</summary>
+        public readonly int EnemiesRemaining;
+
+        public WaveStateChangedEvent(
+            string stageId, int waveIndex, int waveCount, WaveState state, int enemiesRemaining)
         {
             StageId = stageId;
             WaveIndex = waveIndex;
             WaveCount = waveCount;
+            State = state;
+            EnemiesRemaining = enemiesRemaining;
+        }
+    }
+
+    /// <summary>
+    /// Stage progression changed (STG-001..STG-003). The only event for stage progress — same
+    /// caution as <see cref="WaveStateChangedEvent"/> above.
+    /// </summary>
+    public readonly struct StageStateChangedEvent
+    {
+        public readonly string StageId;
+        public readonly StageState State;
+
+        public StageStateChangedEvent(string stageId, StageState state)
+        {
+            StageId = stageId;
             State = state;
         }
     }

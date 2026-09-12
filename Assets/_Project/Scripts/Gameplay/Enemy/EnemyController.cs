@@ -41,6 +41,9 @@ namespace ChibiRift.Gameplay
         private EnemyAttack _attack;
         private EnemyAI _ai;
 
+        /// <summary>Combined stage x elite HP scale (ELT-001). 1 until <see cref="Configure"/> runs.</summary>
+        private float _healthMultiplier = 1f;
+
         private void Awake()
         {
             _health = GetComponent<HealthComponent>();
@@ -91,16 +94,29 @@ namespace ChibiRift.Gameplay
             gameObject.SetActive(false);
         }
 
-        /// <summary>Configures the instance for a wave, applying stage and elite scaling.</summary>
+        /// <summary>
+        /// Configures the instance for a wave, applying stage and elite scaling (ELT-001).
+        /// <paramref name="healthMultiplier"/>/<paramref name="damageMultiplier"/> are already the
+        /// stage multiplier combined with <c>BalanceConfig.EliteHealthMultiplier</c>/
+        /// <c>EliteDamageMultiplier</c> when <paramref name="asElite"/> is set — see
+        /// <see cref="EnemySpawner.Spawn(EnemyData, Vector2, bool, float, float)"/>, which owns that
+        /// arithmetic because it already holds the <c>BalanceConfig</c> reference this component
+        /// does not need otherwise.
+        /// </summary>
+        /// <remarks>
+        /// P2 slice 1 stops at the numbers: an elite here is tankier and hits harder with no visual
+        /// tell. TODO(ELT-003): aura, tint, scale and its own HP bar. TODO(ELT-005): clamp the
+        /// combined multipliers to a configured cap once a P2 system can push them arbitrarily high.
+        /// </remarks>
         public void Configure(EnemyData data, bool asElite, float healthMultiplier, float damageMultiplier)
         {
-            // TODO(ELT-001): apply BalanceConfig.EliteHealthMultiplier and EliteDamageMultiplier
-            //   on top of the stage multipliers when asElite is set.
-            // TODO(ELT-005): clamp the combined multipliers to the configured caps.
             _enemyData = data;
             IsElite = asElite;
+            _healthMultiplier = healthMultiplier;
 
             Distribute(data);
+
+            if (_attack != null) _attack.DamageMultiplier = damageMultiplier;
         }
 
         /// <summary>
@@ -117,7 +133,7 @@ namespace ChibiRift.Gameplay
             if (_motor != null) _motor.Data = data;
             if (_attack != null) _attack.Data = data;
             if (_ai != null) _ai.Data = data;
-            if (_health != null) _health.SeedFrom(data);
+            if (_health != null) _health.SeedFrom(data, _healthMultiplier);
         }
 
         /// <summary>

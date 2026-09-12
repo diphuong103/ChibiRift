@@ -36,6 +36,9 @@ namespace ChibiRift.UI
         [SerializeField] private Text _goldLabel;
         [SerializeField] private Text _gemLabel;
 
+        [Header("Wave (WAV-001..005)")]
+        [SerializeField] private Text _waveLabel;
+
         private EventBus _eventBus;
 
         private void OnEnable()
@@ -50,6 +53,7 @@ namespace ChibiRift.UI
             _eventBus.Subscribe<HealthChangedEvent>(OnHealthChanged);
             _eventBus.Subscribe<SkillCooldownChangedEvent>(OnSkillCooldownChanged);
             _eventBus.Subscribe<DashCooldownChangedEvent>(OnDashCooldownChanged);
+            _eventBus.Subscribe<WaveStateChangedEvent>(OnWaveStateChanged);
 
             // TODO(SRS-19.2): ExperienceChangedEvent, LevelUpEvent, CurrencyChangedEvent,
             //   BossActivatedEvent, BossPhaseChangedEvent and EliteActivatedEvent.
@@ -64,6 +68,7 @@ namespace ChibiRift.UI
             _eventBus.Unsubscribe<HealthChangedEvent>(OnHealthChanged);
             _eventBus.Unsubscribe<SkillCooldownChangedEvent>(OnSkillCooldownChanged);
             _eventBus.Unsubscribe<DashCooldownChangedEvent>(OnDashCooldownChanged);
+            _eventBus.Unsubscribe<WaveStateChangedEvent>(OnWaveStateChanged);
             _eventBus = null;
         }
 
@@ -102,6 +107,14 @@ namespace ChibiRift.UI
             _dashCooldownFill.fillAmount = evt.TotalSeconds > 0f
                 ? Mathf.Clamp01(evt.RemainingSeconds / evt.TotalSeconds)
                 : 0f;
+        }
+
+        /// <summary>"Wave N/M · K left" readout (WAV-001..005).</summary>
+        private void OnWaveStateChanged(WaveStateChangedEvent evt)
+        {
+            if (_waveLabel == null) return;
+
+            _waveLabel.text = $"Wave {evt.WaveIndex + 1}/{evt.WaveCount} · {evt.EnemiesRemaining} left";
         }
 
         /// <summary>Floating damage number over the target (HPS-008).</summary>

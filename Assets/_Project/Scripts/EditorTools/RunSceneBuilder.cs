@@ -693,6 +693,14 @@ namespace ChibiRift.EditorTools
             SetReferences(
                 harness,
                 ("_balanceConfig", balance), ("_spawner", spawner), ("_origin", hero));
+
+            // WAV-001..005, STG-001..003: starts Stage 1 and ticks it every frame.
+            StageData stage = AssetDatabase.LoadAssetAtPath<StageData>($"{DataRoot}/STG_Stage1.asset");
+            var stageRunnerObject = new GameObject("StageRunner");
+            var stageRunner = stageRunnerObject.AddComponent<StageRunner>();
+            SetReferences(
+                stageRunner,
+                ("_stage", stage), ("_balanceConfig", balance), ("_spawner", spawner));
         }
 
         /// <summary>
@@ -723,11 +731,13 @@ namespace ChibiRift.EditorTools
             }
 
             Image dash = BuildCooldownPip(root.transform, "Shift", new Vector2(8f + 3 * 26f + 8f, 8f));
+            Text waveLabel = BuildWaveLabel(root.transform);
 
             var hud = root.AddComponent<HudController>();
             var hudSo = new SerializedObject(hud);
             hudSo.FindProperty("_healthBar").objectReferenceValue = health;
             hudSo.FindProperty("_dashCooldownFill").objectReferenceValue = dash;
+            hudSo.FindProperty("_waveLabel").objectReferenceValue = waveLabel;
 
             SerializedProperty skillFills = hudSo.FindProperty("_skillCooldownFills");
             skillFills.arraySize = fills.Length;
@@ -774,6 +784,29 @@ namespace ChibiRift.EditorTools
             slider.value = 1f;
 
             return slider;
+        }
+
+        /// <summary>Top-centre "Wave N/M · K left" readout (WAV-001..005).</summary>
+        private static Text BuildWaveLabel(Transform parent)
+        {
+            var labelObject = new GameObject("WaveLabel", typeof(RectTransform), typeof(Text));
+            labelObject.transform.SetParent(parent, false);
+
+            var rect = labelObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 1f);
+            rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = new Vector2(0f, -8f);
+            rect.sizeDelta = new Vector2(200f, 20f);
+
+            var label = labelObject.GetComponent<Text>();
+            label.font = AssetDatabase.GetBuiltinExtraResource<Font>("LegacyRuntime.ttf");
+            label.alignment = TextAnchor.MiddleCenter;
+            label.fontSize = 14;
+            label.color = Color.white;
+            label.text = string.Empty;
+
+            return label;
         }
 
         /// <summary>

@@ -160,12 +160,20 @@ namespace ChibiRift.Gameplay
         /// Primitives rather than a <c>StatBlock</c> would work equally well; this overload just
         /// saves every caller from unpacking the asset.
         /// </summary>
-        public void SeedFrom(EnemyData data)
+        public void SeedFrom(EnemyData data) => SeedFrom(data, 1f);
+
+        /// <summary>
+        /// Seeds health and defences, scaling max health by <paramref name="healthMultiplier"/>
+        /// (ELT-001: stage scaling and the elite bonus both flow through here, already combined by
+        /// the caller). Defense and damage reduction are not scaled — SRS 35 defines the elite
+        /// bonus as HP and damage only.
+        /// </summary>
+        public void SeedFrom(EnemyData data, float healthMultiplier)
         {
             if (data == null) return;
 
             StatBlock stats = data.BaseStats;
-            Initialize(stats.MaxHealth, stats.Defense, stats.DamageReduction);
+            Initialize(stats.MaxHealth * healthMultiplier, stats.Defense, stats.DamageReduction);
         }
 
         /// <summary>

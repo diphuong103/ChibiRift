@@ -108,8 +108,8 @@ Paths are relative to `Assets/_Project/`.
 | AI-003 | No attack while dead | `EnemyAI.FixedUpdate` returns on `Death` before anything else; `EnemyMotor` also refuses the killing blow's own knockback so the corpse cannot slide (OI-21) | **Done** — `Test_Enemy_DeathStopsAllAI` |
 | AI-004 | Attack cooldown / window | `Gameplay/Enemy/EnemyAttack.cs`, three phases from `EnemyAttackConfig` (windup 0.35 / active 0.10 / recovery 0.45, cooldown 1.2 counted from the end of recovery). Hitbox open only inside the active window; the swing is committed at windup and plays out even if the hero leaves | **Done** — `Test_Enemy_AttacksWhenInRange`, `Test_Enemy_AttackRespectsCooldown`, `Test_Enemy_HitboxOnlyActiveInWindow` |
 | AI-005 | No infinite pathfinding loop | Two mechanisms: `EnemyAI.UpdateStuckDetection` sidesteps when a chase covers less than `StuckMinDisplacement` in `StuckCheckWindow`, and `EnemyMotor.SeparationPush` keeps a crowd from collapsing into one silhouette | **Done** |
-| AI-006 | Spawn/despawn owned by Wave System | `Gameplay/Enemy/EnemySpawner.cs` over `ObjectPool<T>`, prewarmed at scene load. The single owner of a pooled enemy's lifetime: `HealthComponent` announces `CorpseExpired` and `EnemyController` returns the instance. A second release is refused rather than handing one object to two callers | Spawner **Done** — `Test_Pool_NoInstantiateAfterPrewarm`, `Test_Pool_EnemyFullyResetOnReuse`, `Test_Pool_DoubleDespawnIsSafe`; the wave system that will drive it is P2 |
-| ELT-001 | Elite = base + modifier + ×3 HP / ×1.5 dmg | `Data/EliteModifierData.cs`, `BalanceConfig.EliteHealthMultiplier` / `EliteDamageMultiplier` | Schema **Done** (SRS 35 values), behaviour Skeleton |
+| AI-006 | Spawn/despawn owned by Wave System | `Gameplay/Enemy/EnemySpawner.cs` over `ObjectPool<T>`, prewarmed at scene load. The single owner of a pooled enemy's lifetime: `HealthComponent` announces `CorpseExpired` and `EnemyController` returns the instance. A second release is refused rather than handing one object to two callers | Spawner **Done** — `Test_Pool_NoInstantiateAfterPrewarm`, `Test_Pool_EnemyFullyResetOnReuse`, `Test_Pool_DoubleDespawnIsSafe`; driven by `WaveManager` from P2 slice 1 — `Test_Wave_UsesPoolNotInstantiate` |
+| ELT-001 | Elite = base + modifier + ×3 HP / ×1.5 dmg | `BalanceConfig.EliteHealthMultiplier` / `EliteDamageMultiplier` combined with the stage multiplier in `EnemySpawner.Spawn(EnemyData, Vector2, bool, float, float)`, applied via `HealthComponent.SeedFrom(EnemyData, float)` and `EnemyAttack.DamageMultiplier` | **Done** — stat scaling only, exercised by Stage 1's wave 5 elite placeholder (P2 slice 1); no visual tell (see ELT-003) |
 | ELT-002 | ≥ 3 modifiers: Shielded, Enraged, Explosive | `EliteModifierType` enum + `EliteModifierData` fields for all three; `ELT_Enraged.asset` sample | Schema Done; 2 remaining assets chưa triển khai (content) |
 | ELT-003 | Distinct visuals + HP bar | `EliteModifierData.AuraTint` / `ScaleMultiplier`, `EliteActivatedEvent`, `HudController` | Schema Done, visuals Skeleton |
 | ELT-004 | Higher XP and reward | `EnemyData.EliteRewardMultiplier` | Schema Done |
@@ -117,16 +117,23 @@ Paths are relative to `Assets/_Project/`.
 
 ## 14 Wave & Stage
 
+**Event contract (P2 slice 1).** Wave and stage progress each have exactly one event —
+`WaveStateChangedEvent(StageId, WaveIndex, WaveCount, WaveState, EnemiesRemaining)` and
+`StageStateChangedEvent(StageId, StageState)`, both in `Core/Events/GameEvents.cs`. Check there
+before adding a new one (OI-33): a brief once asked for three separately-named events
+(`OnWaveStarted`/`OnWaveCleared`/`OnStageCleared`) without checking that `WaveStateChangedEvent` was
+already reserved and referenced from this table.
+
 | ID | Requirement | Where | Status |
 |---|---|---|---|
-| WAV-001 | ID, duration/kill condition, composition | `Data/WaveData.cs`, `WaveEntry` | Schema **Done** |
-| WAV-002 | Wave starts only when stage allows | `Gameplay/Wave/WaveManager.BeginWave` TODO | Skeleton |
-| WAV-003 | Spawn budget respected | `WaveData.SpawnBudget` | Schema Done, enforcement Skeleton |
-| WAV-004 | Wave clear detected precisely | `WaveClearCondition` enum, `WaveManager.Tick` TODO | Skeleton — Schema Done |
-| WAV-005 | Transition gap between waves | `WaveData.TransitionDelay` | Schema Done |
-| STG-001 | Stage orders its waves | `Data/StageData.Waves`, `Gameplay/Stage/StageManager.cs` | Schema Done, logic Skeleton |
-| STG-002 | Stage clear condition | `StageManager.OnWaveCleared` TODO, `StageData.ClearGoldReward` | Skeleton |
-| STG-003 | Transition to Boss / next stage | `StageState` enum, `StageData.Boss` | Skeleton — Schema Done |
+| WAV-001 | ID, duration/kill condition, composition | `Data/WaveData.cs`, `WaveEntry`; five waves authored for Stage 1 in `SampleDataGenerator.cs` | **Done** — `Test_Wave_SpawnsCorrectEnemyCount` |
+| WAV-002 | Wave starts only when stage allows | `WaveManager.BeginWave` has exactly one caller, `StageManager`, which only calls it while its own state is `RunningWaves` — holds by construction, not a runtime check | **Done** |
+| WAV-003 | Spawn budget respected | `WaveManager.AdvanceSpawning` checks `EnemySpawner.ActiveEnemyCount` against `WaveData.SpawnBudget` before every spawn, retrying next `Tick` | **Done** |
+| WAV-004 | Wave clear detected precisely | `WaveClearCondition` enum; `WaveManager.EvaluateClearCondition`, gated to only run once every entry has finished spawning | **Done** — `Test_Wave_CompletesWhenAllEnemiesDead` (Stage 1 uses `AllEnemiesDefeated`; `DurationElapsed`/`KillCountReached` implemented but unexercised by a test) |
+| WAV-005 | Transition gap between waves | `WaveData.TransitionDelay` (3s baseline), counted down in `WaveManager.Tick` | **Done** — `Test_Wave_AdvancesAfterDelay` |
+| STG-001 | Stage orders its waves | `Data/StageData.Waves`, `StageManager.BeginStage`/`HandleWaveCleared` | **Done** — `Test_Stage_FiresStageClearedAfterLastWave` |
+| STG-002 | Stage clear condition | `StageManager.HandleWaveCleared`, `StageData.ClearGoldReward` (reward *granting* is a later slice — RunManager/RUN-002 own that, not this one) | Progression **Done**, reward grant Skeleton |
+| STG-003 | Transition to Boss / next stage | `StageState` enum; `StageManager.HandleWaveCleared` moves to `BossFight` when `StageData.Boss` is set, else `Cleared` | **Done** — the `BossFight` branch itself is P2's boss slice |
 
 ## 15 Boss
 

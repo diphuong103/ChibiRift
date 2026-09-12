@@ -74,6 +74,19 @@ namespace ChibiRift.Gameplay
 
         /// <summary>Takes an enemy of <paramref name="data"/> and places it (AI-006).</summary>
         public EnemyController Spawn(EnemyData data, Vector2 position)
+            => Spawn(data, position, false, 1f, 1f);
+
+        /// <summary>
+        /// Takes an enemy of <paramref name="data"/>, places it, and scales it for the wave
+        /// (ELT-001). <paramref name="stageHealthMultiplier"/>/<paramref name="stageDamageMultiplier"/>
+        /// come from <c>StageData</c>; when <paramref name="asElite"/> is set this also applies
+        /// <c>BalanceConfig.EliteHealthMultiplier</c>/<c>EliteDamageMultiplier</c> on top, computed
+        /// here because this is the one place both the stage scale and the balance asset are
+        /// already in hand.
+        /// </summary>
+        public EnemyController Spawn(
+            EnemyData data, Vector2 position, bool asElite,
+            float stageHealthMultiplier, float stageDamageMultiplier)
         {
             if (_pool == null || data == null) return null;
 
@@ -82,7 +95,10 @@ namespace ChibiRift.Gameplay
 
             _owned.Add(enemy.GetInstanceID());
 
-            enemy.Configure(data, false, 1f, 1f);
+            float healthMultiplier = stageHealthMultiplier * (asElite ? _balanceConfig.EliteHealthMultiplier : 1f);
+            float damageMultiplier = stageDamageMultiplier * (asElite ? _balanceConfig.EliteDamageMultiplier : 1f);
+
+            enemy.Configure(data, asElite, healthMultiplier, damageMultiplier);
             enemy.SetSpawner(this);
             enemy.SetSpawnPosition(position);
 

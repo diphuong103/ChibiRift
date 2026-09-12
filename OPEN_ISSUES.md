@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-32 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-33 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -747,3 +747,24 @@ Enemy-vs-Enemy collision matrix entry are untouched — but it sharpens what P2 
 concurrent enemy *count* is the driver, not their behaviour state, which if anything makes NFR-001's
 30-enemy cap a more load-bearing ceiling than the clustering theory implied, not less — a wave or
 elite system adding bodies costs roughly this regardless of whether those bodies are aggroed.
+
+## OI-33 — A P2 brief named wave/stage events without checking GameEvents.cs first
+
+The P2 slice 1 brief asked for three events — `OnWaveStarted(index, total)`, `OnWaveCleared(index)`,
+`OnStageCleared()` — as if finalizing a signature from scratch. `Core/Events/GameEvents.cs` already
+declared `WaveStateChangedEvent(StageId, WaveIndex, WaveCount, WaveState)`, referenced by name in
+TRACEABILITY.md's WAV-002 row and in `WaveManager.BeginWave`'s own TODO comment ("publish
+WaveStateChangedEvent so the HUD shows wave progress"). No `StageClearedEvent` of any kind existed.
+
+**Decision (confirmed with the project owner before writing any code):** reuse
+`WaveStateChangedEvent` for both wave-started (`State` transitions through `Spawning`/`Active`) and
+wave-cleared (`State = Cleared`), extended with an `EnemiesRemaining` field for the HUD's "N left"
+readout. Add `StageStateChangedEvent(StageId, StageState)`, new but matching the same shape, for
+stage-cleared. Three new events named after the brief were rejected: they would have orphaned the
+already-reserved struct and made the TRACEABILITY/TODO references it names point at nothing.
+
+**Why this is worth a numbered issue and not just a code comment.** The failure mode is specifically
+a brief author (human or Claude) proposing a name without grepping `GameEvents.cs` first, and it can
+recur on any future feature that touches an event already sketched ahead of its implementation.
+`GameEvents.cs` now says as much directly on both structs; this entry is the fuller story for
+whoever writes the next brief.

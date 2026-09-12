@@ -43,6 +43,7 @@ namespace ChibiRift.Tests.Edit
         private static SkillData s_skillQ;
         private static SkillData s_skillE;
         private static SkillData s_skillR;
+        private static WaveData s_wave1;
 
         [OneTimeSetUp]
         public void GenerateIntoScratchFolder()
@@ -59,6 +60,7 @@ namespace ChibiRift.Tests.Edit
             s_skillQ = AssetDatabase.LoadAssetAtPath<SkillData>($"{ScratchRoot}/SKL_Q_Fireball.asset");
             s_skillE = AssetDatabase.LoadAssetAtPath<SkillData>($"{ScratchRoot}/SKL_E_Shockwave.asset");
             s_skillR = AssetDatabase.LoadAssetAtPath<SkillData>($"{ScratchRoot}/SKL_R_Cataclysm.asset");
+            s_wave1 = AssetDatabase.LoadAssetAtPath<WaveData>($"{ScratchRoot}/WAV_Stage1_Wave1.asset");
 
             Assert.That(s_balance, Is.Not.Null, $"The generator produced no BalanceConfig in {ScratchRoot}.");
             Assert.That(s_hero, Is.Not.Null, $"The generator produced no HERO_Knight in {ScratchRoot}.");
@@ -67,6 +69,7 @@ namespace ChibiRift.Tests.Edit
             Assert.That(s_skillQ, Is.Not.Null, $"The generator produced no SKL_Q_Fireball in {ScratchRoot}.");
             Assert.That(s_skillE, Is.Not.Null, $"The generator produced no SKL_E_Shockwave in {ScratchRoot}.");
             Assert.That(s_skillR, Is.Not.Null, $"The generator produced no SKL_R_Cataclysm in {ScratchRoot}.");
+            Assert.That(s_wave1, Is.Not.Null, $"The generator produced no WAV_Stage1_Wave1 in {ScratchRoot}.");
         }
 
         [OneTimeTearDown]
@@ -79,6 +82,7 @@ namespace ChibiRift.Tests.Edit
             s_skillQ = null;
             s_skillE = null;
             s_skillR = null;
+            s_wave1 = null;
             DeleteScratchFolder();
         }
 
@@ -95,6 +99,7 @@ namespace ChibiRift.Tests.Edit
             public readonly SkillData SkillQ;
             public readonly SkillData SkillE;
             public readonly SkillData SkillR;
+            public readonly WaveData Wave1;
 
             public Generated(
                 BalanceConfig balance,
@@ -103,7 +108,8 @@ namespace ChibiRift.Tests.Edit
                 EnemyData enemy,
                 SkillData skillQ,
                 SkillData skillE,
-                SkillData skillR)
+                SkillData skillR,
+                WaveData wave1)
             {
                 Balance = balance;
                 Hero = hero;
@@ -112,6 +118,7 @@ namespace ChibiRift.Tests.Edit
                 SkillQ = skillQ;
                 SkillE = skillE;
                 SkillR = skillR;
+                Wave1 = wave1;
             }
 
             /// <summary>Step <paramref name="index"/> of the basic chain, 0-based (COM-002).</summary>
@@ -130,6 +137,7 @@ namespace ChibiRift.Tests.Edit
             yield return Row("baseExperience", 100f, g => g.Balance.BaseExperience);
             yield return Row("xpGrowthFactor", 1.4f, g => g.Balance.ExperienceGrowthFactor);
             yield return Row("eliteDamageMultiplier", 1.5f, g => g.Balance.EliteDamageMultiplier);
+            yield return Row("eliteHealthMultiplier", 3f, g => g.Balance.EliteHealthMultiplier);
 
             // Dash (OI-03). Held in two places, so both are checked.
             yield return Row("dashDistance", 5.0f, g => g.Hero.Dash.Distance);
@@ -320,6 +328,12 @@ namespace ChibiRift.Tests.Edit
             yield return Row("stressAllocationBudgetKilobytes", 5000f,
                 g => g.Balance.StressAllocationBudgetKilobytes);
 
+            // WAV-005 (P2 slice 1): the gap between waves, raised from an earlier 2s default.
+            // Read from WaveData, not BalanceConfig — see README section 8 on why this isn't a
+            // global waveDelaySeconds field.
+            yield return Row("wave1.transitionDelay", 3f, g => g.Wave1.TransitionDelay);
+            yield return Row("wave1.enemyCount", 3f, g => g.Wave1.TotalEnemyCount);
+
             // Performance budgets that used to be literals in Core and Gameplay.
             yield return Row("sfxVoiceCount", 16f, g => g.Balance.SfxVoiceCount);
             yield return Row("maxTargetsPerSweep", 16f, g => g.Balance.MaxTargetsPerSweep);
@@ -335,7 +349,7 @@ namespace ChibiRift.Tests.Edit
         public void GeneratedAssetKeepsConfirmedValue(
             string name, float expected, Func<Generated, float> read)
         {
-            float actual = read(new Generated(s_balance, s_hero, s_attack, s_enemy, s_skillQ, s_skillE, s_skillR));
+            float actual = read(new Generated(s_balance, s_hero, s_attack, s_enemy, s_skillQ, s_skillE, s_skillR, s_wave1));
 
             Assert.That(
                 actual,
