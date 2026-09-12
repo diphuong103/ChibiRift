@@ -688,24 +688,62 @@ to under 60 KB combined, against totals of 2304-3456 KB. Even bracketing whole f
 active hit-stop coroutine's iterations — as broad a net as a script-level bracket can cast — added
 only ~56 KB.
 
-**The honest conclusion: the remainder is not attributable to any of ChibiRift's own code.**
+**The honest conclusion: the remainder is not attributable to any of ChibiRift's own code, and it
+is not clustering either — that part was tested, not just inferred (see the A/B experiment below).**
 Logging the cumulative delta every 2000 frames showed a flat, near-zero rate for the first ~3.5
-seconds, then a sustained ramp of roughly 115-165 bytes/frame for the rest of the run — an
-inflection point that lines up closely with when enemies spawned across an 8-unit radius would
-first walk into melee range and begin clustering around the hero (`(8 - 1.2) / 3 ≈ 2.3s`, plus
-windup). That timing, combined with every reachable script-level cost measuring near zero, points
-at Unity's own Physics2D internal bookkeeping for a cluster of colliding, separating 2D bodies —
-but this is the project's best-supported inference, not a proven attribution the way the two fixed
-bugs are; nothing in `AllocationProfiler`'s method-level bracketing can reach inside the engine's
-own simulation step. Deliberately not "fixed": `EnemyMotor`'s separation force and the Enemy-vs-
-Enemy collision matrix entry are both documented, intentional choices from earlier slices (crowd
-readability, SRS 5), and changing either on a hunch to chase this number would be worse than
-leaving it.
+seconds, then a sustained ramp of roughly 115-165 bytes/frame for the rest of the run. The timing —
+lining up with when enemies spawned across an 8-unit radius would first walk into melee range and
+cluster around the hero, `(8 - 1.2) / 3 ≈ 2.3s` plus windup — first pointed at Physics2D's own
+contact-generation bookkeeping for overlapping, separating bodies. The A/B experiment below rules
+that out directly: enemies that never move and never overlap allocate the same amount as enemies
+that chase and cluster. The remaining honest attribution is coarser than that: something scoped to
+having 30 active enemy instances running `FixedUpdate`/`Update` each frame, independent of what
+they do in it. `EnemyMotor`'s separation force and the Enemy-vs-Enemy collision matrix entry stay
+untouched — both are documented, intentional choices from earlier slices (crowd readability, SRS
+5), and this finding gives no reason to revisit either.
 
-**Regression guard.** `BalanceConfig.StressAllocationBudgetKilobytes` (8192 KB) and
+**Regression guard.** `BalanceConfig.StressAllocationBudgetKilobytes` (5000 KB) and
 `Test_Profiler_AllocationStaysUnderBudget` exist so a genuinely new allocator — a P2 wave spawner
 or elite modifier that allocates per tick — is caught immediately rather than discovered as a bad
-p99 later. The budget is deliberately far above the measured 2304-3456 KB range: it is watching
-for a new large allocator, not holding the engine's own crowd-simulation overhead to a number
-nobody chose. Verified by temporarily lowering it below the measured range and confirming the test
-fails with the actual figure named.
+p99 later. Set to ~1.4x the top of the measured range: wide enough to absorb run-to-run noise,
+narrow enough that a system tripling the allocation rate cannot hide inside it. An earlier cut of
+this guard used 8192 KB (~2.4x of the range known at the time), on the reasoning that the budget
+only needed to be "generous"; tightened once the point of the guard was reframed as catching a P2
+regression, not merely proving the harness runs (README section 8 — raise this only in the commit
+that legitimately needs it, with the new range in the message). The measured range itself widened
+from 2304-3456 KB to 1700-3640 KB once the clustering A/B experiment below added three more
+single-condition runs; 5000 KB still clears the new top by the same ~1.4x, so the number did not
+need to move again. Verified by temporarily lowering it below the measured range and confirming the
+test fails with the actual figure named.
+
+**Follow-up experiment: is it really Physics2D contact generation? No.** The clustering hypothesis
+above was inference by elimination, not a measurement, so it was tested directly: spawn the same 30
+enemies either (A) scattered across the full arena with aggro forced off (`EnemyAI.Target = null`,
+so `DistanceToTarget()` reads `float.MaxValue` and `TickIdle` never crosses `DetectionRange` no
+matter how close a spawn point lands to the hero — never moving, never overlapping each other), or
+(B) spawned inside the hero's `DebugSpawnRadius` with aggro on, exactly like the harness does today
+(closing in, clustering, attacking). Both conditions got their own fresh boot rather than running
+back to back in one — an early combined version ran A then B in the same boot and measured B at
+~12880 KB, nearly 4x every previously observed figure for that exact scenario; that gap tracked
+with which stress phase ran second in the same process, not with which condition was which, so it
+was an order effect from two heavy phases sharing one heap history, not a physics answer, and was
+discarded.
+
+Three independent, freshly-booted A/B pairs:
+
+| Run | A — scattered, no aggro | B — clustered, aggro |
+|---|---|---|
+| 1 | 2984 KB | 1740 KB |
+| 2 | 3016 KB | 2492 KB |
+| 3 | 3640 KB | 2872 KB |
+
+A is not lower than B in any run — if anything it runs slightly ahead. Enemies that stand still,
+never touch each other, and never touch the hero allocate just as much as enemies that chase, pile
+up, and land hits. **Physics2D contact generation for overlapping bodies is not the cause.** The
+remaining honest attribution is coarser, as stated above: something proportional to having 30
+active enemy instances ticking each frame, present whether they are idle or in combat. This is
+diagnostic only — nothing here changes shipped behaviour, `EnemyMotor`'s separation force and the
+Enemy-vs-Enemy collision matrix entry are untouched — but it sharpens what P2 should expect:
+concurrent enemy *count* is the driver, not their behaviour state, which if anything makes NFR-001's
+30-enemy cap a more load-bearing ceiling than the clustering theory implied, not less — a wave or
+elite system adding bodies costs roughly this regardless of whether those bodies are aggroed.

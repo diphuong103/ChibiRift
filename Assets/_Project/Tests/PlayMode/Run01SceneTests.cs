@@ -1219,10 +1219,10 @@ namespace ChibiRift.Tests.Play
             // The regression fence OI-32 asks for. A future P2 system that starts allocating in a
             // hot loop — a wave spawner doing something per-frame, an elite modifier building a
             // list every tick — will blow through this long before it shows up as a bad p99 on
-            // someone's machine. The budget itself is generous: measured runs landed at 2304-3456
-            // KB, almost none of it traceable to ChibiRift's own scripts (see BalanceConfig's
-            // tooltip and OI-32), so this is watching for a NEW large allocator, not holding the
-            // engine's own overhead to a number nobody chose.
+            // someone's machine. Measured runs landed at 1700-3640 KB, almost none of it traceable
+            // to ChibiRift's own scripts and none of it explained by enemy clustering either (see
+            // BalanceConfig's tooltip and OI-32), so this is watching for a NEW large allocator, not
+            // holding the engine's own overhead to a number nobody chose.
             Assert.That(report.AllocatedKilobytesDelta, Is.LessThan(budget),
                 $"Allocated {report.AllocatedKilobytesDelta:F0} KB, over the " +
                 $"{budget:F0} KB budget (BalanceConfig.StressAllocationBudgetKilobytes). " +

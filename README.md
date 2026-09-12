@@ -327,6 +327,14 @@ the same commit that makes a test legitimately slower.
 not report — it looks identical to "still in progress", and the first time it happened it cost a
 full test cycle to work out that anything was wrong at all (OI-28).
 
+**The same rule covers any regression-guard threshold, not just this timeout.**
+`BalanceConfig.StressAllocationBudgetKilobytes` (OI-32, section 14) is the other example: raise a
+guard's number only in the commit whose change legitimately needs the extra room, and say why —
+the new measured range and the margin chosen over it — in that commit's message. A threshold raised
+"to be safe" in an unrelated commit, or silently while fixing something else, stops being a guard:
+nobody reviewing that diff would know a regression fence just moved, and the next real regression
+has more room to hide before anything catches it.
+
 ### The three paths a value takes, and what watches each
 
 | Route | Guarded by |
@@ -480,7 +488,7 @@ window directly. The console prints a one-line summary; the JSON has the full di
 | `OnePercentLowFps` | NFR-001, 1% low | ≥ 50 |
 | `P99Ms` | NFR-002, frame time ceiling | ≤ 33 |
 | `FramesOver33Ms` | NFR-002 | as close to 0 as the run allows |
-| `AllocatedKilobytesDelta` | NFR-002 | below `BalanceConfig.StressAllocationBudgetKilobytes` (8192); exact only when `GcCollectionsDuringSample` is 0, otherwise a floor |
+| `AllocatedKilobytesDelta` | NFR-002 | below `BalanceConfig.StressAllocationBudgetKilobytes` (5000); exact only when `GcCollectionsDuringSample` is 0, otherwise a floor |
 | `GcCollectionsDuringSample` | NFR-002 | 0 for an exact allocation reading; above 0 means a collection ran and the figure undercounts |
 | `StoppedBySafetyCap` | — | must be `false`; `true` means the sample did not reach the configured duration and nothing else here is comparable to a normal run |
 | `TopAllocationSources` | NFR-002 | the five heaviest instrumented call sites, most bytes first — see below for what is and is not covered |
@@ -491,12 +499,15 @@ window directly. The console prints a one-line summary; the JSON has the full di
 triggers synchronously (hit stop, shake, damage numbers, SFX, particles, knockback), since
 `EventBus.Publish` runs every subscriber on the same call stack. Across repeated 30-enemy/10s
 runs, every one of these totalled under 60 KB, against a measured `AllocatedKilobytesDelta` of
-2304-3456 KB. The remainder tracks the timing of enemies clustering around the hero rather than
-anything traceable to a specific script, and is the best-supported read on it: Unity's own
-Physics2D bookkeeping for a crowd of colliding, separating bodies — not a ChibiRift bug, and not
-provably that either, since nothing at the script level can bracket the engine's own simulation
-step. Full investigation notes, including two real bugs this harness shipped with and a hypothesis
-that was tested and disproven (the F1 overlay), are in OI-32.
+1700-3600 KB. The first suspect for the remainder was Physics2D contact generation between
+clustering, overlapping bodies — but an A/B experiment ruled that out: 30 enemies spread across the
+arena, never moving and never touching anything, allocate just as much as 30 enemies chasing and
+piling onto the hero. The honest attribution is coarser — something scoped to having 30 active
+enemy instances ticking each frame, independent of what they do in it — not a ChibiRift bug, and
+not provably attributable further than that either, since nothing at the script level can bracket
+the engine's own simulation step. Full investigation notes, including two real bugs this harness
+shipped with, a hypothesis that was tested and disproven (the F1 overlay), and the clustering A/B
+experiment, are in OI-32.
 
 **What the measurement does not cover.** The harness casts no skill. The ultimate's cooldown is 15s
 and the sample is 10s, so including it would make each run depend on whether a cast happened to

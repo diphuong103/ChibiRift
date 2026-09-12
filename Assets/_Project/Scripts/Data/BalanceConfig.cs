@@ -177,9 +177,9 @@ namespace ChibiRift.Data
         [Min(1f)]
         [SerializeField] private float _stressDurationSeconds = 10f;
 
-        [Tooltip("Managed heap growth budget for one harness run, in kilobytes. Measured 2304-3456 KB across repeated 30-enemy/10s runs (OI-32) — almost none of it attributable to ChibiRift's own scripts (every instrumented gameplay call site totalled under 60 KB); the remainder is Unity/Physics2D internal bookkeeping for a cluster of colliding bodies, which this budget is deliberately generous about. It exists to catch a NEW P2 system that allocates in a hot loop, not to hold the engine to a number nobody chose.")]
+        [Tooltip("Managed heap growth budget for one harness run, in kilobytes. Measured 1700-3640 KB across repeated 30-enemy/10s runs (OI-32) — almost none of it attributable to ChibiRift's own scripts (every instrumented gameplay call site totalled under 60 KB), and an A/B experiment ruled out crowding/contact generation too (idle, non-overlapping enemies allocated just as much as ones chasing and clustering); the remainder is scoped to running 30 active enemy instances, not to what they do. Set to ~1.4x the top of that measured range (README section 8: raise this only in the commit that legitimately needs it, with the new range in the message) — wide enough to absorb run-to-run noise, narrow enough that a P2 system tripling the allocation rate still gets caught instead of hiding inside a budget nobody has looked at since.")]
         [Min(1f)]
-        [SerializeField] private float _stressAllocationBudgetKilobytes = 8192f;
+        [SerializeField] private float _stressAllocationBudgetKilobytes = 5000f;
 
         [Tooltip("Seconds a skill press is remembered (P1-07). Its own field, like the jump, dash and attack buffers, so retuning one cannot silently change how the others feel.")]
         [Min(0f)]

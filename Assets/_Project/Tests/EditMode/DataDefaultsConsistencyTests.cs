@@ -313,9 +313,11 @@ namespace ChibiRift.Tests.Edit
             yield return Row("stressDurationSeconds", 10f, g => g.Balance.StressDurationSeconds);
 
             // Not in any brief's list: OI-32's regression guard needed a threshold, chosen from
-            // repeated real measurements (2304-3456 KB observed), not a round number picked in
-            // advance.
-            yield return Row("stressAllocationBudgetKilobytes", 8192f,
+            // repeated real measurements (1700-3640 KB observed across both the harness and its
+            // clustering A/B follow-up), not a round number picked in advance. ~1.4x the top of
+            // that range, not the ~2.4x margin the first cut used — see README section 8 on raising
+            // this only in the commit that legitimately needs it.
+            yield return Row("stressAllocationBudgetKilobytes", 5000f,
                 g => g.Balance.StressAllocationBudgetKilobytes);
 
             // Performance budgets that used to be literals in Core and Gameplay.
