@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-35 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-36 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -828,3 +828,34 @@ a representative field on three different generated assets (a `Tile.colliderType
 float, a `WaveData` count), runs `RunAll()` again, and asserts every generated `.asset` file came
 back byte-identical to the first run. Verified to have teeth: temporarily reintroducing the early
 return in `LoadOrCreateGroundTile` made the test fail with the exact asset and reason named.
+
+## OI-36 — CompositeCollider2D's Outlines geometry has no solid interior, by design
+
+While writing `Test_Tilemap_ColliderMatchesOldBoxLayout` (OI-35), a point sitting still in the
+middle of the painted ground — nowhere near an edge — read as empty under both
+`Physics2D.OverlapPoint` and `Physics2D.OverlapBox`, and under `CompositeCollider2D.OverlapPoint`
+called directly on the collider itself. The first draft of that test, and this entry before this
+correction, blamed a "query-side quirk." That was wrong, and worth writing down precisely so it
+does not get read as "Unity has a bug here" later: `RunSceneBuilder`'s ground Tilemap sets
+`CompositeCollider2D.geometryType = Outlines`, which generates an **edge-only** collider — a closed
+loop of line segments tracing the merged tiles' boundary, with no filled interior. A point strictly
+inside that loop touches no edge and correctly overlaps nothing. This is Unity's documented,
+intentional behaviour for `Outlines`, not a defect.
+
+**Three consequences worth stating explicitly, since the next person to touch this collider will
+hit the same surprise:**
+
+1. **A ground check still works correctly.** `PlayerMotor`'s and `EnemyMotor`'s `OverlapBox` probes
+   sit at the character's feet, straddling the floor's surface — the box necessarily crosses the
+   outline edge there, and an edge-only collider registers that crossing exactly like a solid one
+   would. Every real Rigidbody2D resting on this ground in every other test in the fixture holds up
+   for this reason, not by chance.
+2. **Any "is this point buried inside solid ground" query will always read as empty against
+   Outlines geometry**, no matter how deep the point is or how correctly the tiles are painted.
+   This is expected and is not a bug to go fix — `Test_Tilemap_ColliderMatchesOldBoxLayout` now
+   asks the question the collider can actually answer (does a falling body stop here) instead.
+3. **A future need for a genuine "is this point solid" query** — checking a spawn point is not
+   buried in a wall, for instance — requires switching that collider's `geometryType` to
+   `Polygons`, which fills the interior at the cost of heavier generated geometry (more colliders,
+   more vertices) than the same shape under `Outlines`. Not needed today; noted here so the
+   trade-off is a decision made on purpose, not a debugging surprise.

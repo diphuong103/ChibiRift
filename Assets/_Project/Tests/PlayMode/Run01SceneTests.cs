@@ -1258,13 +1258,13 @@ namespace ChibiRift.Tests.Play
             // Spot-check the same world-space facts the pre-existing dash/hole/jump tests already
             // hold behaviourally: solid floor at x = -15, open air in the hole at x = -8, and a
             // solid platform top surface at (6, 3). A plain dropped Rigidbody2D settling (or not) —
-            // not a static Physics2D query: CompositeCollider2D.OverlapPoint and
-            // Physics2D.OverlapBox both returned false/null for a point plainly inside GetPath()'s
-            // own reported polygon here, a query-side quirk against this Composite/Outline shape,
-            // not evidence of missing collision — the same shape correctly holds up every real
-            // Rigidbody2D in every other test in this fixture. Not a pooled enemy either: those
-            // chase the hero on their own AI clock and would walk off a platform mid-test, which is
-            // exactly what happened the first time this used one.
+            // not a point/box query sitting still in open space: CompositeCollider2D's
+            // geometryType is Outlines (README, Tilemap section), which generates an edge-only
+            // collider with no solid interior, by design (OI-35). A point resting mid-floor touches
+            // no edge and correctly reads as empty; a falling body's collider sweeps through the
+            // edge on the way down and stops there like anything else would. Not a pooled enemy
+            // either: those chase the hero on their own AI clock and would walk off a platform
+            // mid-test, which is exactly what happened the first time this used one.
             GameObject overGroundLeft = CreateDropProbe(new Vector2(-15f, 2f));
             GameObject overHole = CreateDropProbe(new Vector2(HoleCentreXForTest, 2f));
             GameObject overPlatform = CreateDropProbe(new Vector2(6f, 5f));

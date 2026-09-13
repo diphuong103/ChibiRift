@@ -101,6 +101,16 @@ Boot ──auto──▶ MainMenu ──[Play]──▶ Hub ──[Start Run]─
 a platform at (6, 3), a spawn point, and a camera confiner. Press **F1** in Run_01 for the debug
 overlay (velocity, grounded, jump count, coyote and buffer timers).
 
+**Ground and platform are a Tilemap** (P2 slice 1, A5): a `Grid` + `Tilemap` painted with a
+placeholder tile until the real Ground tileset exists, collision merged by one
+`TilemapCollider2D` + `CompositeCollider2D` (`Rigidbody2D` Static, layer `Ground`) rather than
+hand-placed `BoxCollider2D`s. The boundary walls stay plain boxes — there is no wall tileset. The
+composite's `geometryType` is `Outlines`: an edge-only collider with no solid interior. A ground
+check (a box straddling the surface) works exactly as before; a query asking "is this point buried
+in solid ground" always reads empty against `Outlines`, by design, not a bug — see OI-36 before
+"fixing" that. Switching to `geometryType = Polygons` gives a fillable interior at the cost of
+heavier generated geometry, and is not needed for anything today.
+
 ## 4. Folder structure
 
 ```
