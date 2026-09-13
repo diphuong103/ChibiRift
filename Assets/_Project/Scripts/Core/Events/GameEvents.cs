@@ -317,14 +317,21 @@ namespace ChibiRift.Core
         public readonly float CoyoteTimer;
         public readonly float JumpBufferTimer;
 
+        /// <summary>True while a dash is active. Read by <c>PlayerAnimatorDriver</c> (P2 slice 1)
+        /// as well as the development overlay — one more field on an existing per-frame snapshot
+        /// rather than a second event just for this.</summary>
+        public readonly bool IsDashing;
+
         public PlayerMotorStateEvent(
-            Vector2 velocity, bool isGrounded, int jumpCount, float coyoteTimer, float jumpBufferTimer)
+            Vector2 velocity, bool isGrounded, int jumpCount, float coyoteTimer, float jumpBufferTimer,
+            bool isDashing)
         {
             Velocity = velocity;
             IsGrounded = isGrounded;
             JumpCount = jumpCount;
             CoyoteTimer = coyoteTimer;
             JumpBufferTimer = jumpBufferTimer;
+            IsDashing = isDashing;
         }
     }
 

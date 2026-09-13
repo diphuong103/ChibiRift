@@ -6,7 +6,7 @@ skeleton could be built. **No new requirements were invented.** Where the SRS is
 value chosen is marked *unconfirmed* and is a designer decision to confirm, not a fact.
 
 > **Status 2026-09-05:** OI-01 to OI-05 are **closed** — the project owner confirmed the five
-> outstanding balance values and they are applied to the assets. OI-06 to OI-33 remain open.
+> outstanding balance values and they are applied to the assets. OI-06 to OI-35 remain open.
 > The five values are now consistent in all three places: the `.asset` files, the C# field
 > initialisers (`StatBlock.PlayerBaseline`, `DashConfig.Baseline`, `BalanceConfig`) and
 > `TRACEABILITY.md`. A newly created asset therefore starts from the confirmed numbers.
@@ -768,3 +768,63 @@ a brief author (human or Claude) proposing a name without grepping `GameEvents.c
 recur on any future feature that touches an event already sketched ahead of its implementation.
 `GameEvents.cs` now says as much directly on both structs; this entry is the fuller story for
 whoever writes the next brief.
+
+## OI-34 — StageRunner started a stage the instant Run_01 loaded, with nothing that could stop it
+
+`StageRunner.Start()` called `Stage.BeginStage(...)` unconditionally, so simply opening Run_01 —
+including every PlayMode test that boots it for reasons unrelated to waves — spawned enemies into
+the shared pool in the background. That broke `Test_Pool_NoInstantiateAfterPrewarm` (the wave's own
+spawns pushed the pool past its prewarm count, which read as a real Instantiate-during-play
+violation) and briefly made `Test_Enemies_AreGroundedAfterSpawning` see 5 enemies instead of the 3
+it places by hand — a second symptom stacked on top of an unrelated real bug (OI-35's Tilemap
+collision failure), which is what made it worth separating the two causes before fixing either:
+disabling the auto-start in isolation showed exactly one test recovering
+(`Test_Pool_NoInstantiateAfterPrewarm`), confirming it as the sole cause of that one and ruling it
+out for the other nine.
+
+**Decision.** `StageRunner` no longer starts anything from `Start()` by default. A new
+`_autoStartOnPlay` field (off by default) and a public `BeginStage()` method are the only ways a
+stage begins now: P3's `RunManager` calls `BeginStage()` when a Run actually starts, and until then
+an F5 debug key (guarded `#if UNITY_EDITOR || DEVELOPMENT_BUILD`, the `DebugSpawner`/OI-29 pattern)
+starts it by hand for testing. Every existing test's "3 static enemies, pool never grows past
+prewarm" assumption was correct for a scene nothing has told to start playing yet — the fix left
+those tests unchanged and fixed the component instead.
+
+## OI-35 — Three incidents, one root cause: an editor tool's "already exists" early return
+
+Three separate bugs, same shape, each discovered only after it shipped or nearly shipped:
+
+1. **OI-05** — `hurtIFrameDuration` confirmed by editing the `.asset` directly reverted silently
+   the next time the generator ran, because the generator's default overrode a value that lived
+   only in the asset.
+2. **A P2 slice 1 wave-data count** — caught in review before it shipped, for the same reason:
+   `WaveData`/`StageData` assets are recreated by `SampleDataGenerator` on every `RunAll()`, so a
+   hand-edited `.asset` would have lost the edit on the next regenerate.
+3. **`RunSceneBuilder.LoadOrCreateGroundTile`** (P2 slice 1, A5) — shipped the Tilemap conversion
+   with the ground floor having no real collision. The function loaded and returned the existing
+   `Tile` asset when one was already on disk from a prior run. A fix that set `colliderType` to
+   `Grid` was added to the "create new" branch only, and because the asset already existed from an
+   earlier run, that branch never executed — the fix compiled, ran, and changed nothing, which
+   looked exactly like a Tilemap/CompositeCollider2D wiring problem and cost a full investigation
+   pass (checked `usedByComposite`, the Rigidbody2D, the GameObject layer, `geometryType`, and the
+   actual painted tile count — all correct) before the stale asset itself turned out to be the
+   cause.
+
+**The common shape.** `if (existing != null) return existing;` treats "asset is already on disk" as
+"nothing to do here," which is only true if every property that asset carries is fixed forever.
+Anything that can legitimately change later — a tuning number, a collider type, a computed
+default — makes that branch a place where a future code change silently fails to reach assets
+generated before the change.
+
+**Decision.** Every `LoadOrCreate*`/`GetOrCreate*` function in `ChibiRift.EditorTools` was audited
+(see README section 9): `PlaceholderArt.LoadOrCreateWhiteSprite`, `LoadOrCreateTileSprite`, and
+`RunSceneBuilder.LoadOrCreateGroundTile` all had the early-return shape and now unconditionally
+regenerate their asset every call, matching the delete-then-create pattern
+`SampleDataGenerator.Create<T>` already used correctly. `ProjectLayers`, `SceneGenerator`, and
+`HeroAnimatorBuilder` were checked and already reapply every property unconditionally — no early
+return to fix there. `Test_Setup_IsIdempotent` (`Tests/EditMode/SetupIdempotencyTests.cs`) is the
+regression fence for the whole class, not just this one instance: it runs `RunAll()`, hand-corrupts
+a representative field on three different generated assets (a `Tile.colliderType`, a `BalanceConfig`
+float, a `WaveData` count), runs `RunAll()` again, and asserts every generated `.asset` file came
+back byte-identical to the first run. Verified to have teeth: temporarily reintroducing the early
+return in `LoadOrCreateGroundTile` made the test fail with the exact asset and reason named.

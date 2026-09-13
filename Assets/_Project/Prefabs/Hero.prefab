@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &112048564836393803
+--- !u!1 &381603657029015664
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,10 +8,59 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4655256323392470668}
-  - component: {fileID: 6291919360345432776}
-  - component: {fileID: 7642989951539613581}
-  - component: {fileID: 572428019269292756}
+  - component: {fileID: 6441868292857757198}
+  - component: {fileID: 3270824480605697933}
+  m_Layer: 0
+  m_Name: DashTrail
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6441868292857757198
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 381603657029015664}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3097372898743295793}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3270824480605697933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 381603657029015664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2797250433887daaa512f6ce7406c92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.DashTrail
+  _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
+  _ghostPrefab: {fileID: 3007458954464043577, guid: ef92e55cdba942e668d55a7a6e45c5b8, type: 3}
+  _container: {fileID: 0}
+  _source: {fileID: 12706825992740327}
+  _prewarmCount: 8
+--- !u!1 &8088542996602881032
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1259330434777717990}
+  - component: {fileID: 4704491232454386876}
+  - component: {fileID: 8506113157054357074}
+  - component: {fileID: 6155241769128314387}
   m_Layer: 0
   m_Name: ImpactParticles
   m_TagString: Untagged
@@ -19,28 +68,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4655256323392470668
+--- !u!4 &1259330434777717990
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 112048564836393803}
+  m_GameObject: {fileID: 8088542996602881032}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1803098366017726969}
+  m_Father: {fileID: 3097372898743295793}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!198 &6291919360345432776
+--- !u!198 &4704491232454386876
 ParticleSystem:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 112048564836393803}
+  m_GameObject: {fileID: 8088542996602881032}
   serializedVersion: 8
   lengthInSec: 1
   simulationSpeed: 1
@@ -4757,14 +4806,14 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
---- !u!199 &7642989951539613581
+--- !u!199 &8506113157054357074
 ParticleSystemRenderer:
   serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 112048564836393803}
+  m_GameObject: {fileID: 8088542996602881032}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -4837,20 +4886,20 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
---- !u!114 &572428019269292756
+--- !u!114 &6155241769128314387
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 112048564836393803}
+  m_GameObject: {fileID: 8088542996602881032}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ca282ed27c2bfbd10a62b53395cc914e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.ImpactParticles
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
---- !u!1 &5549162978091266246
+--- !u!1 &8740352779447695440
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4858,24 +4907,24 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1803098366017726969}
-  - component: {fileID: 8717653407725775503}
-  - component: {fileID: 2623173079736293968}
-  - component: {fileID: 3479325811256306544}
-  - component: {fileID: 193546546313648529}
-  - component: {fileID: 888688284017489816}
-  - component: {fileID: 5968497001951775868}
-  - component: {fileID: 4226779666567851084}
-  - component: {fileID: 2979619842324805390}
-  - component: {fileID: 5035724696804398226}
-  - component: {fileID: 1112027941909934241}
-  - component: {fileID: 3389722297218970511}
-  - component: {fileID: 4493877795129497049}
-  - component: {fileID: 8139776396583135067}
-  - component: {fileID: 5209178024841836637}
-  - component: {fileID: 3179290998888594998}
-  - component: {fileID: 4589213763551664929}
-  - component: {fileID: 4214805469513391625}
+  - component: {fileID: 3097372898743295793}
+  - component: {fileID: 12706825992740327}
+  - component: {fileID: 3716229552648314818}
+  - component: {fileID: 6668483944757883522}
+  - component: {fileID: 3106492126548244431}
+  - component: {fileID: 5858125586348012263}
+  - component: {fileID: 1685426292009779620}
+  - component: {fileID: 6256975494571888504}
+  - component: {fileID: 3679546378144837064}
+  - component: {fileID: 7800125692602379725}
+  - component: {fileID: 2857736117403227467}
+  - component: {fileID: 853197594886321667}
+  - component: {fileID: 5485044022245079935}
+  - component: {fileID: 1836375758690154887}
+  - component: {fileID: 6352946007712951557}
+  - component: {fileID: 7710960156310931662}
+  - component: {fileID: 7758833422484258518}
+  - component: {fileID: 4561612575433075111}
   m_Layer: 6
   m_Name: Hero
   m_TagString: Player
@@ -4883,31 +4932,31 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1803098366017726969
+--- !u!4 &3097372898743295793
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8569256381242346948}
-  - {fileID: 4655256323392470668}
+  - {fileID: 6441868292857757198}
+  - {fileID: 1259330434777717990}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &8717653407725775503
+--- !u!212 &12706825992740327
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -4959,14 +5008,14 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!50 &2623173079736293968
+--- !u!50 &3716229552648314818
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -4986,13 +5035,13 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!70 &3479325811256306544
+--- !u!70 &6668483944757883522
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -5023,13 +5072,13 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.8, y: 1.8}
   m_Direction: 0
---- !u!114 &193546546313648529
+--- !u!114 &3106492126548244431
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a49a276c546e79e29948503baeb5fd03, type: 3}
@@ -5037,25 +5086,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.PlayerMotor
   _heroData: {fileID: 11400000, guid: a21ace09338029ed1ac12e9039af337b, type: 2}
   _sceneContext: {fileID: 0}
---- !u!114 &888688284017489816
+--- !u!114 &5858125586348012263
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51f2e61500811b46ca3e4926ecd60810, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.PlayerController
---- !u!114 &5968497001951775868
+--- !u!114 &1685426292009779620
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 479269db015c19739af7f2c4ad800877, type: 3}
@@ -5063,15 +5112,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.HealthComponent
   _sourceData: {fileID: 0}
   _isPlayer: 1
-  _bodyCollider: {fileID: 3479325811256306544}
+  _bodyCollider: {fileID: 6668483944757883522}
   _hurtIFrameDuration: 0.8
---- !u!114 &4226779666567851084
+--- !u!114 &6256975494571888504
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c6cf6b122419b2dc884816807d67d8a0, type: 3}
@@ -5079,13 +5128,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.PlayerStats
   _heroData: {fileID: 11400000, guid: a21ace09338029ed1ac12e9039af337b, type: 2}
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
---- !u!114 &2979619842324805390
+--- !u!114 &3679546378144837064
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f742e1d3fefa5989ea4a203150ddf9d9, type: 3}
@@ -5093,41 +5142,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.PlayerCombat
   _heroData: {fileID: 11400000, guid: a21ace09338029ed1ac12e9039af337b, type: 2}
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
-  _spriteRenderer: {fileID: 8717653407725775503}
---- !u!114 &5035724696804398226
+  _spriteRenderer: {fileID: 12706825992740327}
+  _attackClips: []
+--- !u!114 &7800125692602379725
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0542551c5ecf483eb84d8a6844d159ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.PlayerDash
   _heroData: {fileID: 11400000, guid: a21ace09338029ed1ac12e9039af337b, type: 2}
---- !u!114 &1112027941909934241
+--- !u!114 &2857736117403227467
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 060d55e9ca35e6053a5606666dc33b1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.SpriteFeedback
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
-  _spriteRenderer: {fileID: 8717653407725775503}
---- !u!114 &3389722297218970511
+  _spriteRenderer: {fileID: 12706825992740327}
+--- !u!114 &853197594886321667
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 49061601f8029697d85306f2b212c963, type: 3}
@@ -5135,13 +5185,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.HitStopService
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
   _heavyComboStep: 3
---- !u!114 &4493877795129497049
+--- !u!114 &5485044022245079935
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ab0bc59a2aa6a9a35b2ee622ea8cb1ef, type: 3}
@@ -5149,53 +5199,53 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.ScreenShakeService
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
   _heavyComboStep: 3
---- !u!114 &8139776396583135067
+--- !u!114 &1836375758690154887
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 495c7ddd36d7e1d36843c97d8215dcdf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.SfxPlayer
   _library: {fileID: 11400000, guid: b5e2b347b03e0ba4cb6fdf78d9899e0d, type: 2}
---- !u!114 &5209178024841836637
+--- !u!114 &6352946007712951557
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 70a5226a3e557ae0385d699b76a546ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.ProjectileSkill
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
-  _prefab: {fileID: 7734236983107772866, guid: 2c0d2127ed897e3faab80121dfb2034f, type: 3}
+  _prefab: {fileID: 783692351668758236, guid: 2c0d2127ed897e3faab80121dfb2034f, type: 3}
   _container: {fileID: 0}
---- !u!114 &3179290998888594998
+--- !u!114 &7710960156310931662
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d9610ecc22539e9a9ecafaebbb913fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.AoeSkill
---- !u!114 &4589213763551664929
+--- !u!114 &7758833422484258518
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3a1cd6cf89acd67b499b1a3a51e263d2, type: 3}
@@ -5206,15 +5256,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 44b8e066b1c1653a981a152d37108580, type: 2}
   - {fileID: 11400000, guid: 6eb0c7b68e7b75544861e3f9d773ea84, type: 2}
   _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
-  _projectileBehaviour: {fileID: 5209178024841836637}
-  _areaBehaviour: {fileID: 3179290998888594998}
---- !u!114 &4214805469513391625
+  _projectileBehaviour: {fileID: 6352946007712951557}
+  _areaBehaviour: {fileID: 7710960156310931662}
+--- !u!114 &4561612575433075111
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5549162978091266246}
+  m_GameObject: {fileID: 8740352779447695440}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
@@ -5261,52 +5311,3 @@ MonoBehaviour:
     DissipationDistance: 100
     PropagationSpeed: 343
   DefaultVelocity: {x: 0, y: -1, z: 0}
---- !u!1 &7600406689895776768
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8569256381242346948}
-  - component: {fileID: 6376004733720476171}
-  m_Layer: 0
-  m_Name: DashTrail
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8569256381242346948
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7600406689895776768}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1803098366017726969}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6376004733720476171
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7600406689895776768}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2797250433887daaa512f6ce7406c92, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: ChibiRift.Gameplay::ChibiRift.Gameplay.DashTrail
-  _balanceConfig: {fileID: 11400000, guid: 1659dc2be759ae728b90327115f3f019, type: 2}
-  _ghostPrefab: {fileID: 9084112339403745553, guid: ef92e55cdba942e668d55a7a6e45c5b8, type: 3}
-  _container: {fileID: 0}
-  _source: {fileID: 8717653407725775503}
-  _prewarmCount: 8

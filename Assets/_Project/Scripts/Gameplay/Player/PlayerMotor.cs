@@ -417,7 +417,7 @@ namespace ChibiRift.Gameplay
         private void PublishState(Vector2 velocity)
         {
             _eventBus?.Publish(new PlayerMotorStateEvent(
-                velocity, IsGrounded, JumpCount, CoyoteTimer, JumpBufferTimer));
+                velocity, IsGrounded, JumpCount, CoyoteTimer, JumpBufferTimer, IsDashing));
         }
 
 #if UNITY_EDITOR

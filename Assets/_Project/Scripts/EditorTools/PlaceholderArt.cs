@@ -32,21 +32,35 @@ namespace ChibiRift.EditorTools
         /// <summary>The single white sprite every placeholder renderer uses.</summary>
         public const string WhiteSpritePath = ArtRoot + "/px_white.png";
 
+        /// <summary>
+        /// A second white sprite, sized to one Ground tileset cell (16px at 32 PPU = 0.5 world
+        /// units) rather than one full unit. <see cref="WhiteSpritePath"/>'s sprite is the wrong
+        /// size for a <c>Tile</c>: Tilemap rendering places a tile's sprite at its own pixel size,
+        /// not stretched to fill the grid cell the way <c>SpriteRenderer.size</c> can (P2 slice 1,
+        /// A5 — Run_01's ground moved from BoxCollider2D to Tilemap).
+        /// </summary>
+        public const string TileSpritePath = ArtRoot + "/px_white_tile16.png";
+
         /// <summary>Pixels per unit, matching the project constant (README section 2).</summary>
         private const int PixelsPerUnit = 32;
 
+        /// <summary>Matches the Ground tileset's declared cell size (P2 slice 1, A1).</summary>
+        private const int TilePixelSize = 16;
+
         /// <summary>
-        /// Returns the white placeholder sprite, writing it to disk on first use.
+        /// Returns the white placeholder sprite, regenerating it on disk every run.
         /// </summary>
         [MenuItem("ChibiRift/Setup/6. Generate Placeholder Art")]
         public static void Generate() => LoadOrCreateWhiteSprite();
 
-        /// <summary>Returns the shared white sprite asset, creating it if it is not there yet.</summary>
+        /// <summary>
+        /// Returns the shared white sprite asset, regenerating it every call. Setup tools in this
+        /// project must be idempotent by fully reapplying their output, not by skipping work when
+        /// something already exists (OI-35) — the file and its import settings are both cheap to
+        /// rebuild, so there is no reason to special-case "already exists".
+        /// </summary>
         public static Sprite LoadOrCreateWhiteSprite()
         {
-            var existing = AssetDatabase.LoadAssetAtPath<Sprite>(WhiteSpritePath);
-            if (existing != null) return existing;
-
             Directory.CreateDirectory(ArtRoot);
 
             var texture = new Texture2D(PixelsPerUnit, PixelsPerUnit, TextureFormat.RGBA32, false);
@@ -73,11 +87,39 @@ namespace ChibiRift.EditorTools
         /// </summary>
         private static void ApplyImportSettings()
         {
-            var importer = AssetImporter.GetAtPath(WhiteSpritePath) as TextureImporter;
+            ApplyImportSettings(WhiteSpritePath, SpriteImportMode.Single);
+        }
+
+        /// <summary>Returns the shared tile-sized white sprite, regenerating it every call (OI-35).</summary>
+        public static Sprite LoadOrCreateTileSprite()
+        {
+            Directory.CreateDirectory(ArtRoot);
+
+            var texture = new Texture2D(TilePixelSize, TilePixelSize, TextureFormat.RGBA32, false);
+            var pixels = new Color32[TilePixelSize * TilePixelSize];
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = new Color32(255, 255, 255, 255);
+            texture.SetPixels32(pixels);
+            texture.Apply();
+
+            File.WriteAllBytes(TileSpritePath, texture.EncodeToPNG());
+            Object.DestroyImmediate(texture);
+
+            AssetDatabase.ImportAsset(TileSpritePath, ImportAssetOptions.ForceSynchronousImport);
+            ApplyImportSettings(TileSpritePath, SpriteImportMode.Single);
+
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(TileSpritePath);
+            if (sprite == null) Debug.LogError($"[Setup] Failed to import {TileSpritePath}.");
+
+            return sprite;
+        }
+
+        private static void ApplyImportSettings(string path, SpriteImportMode mode)
+        {
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
             if (importer == null) return;
 
             importer.textureType = TextureImporterType.Sprite;
-            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spriteImportMode = mode;
             importer.spritePixelsPerUnit = PixelsPerUnit;
             importer.filterMode = FilterMode.Point;
             importer.mipmapEnabled = false;

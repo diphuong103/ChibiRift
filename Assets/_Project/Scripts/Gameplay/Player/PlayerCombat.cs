@@ -10,11 +10,18 @@ namespace ChibiRift.Gameplay
     /// the mouse and with no auto-target (COM-009).
     /// </summary>
     /// <remarks>
-    /// <para><b>Why the hitbox is a manual OverlapBox.</b> SRS 21 describes hitboxes toggled by
-    /// Animation Events on the attack clips. P1 has no clips, so there is nothing to hang an event
-    /// on. Instead each step carries an active window in seconds and this component sweeps a box
-    /// during that window from <c>FixedUpdate</c>. The observable behaviour is the same and it is
-    /// testable without an Animator. TODO(COM-004): move the toggle to Animation Events in P2.</para>
+    /// <para><b>The hitbox toggles from Animation Events when the clip carries them, a manual
+    /// OverlapBox timer otherwise (COM-004, P2 slice 1).</b> P1 shipped with no animation clips,
+    /// so each step's active window lived only in seconds
+    /// (<see cref="AttackStep.ActiveStartTime"/>/<see cref="AttackStep.ActiveEndTime"/>) and this
+    /// component swept a box during that window from <c>FixedUpdate</c> — see OI-18. Real Hero
+    /// clips (built by <c>HeroAnimatorBuilder</c>) now carry <see cref="OnAttackActiveStart"/>/
+    /// <see cref="OnAttackActiveEnd"/> events at exactly those same seconds, so the seconds stay
+    /// the one source of truth either way. <see cref="DetectEventDrivenSteps"/> checks once, at
+    /// <see cref="Awake"/>, which of the three attack clips actually carry both events; a step
+    /// whose clip is missing one (or has no clip at all — the placeholder hero, or a spritesheet
+    /// swapped in without re-running the animator builder) keeps using the timer, logging a warning
+    /// once so a forgotten event does not fail silently.</para>
     ///
     /// <para>Damage never leaves this class as arithmetic: it always goes through
     /// <see cref="CombatSystem"/>, which is the single pipeline HPS-003 requires.</para>
@@ -40,6 +47,9 @@ namespace ChibiRift.Gameplay
         [Header("Presentation")]
         [Tooltip("Flipped to face the cursor (COM-009). This component is its only writer.")]
         [SerializeField] private SpriteRenderer _spriteRenderer;
+
+        [Tooltip("Attack1/2/3 clips, index 0..2 — checked only for OnAttackActiveStart/End Animation Events (COM-004), never played from here. Empty until HeroAnimatorBuilder wires a real Animator; the timer fallback covers that gap.")]
+        [SerializeField] private AnimationClip[] _attackClips = System.Array.Empty<AnimationClip>();
 
         /// <summary>Current step of the chain: 0 when idle, 1..3 while attacking (COM-002).</summary>
         public int ComboStep { get; private set; }
@@ -80,6 +90,15 @@ namespace ChibiRift.Gameplay
         private ContactFilter2D _enemyFilter;
         private bool _wasGrounded = true;
 
+        /// <summary>
+        /// Index <c>N</c> is true when <c>_attackClips[N - 1]</c> carries both hitbox events
+        /// (COM-004). Index 0 is always false — <see cref="ComboStep"/> is never 0 while attacking.
+        /// </summary>
+        private bool[] _stepEventDriven = System.Array.Empty<bool>();
+
+        private bool _hasAnimatorController;
+        private bool _warnedMissingEvents;
+
         private void Awake()
         {
             _stats = GetComponent<PlayerStats>();
@@ -104,6 +123,42 @@ namespace ChibiRift.Gameplay
                 GameLog.Error("Combat", $"{name} has no HeroData; the attack chain is unavailable (SRS 30).");
             else if (Attack == null)
                 GameLog.Error("Combat", $"{_heroData.name} has no AttackData; the attack chain is unavailable (SRS 30).");
+
+            DetectEventDrivenSteps();
+        }
+
+        /// <summary>
+        /// Checked once, not every swing: <see cref="_attackClips"/> is wired at edit time by
+        /// <c>HeroAnimatorBuilder</c> and does not change at runtime, so which steps are
+        /// event-driven cannot change either.
+        /// </summary>
+        private void DetectEventDrivenSteps()
+        {
+            int maxSteps = Attack != null ? Attack.StepCount : 0;
+            _stepEventDriven = new bool[maxSteps + 1];
+            _hasAnimatorController = _attackClips != null && _attackClips.Length > 0;
+
+            if (_attackClips == null) return;
+
+            for (int step = 1; step <= maxSteps && step - 1 < _attackClips.Length; step++)
+            {
+                AnimationClip clip = _attackClips[step - 1];
+                if (clip != null) _stepEventDriven[step] = ClipHasBothHitboxEvents(clip);
+            }
+        }
+
+        private static bool ClipHasBothHitboxEvents(AnimationClip clip)
+        {
+            bool hasStart = false;
+            bool hasEnd = false;
+
+            foreach (AnimationEvent evt in clip.events)
+            {
+                if (evt.functionName == nameof(OnAttackActiveStart)) hasStart = true;
+                else if (evt.functionName == nameof(OnAttackActiveEnd)) hasEnd = true;
+            }
+
+            return hasStart && hasEnd;
         }
 
         private void Start()
@@ -206,11 +261,24 @@ namespace ChibiRift.Gameplay
                 AttackStep step = Attack.GetStep(ComboStep - 1);
                 _stepElapsed += Time.fixedDeltaTime;
 
-                // COM-004: the hitbox exists only inside the active window of the current step.
-                bool active = _stepElapsed >= step.ActiveStartTime && _stepElapsed <= step.ActiveEndTime;
-                IsHitboxActive = active;
+                // COM-004: an event-driven step has IsHitboxActive toggled by OnAttackActiveStart/
+                // End below, called by the clip itself; this still re-sweeps every fixed step while
+                // it is open, matching the timer path's behaviour of catching a target that walks
+                // into the box mid-window rather than only checking once. Everything else uses the
+                // ActiveStartTime/ActiveEndTime timer directly (OI-18).
+                bool eventDriven = ComboStep < _stepEventDriven.Length && _stepEventDriven[ComboStep];
+                if (eventDriven)
+                {
+                    if (IsHitboxActive) SweepHitbox(step);
+                }
+                else
+                {
+                    bool active = _stepElapsed >= step.ActiveStartTime && _stepElapsed <= step.ActiveEndTime;
+                    IsHitboxActive = active;
+                    if (active) SweepHitbox(step);
 
-                if (active) SweepHitbox(step);
+                    WarnOnceIfMissingEvents();
+                }
 
                 if (_stepElapsed < step.TotalDuration) return;
 
@@ -264,6 +332,38 @@ namespace ChibiRift.Gameplay
             ComboStep = 0;
             ComboWindowRemaining = 0f;
             PublishCombo();
+        }
+
+        /// <summary>
+        /// Animation Event receiver, called by the current attack clip at its step's
+        /// ActiveStartTime (COM-004). Opens the hitbox for the same current step
+        /// <see cref="FixedUpdate"/> would otherwise be timing with the seconds-based fallback.
+        /// </summary>
+        public void OnAttackActiveStart()
+        {
+            if (State != CombatState.Attacking) return;
+
+            IsHitboxActive = true;
+            SweepHitbox(Attack.GetStep(ComboStep - 1));
+        }
+
+        /// <summary>Animation Event receiver, called at the step's ActiveEndTime (COM-004).</summary>
+        public void OnAttackActiveEnd()
+        {
+            if (State != CombatState.Attacking) return;
+
+            IsHitboxActive = false;
+        }
+
+        private void WarnOnceIfMissingEvents()
+        {
+            if (!_hasAnimatorController || _warnedMissingEvents) return;
+            _warnedMissingEvents = true;
+
+            GameLog.Warn("Combat",
+                $"Attack{ComboStep} has no OnAttackActiveStart/OnAttackActiveEnd Animation Event; " +
+                "falling back to the ActiveStartTime/ActiveEndTime timer (COM-004). Re-run the Hero " +
+                "Animator builder if a spritesheet was swapped in without one.");
         }
 
         private void SweepHitbox(in AttackStep step)

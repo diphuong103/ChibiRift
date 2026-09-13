@@ -372,6 +372,23 @@ five scenes from scratch. Menu: **ChibiRift → Setup → Run All**, or headless
 
 This is destructive to `Assets/_Project/Data/*.asset` and `Assets/_Project/Scenes/*.unity`.
 
+**A setup tool that generates an asset must be idempotent.** Running `RunAll()` twice must land on
+exactly the same result as running it once — every property fully reapplied every time, not only
+when the asset is created. An early return of the shape `if (existing != null) return existing;`
+is exactly what breaks this: the second run keeps whatever is already on disk instead of
+overwriting it, which means a fix made in code afterwards never reaches an asset generated before
+that fix, and a value hand-edited into an asset survives a "regenerate everything" run that was
+supposed to remove it. Prefer deleting and recreating the asset (`SampleDataGenerator.Create<T>`'s
+pattern) over loading and conditionally keeping it.
+
+This is not hypothetical — it is the same bug, three times: `hurtIFrameDuration` reverting
+silently on a regenerate (OI-05), a wave-data count caught in review before it shipped, and
+`RunSceneBuilder`'s ground tile keeping a stale `colliderType` that left Run_01's floor with no
+real collision for an entire slice (OI-35). `Test_Setup_IsIdempotent`
+(`Tests/EditMode/SetupIdempotencyTests.cs`) is the regression fence: it runs `RunAll()`, hand-edits
+a few representative generated assets, runs `RunAll()` again, and asserts every asset it checks
+came back to exactly its first-run state.
+
 ## 10. Physics2D layers and collision matrix
 
 Nine layers occupy slots 6 to 14 (0–5 are Unity built-ins):

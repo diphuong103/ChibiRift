@@ -14,12 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.StageData
   _id: stage.01
   _displayName: Stage 1
-  _description: 'The MVP stage: waves then a two phase boss (SRS 14, STG-003).'
+  _description: 'The MVP stage: five waves then a two phase boss (SRS 14, STG-003).'
   _waves:
   - {fileID: 11400000, guid: a760907e450b223638b0275826858291, type: 2}
+  - {fileID: 11400000, guid: 62aa6107bda4b0bf2b0fc3fbae0aa8bf, type: 2}
+  - {fileID: 11400000, guid: 9cc333647e9d76c8db5cc29f2a53592c, type: 2}
+  - {fileID: 11400000, guid: 0672d563a007f2cba9d5cadf73ab88e5, type: 2}
+  - {fileID: 11400000, guid: e1ba4cdf3ef9696918fe47c8f117ff09, type: 2}
   _boss: {fileID: 11400000, guid: 330d698879ed2a7c9b76ef45ba2450d4, type: 2}
   _enemyHealthMultiplier: 1
   _enemyDamageMultiplier: 1
   _clearGoldReward: 50
   _clearGemReward: 0
   _sceneName: Run_01
+  _enemySpawnPoint: {x: 14, y: 1}

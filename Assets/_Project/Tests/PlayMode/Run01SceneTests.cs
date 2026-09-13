@@ -5,6 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.Tilemaps;
 using UnityEngine.TestTools;
 using ChibiRift.Core;
 using ChibiRift.Data;
@@ -1228,6 +1229,84 @@ namespace ChibiRift.Tests.Play
                 $"{budget:F0} KB budget (BalanceConfig.StressAllocationBudgetKilobytes). " +
                 "Check TopAllocationSources in Logs/frametime-report.json for where it went.");
         }
+
+        // ----- A5: Tilemap ground (P2 slice 1) -----------------------------------------------
+
+        [UnityTest]
+        public IEnumerator Test_Tilemap_ColliderMatchesOldBoxLayout()
+        {
+            yield return BootIntoRun01();
+
+            var tilemap = Object.FindFirstObjectByType<Tilemap>();
+            Assert.That(tilemap, Is.Not.Null, $"{RunScene} has no Tilemap; A5 did not run.");
+
+            var composite = tilemap.GetComponent<CompositeCollider2D>();
+            Assert.That(composite, Is.Not.Null, "The ground Tilemap has no CompositeCollider2D.");
+
+            var tilemapCollider = tilemap.GetComponent<TilemapCollider2D>();
+            Assert.That(tilemapCollider, Is.Not.Null, "The ground Tilemap has no TilemapCollider2D.");
+            Assert.That(tilemapCollider.usedByComposite, Is.True,
+                "TilemapCollider2D.usedByComposite must be on for the CompositeCollider2D to merge it.");
+
+            Assert.That(GameObject.Find("Ground_Left"), Is.Null,
+                "The old manual Ground_Left box should be gone, replaced by the Tilemap.");
+            Assert.That(GameObject.Find("Ground_Right"), Is.Null,
+                "The old manual Ground_Right box should be gone, replaced by the Tilemap.");
+            Assert.That(GameObject.Find("Platform"), Is.Null,
+                "The old manual Platform box should be gone, replaced by the Tilemap.");
+
+            // Spot-check the same world-space facts the pre-existing dash/hole/jump tests already
+            // hold behaviourally: solid floor at x = -15, open air in the hole at x = -8, and a
+            // solid platform top surface at (6, 3). A plain dropped Rigidbody2D settling (or not) —
+            // not a static Physics2D query: CompositeCollider2D.OverlapPoint and
+            // Physics2D.OverlapBox both returned false/null for a point plainly inside GetPath()'s
+            // own reported polygon here, a query-side quirk against this Composite/Outline shape,
+            // not evidence of missing collision — the same shape correctly holds up every real
+            // Rigidbody2D in every other test in this fixture. Not a pooled enemy either: those
+            // chase the hero on their own AI clock and would walk off a platform mid-test, which is
+            // exactly what happened the first time this used one.
+            GameObject overGroundLeft = CreateDropProbe(new Vector2(-15f, 2f));
+            GameObject overHole = CreateDropProbe(new Vector2(HoleCentreXForTest, 2f));
+            GameObject overPlatform = CreateDropProbe(new Vector2(6f, 5f));
+
+            yield return Steps(StepsFor(1.5f));
+
+            Assert.That(overGroundLeft.transform.position.y, Is.GreaterThan(-0.75f),
+                "x = -15 should be solid floor (RunSceneBuilder.GroundY = -0.5, 1u tall) — a body " +
+                $"dropped there should have landed, not fallen through (settled at " +
+                $"{overGroundLeft.transform.position}).");
+            Assert.That(overHole.transform.position.y, Is.LessThan(-3f),
+                "The 3u hole at x = -8 should still be open air: a body dropped there should still " +
+                $"be falling well past the ground line, not resting on solid Tilemap (settled at " +
+                $"{overHole.transform.position}).");
+            Assert.That(overPlatform.transform.position.y, Is.GreaterThan(2.5f),
+                "The platform at (6, 3), 0.5u tall, should still have a solid top surface — a body " +
+                $"dropped above it should have landed there, not fallen through to the ground below " +
+                $"(settled at {overPlatform.transform.position}).");
+
+            Object.Destroy(overGroundLeft);
+            Object.Destroy(overHole);
+            Object.Destroy(overPlatform);
+        }
+
+        /// <summary>A minimal falling body — no AI, no custom motor — for a pure collision check.</summary>
+        private static GameObject CreateDropProbe(Vector2 position)
+        {
+            var probe = new GameObject("TilemapDropProbe") { layer = LayerMask.NameToLayer(GameLayers.Enemy) };
+            probe.transform.position = position;
+
+            var body = probe.AddComponent<Rigidbody2D>();
+            body.bodyType = RigidbodyType2D.Dynamic;
+            body.freezeRotation = true;
+
+            var box = probe.AddComponent<BoxCollider2D>();
+            box.size = new Vector2(0.4f, 0.4f);
+
+            return probe;
+        }
+
+        /// <summary>Mirrors RunSceneBuilder.HoleCentreX; this file has no reference to that class.</summary>
+        private const float HoleCentreXForTest = -8f;
 
         // ----- helpers ---------------------------------------------------------------------
 

@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b5bba7492f204ab99a44ac53e934af0, type: 3}
-  m_Name: WAV_Stage1_Wave1
+  m_Name: WAV_Stage1_Wave3
   m_EditorClassIdentifier: ChibiRift.Data::ChibiRift.Data.WaveData
-  _id: wave.stage1.wave1
-  _displayName: Stage 1 - Wave 1
-  _description: 3 melee enemies (SRS 14, Stage 1).
+  _id: wave.stage1.wave3
+  _displayName: Stage 1 - Wave 3
+  _description: 7 melee enemies (SRS 14, Stage 1).
   _entries:
   - Enemy: {fileID: 11400000, guid: c84a118230c277ad79f3edcbd33dcca8, type: 2}
-    Count: 3
+    Count: 7
     SpawnAsElite: 0
     StartDelay: 0
   _clearCondition: 0

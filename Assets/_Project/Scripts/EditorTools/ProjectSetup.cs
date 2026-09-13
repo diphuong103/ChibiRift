@@ -21,6 +21,8 @@ namespace ChibiRift.EditorTools
             SampleDataGenerator.Generate();
             SceneGenerator.GenerateAll();
             RunSceneBuilder.Build();
+            SpritesheetSlicer.ReimportKnownSpritesheets();
+            HeroAnimatorBuilder.Build();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
