@@ -58,7 +58,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 44b8e066b1c1653a981a152d37108580, type: 2}
   - {fileID: 11400000, guid: 6eb0c7b68e7b75544861e3f9d773ea84, type: 2}
   _passive: {fileID: 0}
-  _animatorController: {fileID: 0}
+  _animatorController: {fileID: 9100000, guid: be5fe2fad2bd138f1a62a69cfc59080c, type: 2}
   _portrait: {fileID: 0}
   _unlockedByDefault: 1
   _gemUnlockCost: 0

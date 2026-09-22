@@ -1,0 +1,1330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="191" result="Passed" total="191" passed="191" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-22 09:45:38Z" end-time="2026-09-22 09:45:53Z" duration="14.2989429">
+  <test-suite type="TestSuite" id="1000" name="ChibiRift" fullname="ChibiRift" runstate="Runnable" testcasecount="191" result="Passed" start-time="2026-09-22 09:45:38Z" end-time="2026-09-22 09:45:53Z" duration="14.298943" total="191" passed="191" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1205" name="ChibiRift.Tests.Edit.dll" fullname="/home/dinhphuong/Linux/Game/ChibiRift/Library/ScriptAssemblies/ChibiRift.Tests.Edit.dll" runstate="Runnable" testcasecount="191" result="Passed" start-time="2026-09-22 09:45:38Z" end-time="2026-09-22 09:45:53Z" duration="14.294103" total="191" passed="191" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="32338" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1206" name="ChibiRift" fullname="ChibiRift" runstate="Runnable" testcasecount="191" result="Passed" start-time="2026-09-22 09:45:38Z" end-time="2026-09-22 09:45:53Z" duration="14.293868" total="191" passed="191" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1207" name="Tests" fullname="ChibiRift.Tests" runstate="Runnable" testcasecount="191" result="Passed" start-time="2026-09-22 09:45:38Z" end-time="2026-09-22 09:45:53Z" duration="14.293797" total="191" passed="191" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1208" name="Edit" fullname="ChibiRift.Tests.Edit" runstate="Runnable" testcasecount="191" result="Passed" start-time="2026-09-22 09:45:38Z" end-time="2026-09-22 09:45:53Z" duration="14.293650" total="191" passed="191" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1001" name="ArtImportSettingsTests" fullname="ChibiRift.Tests.Edit.ArtImportSettingsTests" classname="ChibiRift.Tests.Edit.ArtImportSettingsTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-22 09:45:38Z" end-time="2026-09-22 09:45:40Z" duration="1.327426" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1004" name="Test_ArtPipeline_ToolsRunWithoutArtFiles" fullname="ChibiRift.Tests.Edit.ArtImportSettingsTests.Test_ArtPipeline_ToolsRunWithoutArtFiles" methodname="Test_ArtPipeline_ToolsRunWithoutArtFiles" classname="ChibiRift.Tests.Edit.ArtImportSettingsTests" runstate="Runnable" seed="45841205" result="Passed" start-time="2026-09-22 09:45:38Z" end-time="2026-09-22 09:45:39Z" duration="1.146267" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[Setup] Assets/_Project/Art/Characters/Enemy_Melee/Enemy_Melee_Spritesheet.png not found; keeping the existing placeholder art.
+[Setup] Hero Animator built.
+]]></output>
+              </test-case>
+              <test-case id="1002" name="Test_Sprite_ImportSettingsAreCorrect" fullname="ChibiRift.Tests.Edit.ArtImportSettingsTests.Test_Sprite_ImportSettingsAreCorrect" methodname="Test_Sprite_ImportSettingsAreCorrect" classname="ChibiRift.Tests.Edit.ArtImportSettingsTests" runstate="Runnable" seed="105586761" result="Passed" start-time="2026-09-22 09:45:39Z" end-time="2026-09-22 09:45:40Z" duration="0.023371" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1003" name="Test_SpritesheetSlicer_SlicesAKnownFolderCorrectly" fullname="ChibiRift.Tests.Edit.ArtImportSettingsTests.Test_SpritesheetSlicer_SlicesAKnownFolderCorrectly" methodname="Test_SpritesheetSlicer_SlicesAKnownFolderCorrectly" classname="ChibiRift.Tests.Edit.ArtImportSettingsTests" runstate="Runnable" seed="1659030263" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.147843" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1005" name="AssetReferenceIntegrityTests" fullname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests" classname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.178198" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1009" name="EveryDataAssetHasAnId" fullname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests.EveryDataAssetHasAnId" methodname="EveryDataAssetHasAnId" classname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests" runstate="Runnable" seed="479810672" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.166880" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1007" name="EveryStagePointsAtAnExistingWaveAndBoss" fullname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests.EveryStagePointsAtAnExistingWaveAndBoss" methodname="EveryStagePointsAtAnExistingWaveAndBoss" classname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests" runstate="Runnable" seed="1508328901" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.002454" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1006" name="EveryWaveEntryPointsAtAnExistingEnemy" fullname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests.EveryWaveEntryPointsAtAnExistingEnemy" methodname="EveryWaveEntryPointsAtAnExistingEnemy" classname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests" runstate="Runnable" seed="241885633" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.001773" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1008" name="HeroPointsAtAnExistingAttackChain" fullname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests.HeroPointsAtAnExistingAttackChain" methodname="HeroPointsAtAnExistingAttackChain" classname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests" runstate="Runnable" seed="1705736173" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.001876" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1010" name="NoTwoDataAssetsShareAnId" fullname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests.NoTwoDataAssetsShareAnId" methodname="NoTwoDataAssetsShareAnId" classname="ChibiRift.Tests.Edit.AssetReferenceIntegrityTests" runstate="Runnable" seed="1884548988" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.001582" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1011" name="DamageCalculatorTests" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.007900" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1023" name="BalanceConfigDefaultsMatchTheSrsBaseline" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.BalanceConfigDefaultsMatchTheSrsBaseline" methodname="BalanceConfigDefaultsMatchTheSrsBaseline" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="1720675657" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.001316" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1022" name="CreateRequest_TakesMinDamageAndCapFromBalanceConfig" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.CreateRequest_TakesMinDamageAndCapFromBalanceConfig" methodname="CreateRequest_TakesMinDamageAndCapFromBalanceConfig" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="1625001961" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000573" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1018" name="DamageReductionAboveCapIsClampedToPointEight" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.DamageReductionAboveCapIsClampedToPointEight" methodname="DamageReductionAboveCapIsClampedToPointEight" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="572564336" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000362" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1019" name="DamageReductionOfExactlyOneStillLeavesTwentyPercent" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.DamageReductionOfExactlyOneStillLeavesTwentyPercent" methodname="DamageReductionOfExactlyOneStillLeavesTwentyPercent" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="1113356883" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000143" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1020" name="NegativeDamageReductionIsClampedToZero" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.NegativeDamageReductionIsClampedToZero" methodname="NegativeDamageReductionIsClampedToZero" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="1530296313" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000148" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1015" name="OrderIsMandatory_CritAppliesBeforeArmorSubtraction" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.OrderIsMandatory_CritAppliesBeforeArmorSubtraction" methodname="OrderIsMandatory_CritAppliesBeforeArmorSubtraction" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="2075921416" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000157" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1024" name="RollCritical_IsDeterministicForAGivenSeed" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.RollCritical_IsDeterministicForAGivenSeed" methodname="RollCritical_IsDeterministicForAGivenSeed" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="1078297337" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000452" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1025" name="RollCritical_NeverCritsAtZeroChanceAndAlwaysCritsAtOne" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.RollCritical_NeverCritsAtZeroChanceAndAlwaysCritsAtOne" methodname="RollCritical_NeverCritsAtZeroChanceAndAlwaysCritsAtOne" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="978742845" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000281" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1021" name="SourceIsCarriedThroughForTelemetry" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.SourceIsCarriedThroughForTelemetry" methodname="SourceIsCarriedThroughForTelemetry" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="1416364171" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000213" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1012" name="Step1_MultipliesBaseDamageByAttackModifiers" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.Step1_MultipliesBaseDamageByAttackModifiers" methodname="Step1_MultipliesBaseDamageByAttackModifiers" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="772007664" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000156" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1013" name="Step2_AppliesCriticalMultiplierOnlyOnCrit" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.Step2_AppliesCriticalMultiplierOnlyOnCrit" methodname="Step2_AppliesCriticalMultiplierOnlyOnCrit" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="1937975409" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000200" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1014" name="Step3_SubtractsFlatDefenseBeforeApplyingDamageReduction" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.Step3_SubtractsFlatDefenseBeforeApplyingDamageReduction" methodname="Step3_SubtractsFlatDefenseBeforeApplyingDamageReduction" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="2104945407" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000136" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1016" name="Step4_NegativeDamageIsClampedToMinDamage" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.Step4_NegativeDamageIsClampedToMinDamage" methodname="Step4_NegativeDamageIsClampedToMinDamage" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="1156606817" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.001807" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1017" name="Step4_ZeroDamageIsClampedToMinDamage" fullname="ChibiRift.Tests.Edit.DamageCalculatorTests.Step4_ZeroDamageIsClampedToMinDamage" methodname="Step4_ZeroDamageIsClampedToMinDamage" classname="ChibiRift.Tests.Edit.DamageCalculatorTests" runstate="Runnable" seed="580430043" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.000225" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1026" name="DamagePipelineSourceTests" fullname="ChibiRift.Tests.Edit.DamagePipelineSourceTests" classname="ChibiRift.Tests.Edit.DamagePipelineSourceTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.121002" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1027" name="ApplyDamageIsCalledOnlyByCombatSystem" fullname="ChibiRift.Tests.Edit.DamagePipelineSourceTests.ApplyDamageIsCalledOnlyByCombatSystem" methodname="ApplyDamageIsCalledOnlyByCombatSystem" classname="ChibiRift.Tests.Edit.DamagePipelineSourceTests" runstate="Runnable" seed="347135185" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.036392" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1028" name="HealthIsWrittenOnlyInsideHealthComponent" fullname="ChibiRift.Tests.Edit.DamagePipelineSourceTests.HealthIsWrittenOnlyInsideHealthComponent" methodname="HealthIsWrittenOnlyInsideHealthComponent" classname="ChibiRift.Tests.Edit.DamagePipelineSourceTests" runstate="Runnable" seed="1078444749" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:40Z" duration="0.074334" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1029" name="DataDefaultsConsistencyTests" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" testcasecount="125" result="Passed" start-time="2026-09-22 09:45:40Z" end-time="2026-09-22 09:45:42Z" duration="1.867233" total="125" passed="125" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <output><![CDATA[[Data] Duplicate Id 'balance.default' on BalanceConfig: 'BalanceConfig' and 'BalanceConfig' (UPG-001).
+[Data] Duplicate Id 'balance.default' on BalanceConfig: 'BalanceConfig' and 'BalanceConfig' (UPG-001).
+[Data] Duplicate Id 'camera.default' on CameraConfig: 'CameraConfig' and 'CameraConfig' (UPG-001).
+[Data] Duplicate Id 'camera.default' on CameraConfig: 'CameraConfig' and 'CameraConfig' (UPG-001).
+[Data] Duplicate Id 'skill.fireball' on SkillData: 'SKL_Q_Fireball' and 'SKL_Q_Fireball' (UPG-001).
+[Data] Duplicate Id 'skill.fireball' on SkillData: 'SKL_Q_Fireball' and 'SKL_Q_Fireball' (UPG-001).
+[Data] Duplicate Id 'skill.shockwave' on SkillData: 'SKL_E_Shockwave' and 'SKL_E_Shockwave' (UPG-001).
+[Data] Duplicate Id 'skill.cataclysm' on SkillData: 'SKL_R_Cataclysm' and 'SKL_R_Cataclysm' (UPG-001).
+[Data] Duplicate Id 'upgrade.attack_up' on UpgradeData: 'UPG_AttackUp' and 'UPG_AttackUp' (UPG-001).
+[Data] Duplicate Id 'upgrade.attack_up' on UpgradeData: 'UPG_AttackUp' and 'UPG_AttackUp' (UPG-001).
+[Data] Duplicate Id 'elite.enraged' on EliteModifierData: 'ELT_Enraged' and 'ELT_Enraged' (UPG-001).
+[Data] Duplicate Id 'elite.enraged' on EliteModifierData: 'ELT_Enraged' and 'ELT_Enraged' (UPG-001).
+[Data] Duplicate Id 'enemy.melee_grunt' on EnemyData: 'ENM_MeleeGrunt' and 'ENM_MeleeGrunt' (UPG-001).
+[Data] Duplicate Id 'enemy.melee_grunt' on EnemyData: 'ENM_MeleeGrunt' and 'ENM_MeleeGrunt' (UPG-001).
+[Data] Duplicate Id 'attack.knight.basic' on AttackData: 'ATK_KnightBasic' and 'ATK_KnightBasic' (UPG-001).
+[Data] Duplicate Id 'attack.knight.basic' on AttackData: 'ATK_KnightBasic' and 'ATK_KnightBasic' (UPG-001).
+[Data] Duplicate Id 'hero.knight' on HeroData: 'HERO_Knight' and 'HERO_Knight' (UPG-001).
+[Data] Duplicate Id 'hero.knight' on HeroData: 'HERO_Knight' and 'HERO_Knight' (UPG-001).
+[Data] Duplicate Id 'enemy.training_dummy' on EnemyData: 'ENM_TrainingDummy' and 'ENM_TrainingDummy' (UPG-001).
+[Data] Duplicate Id 'enemy.training_dummy' on EnemyData: 'ENM_TrainingDummy' and 'ENM_TrainingDummy' (UPG-001).
+[Data] Duplicate Id 'enemy.training_dummy_fragile' on EnemyData: 'ENM_TrainingDummyFragile' and 'ENM_TrainingDummyFragile' (UPG-001).
+[Data] Duplicate Id 'enemy.training_dummy_fragile' on EnemyData: 'ENM_TrainingDummyFragile' and 'ENM_TrainingDummyFragile' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave1' on WaveData: 'WAV_Stage1_Wave1' and 'WAV_Stage1_Wave1' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave1' on WaveData: 'WAV_Stage1_Wave1' and 'WAV_Stage1_Wave1' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave2' on WaveData: 'WAV_Stage1_Wave2' and 'WAV_Stage1_Wave2' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave2' on WaveData: 'WAV_Stage1_Wave2' and 'WAV_Stage1_Wave2' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave3' on WaveData: 'WAV_Stage1_Wave3' and 'WAV_Stage1_Wave3' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave3' on WaveData: 'WAV_Stage1_Wave3' and 'WAV_Stage1_Wave3' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave4' on WaveData: 'WAV_Stage1_Wave4' and 'WAV_Stage1_Wave4' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave4' on WaveData: 'WAV_Stage1_Wave4' and 'WAV_Stage1_Wave4' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave5' on WaveData: 'WAV_Stage1_Wave5' and 'WAV_Stage1_Wave5' (UPG-001).
+[Data] Duplicate Id 'wave.stage1.wave5' on WaveData: 'WAV_Stage1_Wave5' and 'WAV_Stage1_Wave5' (UPG-001).
+[Data] Duplicate Id 'boss.stage1' on BossData: 'BOSS_Stage1' and 'BOSS_Stage1' (UPG-001).
+[Data] Duplicate Id 'boss.stage1' on BossData: 'BOSS_Stage1' and 'BOSS_Stage1' (UPG-001).
+[Data] Duplicate Id 'sfx.default' on SfxLibrary: 'SFX_Default' and 'SFX_Default' (UPG-001).
+[Data] Duplicate Id 'sfx.default' on SfxLibrary: 'SFX_Default' and 'SFX_Default' (UPG-001).
+[Data] Duplicate Id 'stage.01' on StageData: 'STG_Stage1' and 'STG_Stage1' (UPG-001).
+[Data] Duplicate Id 'stage.01' on StageData: 'STG_Stage1' and 'STG_Stage1' (UPG-001).
+[Setup] Baseline data assets generated in Assets/_DataDefaultsScratch.
+]]></output>
+              <test-suite type="ParameterizedMethod" id="1155" name="GeneratedAssetKeepsConfirmedValue" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" testcasecount="125" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.015515" total="125" passed="125" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1030" name="Confirmed: critMultiplier (BalanceConfig) == 2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: critMultiplier (BalanceConfig) == 2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="153009308" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000624" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1031" name="Confirmed: critMultiplier (HERO_Knight) == 2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: critMultiplier (HERO_Knight) == 2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1754501818" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000188" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1032" name="Confirmed: baseExperience == 100" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: baseExperience == 100" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1121334297" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000118" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1033" name="Confirmed: xpGrowthFactor == 1.4" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: xpGrowthFactor == 1.4" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1441478082" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000091" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1034" name="Confirmed: eliteDamageMultiplier == 1.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: eliteDamageMultiplier == 1.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="780931578" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000071" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1035" name="Confirmed: eliteHealthMultiplier == 3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: eliteHealthMultiplier == 3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="331025312" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000065" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1036" name="Confirmed: dashDistance == 5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashDistance == 5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="924717064" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000076" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1037" name="Confirmed: dashDuration == 0.25" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashDuration == 0.25" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1730833998" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000089" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1038" name="Confirmed: dashIFrameDuration (BalanceConfig) == 0.25" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashIFrameDuration (BalanceConfig) == 0.25" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1414140071" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000066" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1039" name="Confirmed: dashIFrameDuration (HERO_Knight) == 0.25" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashIFrameDuration (HERO_Knight) == 0.25" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="567440603" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000071" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1040" name="Confirmed: dashCooldown (BalanceConfig) == 1.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashCooldown (BalanceConfig) == 1.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1417063862" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000063" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1041" name="Confirmed: dashCooldown (HERO_Knight) == 1.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashCooldown (HERO_Knight) == 1.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1005446218" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000066" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1042" name="Confirmed: comboWindow (BalanceConfig) == 0.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: comboWindow (BalanceConfig) == 0.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1590034715" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000072" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1043" name="Confirmed: comboWindow (HERO_Knight) == 0.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: comboWindow (HERO_Knight) == 0.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1146694500" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000067" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1044" name="Confirmed: hurtIFrameDuration == 0.8" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hurtIFrameDuration == 0.8" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="493148913" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000068" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1045" name="Confirmed: moveSpeed == 7" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: moveSpeed == 7" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="754703956" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000077" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1046" name="Confirmed: jumpVelocity == 15.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: jumpVelocity == 15.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="251757776" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000086" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1047" name="Confirmed: doubleJumpVelocity == 13" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: doubleJumpVelocity == 13" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="872815631" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000081" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1048" name="Confirmed: gravityUp == 40" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: gravityUp == 40" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1201977779" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000079" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1049" name="Confirmed: fallMultiplier == 1.6" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: fallMultiplier == 1.6" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1972611027" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000075" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1050" name="Confirmed: lowJumpMultiplier == 2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: lowJumpMultiplier == 2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="2143807930" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000069" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1051" name="Confirmed: maxFallSpeed == 25" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: maxFallSpeed == 25" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="714728537" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000073" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1052" name="Confirmed: coyoteTime == 0.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: coyoteTime == 0.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="2031003084" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000065" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1053" name="Confirmed: jumpBuffer == 0.12" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: jumpBuffer == 0.12" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1860913988" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000069" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1054" name="Confirmed: attack1.totalDuration == 0.3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack1.totalDuration == 0.3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="857023760" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000122" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1055" name="Confirmed: attack1.activeStart == 0.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack1.activeStart == 0.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1834224662" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000075" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1056" name="Confirmed: attack1.activeEnd == 0.16" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack1.activeEnd == 0.16" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1804550018" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000065" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1057" name="Confirmed: attack1.damageMult == 1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack1.damageMult == 1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="119512056" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000062" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1058" name="Confirmed: attack2.totalDuration == 0.3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack2.totalDuration == 0.3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1318661939" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000059" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1059" name="Confirmed: attack2.activeStart == 0.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack2.activeStart == 0.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1806921425" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000061" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1060" name="Confirmed: attack2.activeEnd == 0.16" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack2.activeEnd == 0.16" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1313114117" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000059" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1061" name="Confirmed: attack2.damageMult == 1.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack2.damageMult == 1.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1516901604" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000054" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1062" name="Confirmed: attack3.totalDuration == 0.45" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack3.totalDuration == 0.45" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="691482272" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000055" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1063" name="Confirmed: attack3.activeStart == 0.15" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack3.activeStart == 0.15" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1894742745" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000068" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1064" name="Confirmed: attack3.activeEnd == 0.24" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack3.activeEnd == 0.24" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1482054954" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000060" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1065" name="Confirmed: attack3.damageMult == 1.6" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attack3.damageMult == 1.6" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="558165035" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000055" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1066" name="Confirmed: hitboxWidth == 1.2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hitboxWidth == 1.2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1073260003" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000057" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1067" name="Confirmed: hitboxHeight == 1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hitboxHeight == 1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="979929873" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000061" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1068" name="Confirmed: hitboxOffsetDistance == 0.8" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hitboxOffsetDistance == 0.8" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="268319810" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000056" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1069" name="Confirmed: moveSpeedMultiplierWhileAttacking == 0.3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: moveSpeedMultiplierWhileAttacking == 0.3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1405617890" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000053" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1070" name="Confirmed: enemy.hp == 40" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.hp == 40" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1375090837" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000068" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1071" name="Confirmed: enemy.damage == 8" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.damage == 8" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1790124037" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000069" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1072" name="Confirmed: enemy.defense == 0" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.defense == 0" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="301557486" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000060" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1073" name="Confirmed: enemy.damageReduction == 0" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.damageReduction == 0" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="584940803" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000065" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1074" name="Confirmed: enemy.moveSpeed == 3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.moveSpeed == 3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="349624298" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000057" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1075" name="Confirmed: enemy.detectionRange == 8" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.detectionRange == 8" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="817505020" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000055" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1076" name="Confirmed: enemy.loseAggroRange == 12" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.loseAggroRange == 12" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1852163227" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000057" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1077" name="Confirmed: enemy.attackRange == 1.2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.attackRange == 1.2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="416442991" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000051" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1078" name="Confirmed: enemy.attackWindup == 0.35" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.attackWindup == 0.35" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1650062642" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000070" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1079" name="Confirmed: enemy.attackActive == 0.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.attackActive == 0.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1799213802" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000061" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1080" name="Confirmed: enemy.attackRecovery == 0.45" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.attackRecovery == 0.45" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="410442881" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000057" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1081" name="Confirmed: enemy.attackCooldown == 1.2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.attackCooldown == 1.2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="737768272" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000063" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1082" name="Confirmed: enemy.hurtStunDuration == 0.2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.hurtStunDuration == 0.2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1695196201" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000056" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1083" name="Confirmed: enemy.corpseLingerSeconds == 1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.corpseLingerSeconds == 1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1556452385" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000060" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1084" name="Confirmed: enemyKnockbackForce == 6" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemyKnockbackForce == 6" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1223853310" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000057" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1085" name="Confirmed: enemyKnockbackDuration == 0.15" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemyKnockbackDuration == 0.15" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1585764418" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000054" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1086" name="Confirmed: heroKnockbackForce == 4" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: heroKnockbackForce == 4" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1870982381" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000051" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1087" name="Confirmed: heroKnockbackDuration == 0.12" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: heroKnockbackDuration == 0.12" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1407903956" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000051" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1088" name="Confirmed: stuckCheckWindow == 0.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: stuckCheckWindow == 0.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="584454322" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000050" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1089" name="Confirmed: stuckMinDisplacement == 0.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: stuckMinDisplacement == 0.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1094190563" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000052" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1090" name="Confirmed: separationRadius == 0.6" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: separationRadius == 0.6" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="673958941" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000051" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1091" name="Confirmed: separationForce == 2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: separationForce == 2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="805205008" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000052" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1092" name="Confirmed: enemyHealthBarHideDelay == 3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemyHealthBarHideDelay == 3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="412172059" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000050" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1093" name="Confirmed: enemy.hitboxWidth == 1.2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.hitboxWidth == 1.2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1754702293" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000056" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1094" name="Confirmed: enemy.hitboxHeight == 1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.hitboxHeight == 1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1401810133" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000060" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1095" name="Confirmed: enemy.hitboxOffsetDistance == 0.8" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.hitboxOffsetDistance == 0.8" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="2047645905" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000062" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1096" name="Confirmed: enemy.gravity == 40" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.gravity == 40" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="313963946" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000059" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1097" name="Confirmed: enemy.maxFallSpeed == 25" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.maxFallSpeed == 25" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1842775617" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000055" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1098" name="Confirmed: enemy.groundCheckWidth == 0.7" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.groundCheckWidth == 0.7" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1812123193" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000054" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1099" name="Confirmed: enemy.groundCheckHeight == 0.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.groundCheckHeight == 0.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="2082467525" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000053" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1100" name="Confirmed: enemy.groundCheckOffsetY == -0.9" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.groundCheckOffsetY == -0.9" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1828927600" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000052" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1101" name="Confirmed: enemy.spawnArrivalTolerance == 0.15" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.spawnArrivalTolerance == 0.15" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1419311550" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000053" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1102" name="Confirmed: enemy.evadeDuration == 0.35" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemy.evadeDuration == 0.35" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="604495821" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000050" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1103" name="Confirmed: hurtFlashesPerSecond == 8" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hurtFlashesPerSecond == 8" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1943843536" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000057" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1104" name="Confirmed: hurtFlashMinAlpha == 0.25" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hurtFlashMinAlpha == 0.25" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="597520190" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000051" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1105" name="Confirmed: hitStopLight == 0.04" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hitStopLight == 0.04" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="353683893" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000062" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1106" name="Confirmed: hitStopHeavy == 0.08" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hitStopHeavy == 0.08" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="413171051" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000061" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1107" name="Confirmed: hitStopCrit == 0.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hitStopCrit == 0.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1446062281" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000058" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1108" name="Confirmed: hitStopKill == 0.14" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: hitStopKill == 0.14" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1511289690" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000058" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1109" name="Confirmed: shakeLight.amplitude == 0.12" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: shakeLight.amplitude == 0.12" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="39518740" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000067" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1110" name="Confirmed: shakeLight.duration == 0.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: shakeLight.duration == 0.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="2129545082" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000076" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1111" name="Confirmed: shakeHeavy.amplitude == 0.25" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: shakeHeavy.amplitude == 0.25" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1388107027" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000065" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1112" name="Confirmed: shakeHeavy.duration == 0.16" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: shakeHeavy.duration == 0.16" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="616933061" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000060" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1113" name="Confirmed: shakeCrit.amplitude == 0.35" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: shakeCrit.amplitude == 0.35" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1666931784" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000065" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1114" name="Confirmed: shakeCrit.duration == 0.2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: shakeCrit.duration == 0.2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1396478544" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000059" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1115" name="Confirmed: shakeHeroHurt.amplitude == 0.3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: shakeHeroHurt.amplitude == 0.3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="575345845" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000080" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1116" name="Confirmed: shakeHeroHurt.duration == 0.18" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: shakeHeroHurt.duration == 0.18" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1969189050" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000062" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1117" name="Confirmed: flashDuration == 0.08" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: flashDuration == 0.08" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1282513534" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000075" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1118" name="Confirmed: dashGhostInterval == 0.04" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashGhostInterval == 0.04" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="670889435" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000063" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1119" name="Confirmed: dashGhostLifetime == 0.15" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashGhostLifetime == 0.15" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="2043774183" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000061" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1120" name="Confirmed: dashGhostAlpha == 0.4" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashGhostAlpha == 0.4" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="834666301" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000060" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1121" name="Confirmed: impactParticleCount == 6" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: impactParticleCount == 6" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1812839694" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000063" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1122" name="Confirmed: attackBufferSeconds == 0.12" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: attackBufferSeconds == 0.12" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="395475551" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000065" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1123" name="Confirmed: dashBufferSeconds == 0.12" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashBufferSeconds == 0.12" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1321612894" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000063" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1124" name="Confirmed: dashWallStopFraction == 0.1" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: dashWallStopFraction == 0.1" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="731658949" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000058" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1125" name="Confirmed: launchGravityFraction == 0.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: launchGravityFraction == 0.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="569885829" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000078" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1126" name="Confirmed: skillQ.damageMult == 1.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillQ.damageMult == 1.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1377951978" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000060" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1127" name="Confirmed: skillQ.cooldown == 3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillQ.cooldown == 3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="694338840" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000053" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1128" name="Confirmed: skillQ.projectileSpeed == 12" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillQ.projectileSpeed == 12" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1330614317" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000057" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1129" name="Confirmed: skillQ.projectileLifetime == 2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillQ.projectileLifetime == 2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="449462040" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000056" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1130" name="Confirmed: skillQ.projectileRadius == 0.25" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillQ.projectileRadius == 0.25" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="503541074" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000056" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1131" name="Confirmed: skillE.damageMult == 2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillE.damageMult == 2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="9387610" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000054" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1132" name="Confirmed: skillE.cooldown == 6" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillE.cooldown == 6" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="751803445" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000054" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1133" name="Confirmed: skillE.radius == 2.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillE.radius == 2.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1715078764" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000056" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1134" name="Confirmed: skillE.windup == 0.2" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillE.windup == 0.2" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="2117769849" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000059" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1135" name="Confirmed: skillR.damageMult == 4" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillR.damageMult == 4" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1138614978" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000061" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1136" name="Confirmed: skillR.cooldown == 15" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillR.cooldown == 15" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="133272451" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000058" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1137" name="Confirmed: skillR.radius == 3.5" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillR.radius == 3.5" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1898836312" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000051" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1138" name="Confirmed: skillR.windup == 0.35" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillR.windup == 0.35" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="958932195" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000051" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1139" name="Confirmed: skillQ.baseDamage == 0" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillQ.baseDamage == 0" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="870169417" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000062" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1140" name="Confirmed: skillE.baseDamage == 0" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillE.baseDamage == 0" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1172593367" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000055" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1141" name="Confirmed: skillR.baseDamage == 0" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillR.baseDamage == 0" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="424920100" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000050" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1142" name="Confirmed: enemyPoolPrewarm == 16" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemyPoolPrewarm == 16" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="2044097913" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000074" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1143" name="Confirmed: projectilePoolPrewarm == 24" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: projectilePoolPrewarm == 24" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="544935582" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000063" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1144" name="Confirmed: enemyPoolMax == 48" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: enemyPoolMax == 48" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1112129128" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000060" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1145" name="Confirmed: projectilePoolMax == 64" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: projectilePoolMax == 64" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1433335561" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000064" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1146" name="Confirmed: stressEnemyCount == 30" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: stressEnemyCount == 30" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="188271947" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000057" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1147" name="Confirmed: stressDurationSeconds == 10" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: stressDurationSeconds == 10" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="892723922" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000054" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1148" name="Confirmed: stressAllocationBudgetKilobytes == 5000" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: stressAllocationBudgetKilobytes == 5000" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="358223749" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000054" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1149" name="Confirmed: wave1.transitionDelay == 3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: wave1.transitionDelay == 3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="826464288" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000052" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1150" name="Confirmed: wave1.enemyCount == 3" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: wave1.enemyCount == 3" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="78456855" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000108" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1151" name="Confirmed: sfxVoiceCount == 16" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: sfxVoiceCount == 16" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1178934059" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000063" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1152" name="Confirmed: maxTargetsPerSweep == 16" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: maxTargetsPerSweep == 16" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1171886182" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000055" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1153" name="Confirmed: debugSpawnRadius == 8" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: debugSpawnRadius == 8" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1915832657" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000056" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1154" name="Confirmed: skillBufferSeconds == 0.12" fullname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests.Confirmed: skillBufferSeconds == 0.12" methodname="GeneratedAssetKeepsConfirmedValue" classname="ChibiRift.Tests.Edit.DataDefaultsConsistencyTests" runstate="Runnable" seed="1247801224" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000054" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1156" name="DeviceInputSourceTests" fullname="ChibiRift.Tests.Edit.DeviceInputSourceTests" classname="ChibiRift.Tests.Edit.DeviceInputSourceTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.055129" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1157" name="DeviceAccessIsOnlyEverInsideADevelopmentGuard" fullname="ChibiRift.Tests.Edit.DeviceInputSourceTests.DeviceAccessIsOnlyEverInsideADevelopmentGuard" methodname="DeviceAccessIsOnlyEverInsideADevelopmentGuard" classname="ChibiRift.Tests.Edit.DeviceInputSourceTests" runstate="Runnable" seed="720583915" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.054193" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1158" name="ExperienceCurveTests" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.004721" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1161" name="CurveIsMonotonicallyIncreasing" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.CurveIsMonotonicallyIncreasing" methodname="CurveIsMonotonicallyIncreasing" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="621053125" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000555" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1160" name="EachLevelScalesByTheGrowthFactor" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.EachLevelScalesByTheGrowthFactor" methodname="EachLevelScalesByTheGrowthFactor" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="899693255" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000193" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1159" name="FirstLevelCostsExactlyBaseExperience" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.FirstLevelCostsExactlyBaseExperience" methodname="FirstLevelCostsExactlyBaseExperience" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="1714152215" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000100" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1162" name="GrowthFactorOfOneProducesAFlatCurve" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.GrowthFactorOfOneProducesAFlatCurve" methodname="GrowthFactorOfOneProducesAFlatCurve" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="560372273" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000113" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1163" name="LevelBelowOneIsRejected" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.LevelBelowOneIsRejected" methodname="LevelBelowOneIsRejected" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="1070130567" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.001068" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1166" name="LevelForTotalExperienceInvertsTheCurve" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.LevelForTotalExperienceInvertsTheCurve" methodname="LevelForTotalExperienceInvertsTheCurve" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="1064639905" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000322" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1167" name="LevelForTotalExperienceRespectsTheLevelCap" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.LevelForTotalExperienceRespectsTheLevelCap" methodname="LevelForTotalExperienceRespectsTheLevelCap" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="2140782076" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000102" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1168" name="NegativeExperienceIsTreatedAsZero" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.NegativeExperienceIsTreatedAsZero" methodname="NegativeExperienceIsTreatedAsZero" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="1172332189" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000086" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1170" name="NullBalanceConfigIsRejected" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.NullBalanceConfigIsRejected" methodname="NullBalanceConfigIsRejected" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="1052950312" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000255" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1169" name="ParametersAreReadFromBalanceConfig" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.ParametersAreReadFromBalanceConfig" methodname="ParametersAreReadFromBalanceConfig" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="87563309" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000248" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1164" name="TotalExperienceIsTheSumOfEveryPrecedingLevel" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.TotalExperienceIsTheSumOfEveryPrecedingLevel" methodname="TotalExperienceIsTheSumOfEveryPrecedingLevel" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="452582286" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000127" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1165" name="TotalExperienceToReachLevelOneIsZero" fullname="ChibiRift.Tests.Edit.ExperienceCurveTests.TotalExperienceToReachLevelOneIsZero" methodname="TotalExperienceToReachLevelOneIsZero" classname="ChibiRift.Tests.Edit.ExperienceCurveTests" runstate="Runnable" seed="1551311266" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000090" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1171" name="InputActionsAssetTests" fullname="ChibiRift.Tests.Edit.InputActionsAssetTests" classname="ChibiRift.Tests.Edit.InputActionsAssetTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.010970" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1173" name="AllNineActionsArePresentAndNamedCorrectly" fullname="ChibiRift.Tests.Edit.InputActionsAssetTests.AllNineActionsArePresentAndNamedCorrectly" methodname="AllNineActionsArePresentAndNamedCorrectly" classname="ChibiRift.Tests.Edit.InputActionsAssetTests" runstate="Runnable" seed="762633439" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.005603" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1172" name="GameplayActionMapExists" fullname="ChibiRift.Tests.Edit.InputActionsAssetTests.GameplayActionMapExists" methodname="GameplayActionMapExists" classname="ChibiRift.Tests.Edit.InputActionsAssetTests" runstate="Runnable" seed="756708520" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000448" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1174" name="JumpIsBoundToSpace" fullname="ChibiRift.Tests.Edit.InputActionsAssetTests.JumpIsBoundToSpace" methodname="JumpIsBoundToSpace" classname="ChibiRift.Tests.Edit.InputActionsAssetTests" runstate="Runnable" seed="245099878" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.001629" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1175" name="MoveIsAOneDimensionalAxisOverAAndD" fullname="ChibiRift.Tests.Edit.InputActionsAssetTests.MoveIsAOneDimensionalAxisOverAAndD" methodname="MoveIsAOneDimensionalAxisOverAAndD" classname="ChibiRift.Tests.Edit.InputActionsAssetTests" runstate="Runnable" seed="457927231" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000733" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1176" name="RemainingActionsKeepTheSrsControlMap" fullname="ChibiRift.Tests.Edit.InputActionsAssetTests.RemainingActionsKeepTheSrsControlMap" methodname="RemainingActionsKeepTheSrsControlMap" classname="ChibiRift.Tests.Edit.InputActionsAssetTests" runstate="Runnable" seed="235369817" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000608" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1177" name="WasdKeysBeyondAAndDStayUnbound" fullname="ChibiRift.Tests.Edit.InputActionsAssetTests.WasdKeysBeyondAAndDStayUnbound" methodname="WasdKeysBeyondAAndDStayUnbound" classname="ChibiRift.Tests.Edit.InputActionsAssetTests" runstate="Runnable" seed="1280974167" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000560" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1178" name="PrefabWiringTests" fullname="ChibiRift.Tests.Edit.PrefabWiringTests" classname="ChibiRift.Tests.Edit.PrefabWiringTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.144072" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1179" name="EveryNumericAndReferenceFieldOnCheckedPrefabsIsWiredOrDeclared" fullname="ChibiRift.Tests.Edit.PrefabWiringTests.EveryNumericAndReferenceFieldOnCheckedPrefabsIsWiredOrDeclared" methodname="EveryNumericAndReferenceFieldOnCheckedPrefabsIsWiredOrDeclared" classname="ChibiRift.Tests.Edit.PrefabWiringTests" runstate="Runnable" seed="170067873" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.006222" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1180" name="EveryPerSceneFieldIsAssignedOnTheRunSceneInstance" fullname="ChibiRift.Tests.Edit.PrefabWiringTests.EveryPerSceneFieldIsAssignedOnTheRunSceneInstance" methodname="EveryPerSceneFieldIsAssignedOnTheRunSceneInstance" classname="ChibiRift.Tests.Edit.PrefabWiringTests" runstate="Runnable" seed="621303521" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.136391" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1181" name="NoExemptionIsStale" fullname="ChibiRift.Tests.Edit.PrefabWiringTests.NoExemptionIsStale" methodname="NoExemptionIsStale" classname="ChibiRift.Tests.Edit.PrefabWiringTests" runstate="Runnable" seed="286456400" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.000479" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1182" name="SceneActorVisualTests" fullname="ChibiRift.Tests.Edit.SceneActorVisualTests" classname="ChibiRift.Tests.Edit.SceneActorVisualTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.035454" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1184" name="EveryActorDrawsSomething" fullname="ChibiRift.Tests.Edit.SceneActorVisualTests.EveryActorDrawsSomething" methodname="EveryActorDrawsSomething" classname="ChibiRift.Tests.Edit.SceneActorVisualTests" runstate="Runnable" seed="1669465776" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.008539" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1183" name="EveryActorIsPresentInTheScene" fullname="ChibiRift.Tests.Edit.SceneActorVisualTests.EveryActorIsPresentInTheScene" methodname="EveryActorIsPresentInTheScene" classname="ChibiRift.Tests.Edit.SceneActorVisualTests" runstate="Runnable" seed="2058877382" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.007652" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1186" name="HeroGroundProbeSitsAtTheBottomOfItsCollider" fullname="ChibiRift.Tests.Edit.SceneActorVisualTests.HeroGroundProbeSitsAtTheBottomOfItsCollider" methodname="HeroGroundProbeSitsAtTheBottomOfItsCollider" classname="ChibiRift.Tests.Edit.SceneActorVisualTests" runstate="Runnable" seed="585950822" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.009638" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1185" name="NoActorIsScaledThroughItsTransform" fullname="ChibiRift.Tests.Edit.SceneActorVisualTests.NoActorIsScaledThroughItsTransform" methodname="NoActorIsScaledThroughItsTransform" classname="ChibiRift.Tests.Edit.SceneActorVisualTests" runstate="Runnable" seed="472021329" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:42Z" duration="0.008021" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1187" name="SetupIdempotencyTests" fullname="ChibiRift.Tests.Edit.SetupIdempotencyTests" classname="ChibiRift.Tests.Edit.SetupIdempotencyTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:53Z" duration="10.487789" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1188" name="Test_Setup_IsIdempotent" fullname="ChibiRift.Tests.Edit.SetupIdempotencyTests.Test_Setup_IsIdempotent" methodname="Test_Setup_IsIdempotent" classname="ChibiRift.Tests.Edit.SetupIdempotencyTests" runstate="Runnable" seed="1683709790" result="Passed" start-time="2026-09-22 09:45:42Z" end-time="2026-09-22 09:45:53Z" duration="10.486717" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[
+IgnoreFailingMessages:true
+[Setup] === ChibiRift foundation setup ===
+[Setup] Created 9 layers at slots 6-14.
+[Setup] Physics2D collision matrix configured.
+[Setup] Baseline data assets generated in Assets/_Project/Data.
+[Setup] Five scenes generated and registered in Build Settings.
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+[Setup] Run_01 arena built.
+[Setup] Hero Animator built.
+[Setup] === Complete ===
+[Setup] === ChibiRift foundation setup ===
+[Setup] Created 9 layers at slots 6-14.
+[Setup] Physics2D collision matrix configured.
+[Setup] Baseline data assets generated in Assets/_Project/Data.
+[Setup] Five scenes generated and registered in Build Settings.
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Sprite Tiling might not appear correctly because the Sprite used is not generated with Full Rect. To fix this, change the Mesh Type in the Sprite's import setting to Full Rect
+Failed to find LegacyRuntime.ttf
+The resource LegacyRuntime.ttf could not be loaded from the resource file!
+[Setup] Run_01 arena built.
+[Setup] Hero Animator built.
+[Setup] === Complete ===
+
+IgnoreFailingMessages:false
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1189" name="UpgradeRollerTests" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.052030" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1203" name="ChoiceCountComesFromBalanceConfig" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.ChoiceCountComesFromBalanceConfig" methodname="ChoiceCountComesFromBalanceConfig" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="996564301" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.001687" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1195" name="CompletelyEmptyPoolReturnsNothingAndReportsAnError" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.CompletelyEmptyPoolReturnsNothingAndReportsAnError" methodname="CompletelyEmptyPoolReturnsNothingAndReportsAnError" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="609908273" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.001039" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[
+IgnoreFailingMessages:true
+[UpgradeRoller] Rolled against an empty pool; the Level Up panel must not open (SRS 30).
+
+IgnoreFailingMessages:false
+]]></output>
+              </test-case>
+              <test-case id="1194" name="ExhaustedNormalPoolIsFullyCoveredByFallback" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.ExhaustedNormalPoolIsFullyCoveredByFallback" methodname="ExhaustedNormalPoolIsFullyCoveredByFallback" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="1958370940" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000630" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1193" name="FallbackEntriesMayRepeatWithinOneRoll" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.FallbackEntriesMayRepeatWithinOneRoll" methodname="FallbackEntriesMayRepeatWithinOneRoll" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="2040918174" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000279" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1201" name="HeavierWeightsAreDrawnMoreOften" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.HeavierWeightsAreDrawnMoreOften" methodname="HeavierWeightsAreDrawnMoreOften" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="1925023299" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000366" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1191" name="NoDuplicatesWithinOneRoll" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.NoDuplicatesWithinOneRoll" methodname="NoDuplicatesWithinOneRoll" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="1183391903" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.001175" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1196" name="NoFallbackAndTooFewNormalsProducesAShortOfferAndAnError" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.NoFallbackAndTooFewNormalsProducesAShortOfferAndAnError" methodname="NoFallbackAndTooFewNormalsProducesAShortOfferAndAnError" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="1675031536" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.003707" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[
+IgnoreFailingMessages:true
+[UpgradeRoller] Only 1 of 3 cards available; add Fallback Pool entries (UPG-009, EXP-009).
+
+IgnoreFailingMessages:false
+]]></output>
+              </test-case>
+              <test-case id="1197" name="NonStackableUpgradeLeavesThePoolOnceTaken" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.NonStackableUpgradeLeavesThePoolOnceTaken" methodname="NonStackableUpgradeLeavesThePoolOnceTaken" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="2079103876" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000513" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1204" name="NullEntriesInThePoolAreSkipped" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.NullEntriesInThePoolAreSkipped" methodname="NullEntriesInThePoolAreSkipped" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="568697294" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000371" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1202" name="RarityMultiplierCanSuppressATier" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.RarityMultiplierCanSuppressATier" methodname="RarityMultiplierCanSuppressATier" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="225877748" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000442" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1190" name="ReturnsExactlyThreeChoicesFromAHealthyPool" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.ReturnsExactlyThreeChoicesFromAHealthyPool" methodname="ReturnsExactlyThreeChoicesFromAHealthyPool" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="4677465" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000331" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1200" name="SameSeedProducesTheSameOffer" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.SameSeedProducesTheSameOffer" methodname="SameSeedProducesTheSameOffer" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="702475521" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000840" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1198" name="StackableUpgradeStaysUntilItReachesMaxStack" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.StackableUpgradeStaysUntilItReachesMaxStack" methodname="StackableUpgradeStaysUntilItReachesMaxStack" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="116743952" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000594" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1192" name="TopsUpFromFallbackPoolWhenTooFewNormalUpgradesRemain" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.TopsUpFromFallbackPoolWhenTooFewNormalUpgradesRemain" methodname="TopsUpFromFallbackPoolWhenTooFewNormalUpgradesRemain" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="1731066377" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000463" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1199" name="ZeroWeightUpgradesAreNeverOffered" fullname="ChibiRift.Tests.Edit.UpgradeRollerTests.ZeroWeightUpgradesAreNeverOffered" methodname="ZeroWeightUpgradesAreNeverOffered" classname="ChibiRift.Tests.Edit.UpgradeRollerTests" runstate="Runnable" seed="1046643329" result="Passed" start-time="2026-09-22 09:45:53Z" end-time="2026-09-22 09:45:53Z" duration="0.000410" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: /home/dinhphuong/.config/unity3d/DefaultCompany/ChibiRift/TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

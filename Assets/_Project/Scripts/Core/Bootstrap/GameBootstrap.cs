@@ -58,6 +58,7 @@ namespace ChibiRift.Core
         {
             if (!_loadFirstSceneOnStart) return;
             if (_locator == null) return;
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != SceneNames.Boot) return;
 
             _locator.Get<ISceneFlowService>().LoadScene(_firstScene);
         }

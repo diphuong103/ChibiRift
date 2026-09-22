@@ -93,7 +93,7 @@ namespace ChibiRift.Tests.Edit
         [Test]
         public void Test_SpritesheetSlicer_SlicesAKnownFolderCorrectly()
         {
-            const string path = ArtRoot + "/Characters/Hero/Hero_Spritesheet.png";
+            const string path = ArtRoot + "/Characters/Hero/Test_Spritesheet.png";
 
             Assert.That(File.Exists(path), Is.False,
                 $"{path} already exists — refusing to overwrite it with a synthetic test sheet.");

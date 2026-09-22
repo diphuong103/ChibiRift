@@ -23,6 +23,7 @@ namespace ChibiRift.EditorTools
             RunSceneBuilder.Build();
             SpritesheetSlicer.ReimportKnownSpritesheets();
             HeroAnimatorBuilder.Build();
+            Level01Builder.Build();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
